@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>세무법인삼호 메시지 도구</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📨%3C/text%3E%3C/svg%3E" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+  html, body, #root { height: 100%; margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif; }
+  .booting { display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-size: 14px; }
+</style>
+</head>
+<body class="bg-slate-50">
+<div id="root"><div class="booting">로딩 중…</div></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* =========================
+   아이콘 (inline SVG)
+   ========================= */
+const SvgBase = ({ size = 16, className = '', children }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+       fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+       className={className}>{children}</svg>
+);
+const Copy = (p) => (<SvgBase {...p}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></SvgBase>);
+const Settings = (p) => (<SvgBase {...p}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></SvgBase>);
+const RefreshCw = (p) => (<SvgBase {...p}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></SvgBase>);
+const Lock = (p) => (<SvgBase {...p}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></SvgBase>);
+const Save = (p) => (<SvgBase {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></SvgBase>);
+const GripHorizontal = (p) => (<SvgBase {...p}><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></SvgBase>);
+
+/* =========================
+   기본 템플릿
+   ========================= */
+const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
+
+{고객명} 대표님.
+김선영세무사입니다.
+
+기다려주셔서 감사합니다. 많이 궁금하실 것 같아 메시지로 종합소득세 신고 결과를 먼저 보고드립니다.
+
+메시지 확인하신 후 궁금하신 점은 5월 내내 오전 8시부터 오후 10시까지 언제든 연락 주시면 상세히 말씀드리겠습니다. 최하단에 개인직통번호 안내드리겠습니다.
+{?개별주의_있음}
+
+-개별주의 안내대상자-{?개별주의_2025_있음}
+
+2025년 귀속{?개별주의_2025_1}
+①{개별주의_2025_1}{/?개별주의_2025_1}{?개별주의_2025_2}
+②{개별주의_2025_2}{/?개별주의_2025_2}{?개별주의_2025_3}
+③{개별주의_2025_3}{/?개별주의_2025_3}{/?개별주의_2025_있음}{?개별주의_2024_있음}
+
+2024년 귀속{?개별주의_2024_1}
+①{개별주의_2024_1}{/?개별주의_2024_1}{?개별주의_2024_2}
+②{개별주의_2024_2}{/?개별주의_2024_2}{?개별주의_2024_3}
+③{개별주의_2024_3}{/?개별주의_2024_3}{/?개별주의_2024_있음}{?개별주의_2023_있음}
+
+2023년 귀속{?개별주의_2023_1}
+①{개별주의_2023_1}{/?개별주의_2023_1}{?개별주의_2023_2}
+②{개별주의_2023_2}{/?개별주의_2023_2}{?개별주의_2023_3}
+③{개별주의_2023_3}{/?개별주의_2023_3}{/?개별주의_2023_있음}{/?개별주의_있음}
+
+-5월 31일까지 납부하실 세금-{?국세}
+국세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
+지방세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?국세_환급}
+종합소득세 환급예정일은 6월말{/?국세_환급}{?지방세_환급}
+지방소득세 환급예정일은 7월말{/?지방세_환급}{?세금없음}
+납부하실 세금 없습니다.{/?세금없음}
+
+{?매출_당해}매출  {매출_당해}원{?매출_전년}(전년 {매출_전년}원){/?매출_전년}{/?매출_당해}{?소득_당해}
+소득  {소득_당해}원{?소득_전년}(전년 {소득_전년}원){/?소득_전년}{/?소득_당해}{?소득률}
+소득률  {소득률} %{?소득률_전년}(전년 {소득률_전년} %){/?소득률_전년}{/?소득률}
+
+{?이월결손금}이월결손금    {이월결손금}원(15년간 소득금액에서 공제예정){/?이월결손금}{?추가증빙_경비}
+추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}
+
+{?_산출세액있음}{?_helper}
+조정전 소득  {조정전_소득}원(입력용·미출력)
+{/?_helper}{?조정전_산출세액}조정전 소득에 따른 산출세액 {조정전_산출세액}원
+{/?조정전_산출세액}{?조정후_산출세액}조정후 소득에 따른 산출세액 {조정후_산출세액}원
+{/?조정후_산출세액}{?추가증빙_경비2}추가증빙 필요한 경비  {추가증빙_경비2}원
+{/?추가증빙_경비2}{/?_산출세액있음}{?수수료}
+
+종합소득세 신고 수수료는 {수수료}원(부가세 별도)입니다.  종합소득세 신고 수수료는 5월 21일에 CMS로 출금되오니 확인 부탁드립니다(2022년 귀속 종합소득세 신고분부터 종합소득세 신고 수수료 2,000,000원(부가세별도)의 고객분께만 별도의 청구서로 대체하고 있습니다).{/?수수료}
+
+고객님께 신고는 1년에 한 번 뿐임을 알기에, 보고드리기 전까지 최선의 결과를 내기 위해 온 힘을 다하고 있습니다. 저를 비롯한 전 직원이 다 같은 마음으로 일하고 있습니다. 언제나 그랬듯 내 일처럼 진심으로 성의 있게 일하겠습니다.
+
+처음 저를 찾아주셨던 마음 잊지 않고자 늘 노력합니다. 믿고 맡겨주셔서 항상 감사드립니다.
+
+한 해 동안 사업하시느라 고생 많으셨습니다! 남은 한해도 번창하시기를 간절히 기원합니다. 저를 만나시는 모든 분들께 행운이 깃드시기를 늘 간절히 기원합니다. 감사합니다.
+
+⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬
+
+대표님!!!
+
+2025년 귀속분 종합소득세 신고는 2026년에도 매출이 유지되거나 떨어질 경우를 가정하였습니다. 만약, 올해 매출이 급격히!!! 늘어날 것으로 예상된다면 소득률을 대폭 상향 조정해야 합니다. 반드시 재신고해야합니다.
+
+국세청에서 발표한 2024년 귀속분까지의 세무조사 현황에 따르면 조사대상자는 전년과 비슷한 수준이나 조사건수당 부과세액이 전년대비 46.6%나 늘어난 171백만원입니다. 건수는 줄이되 난이도를 높이는 기조는 계속될 것으로 예상됩니다.
+
+국세청에서는 이번 신고시 사전안내 반영여부를 정밀 분석하여 불성실 신고에 대해 사후검증을 강화하겠다고 밝혔습니다(국세청 보도일자. 2026.2.23.).
+{?_추가증빙있음}
+저희는 종합소득세 신고시 대표님께서 사용하신 경비 모두 유불리만 판단하여 필요경비로(+α)처리하였습니다. 추가증빙이 필요한 경비는 사후검증시 소득에 가산되는 금액입니다. 귀사는 타 세무 대리인으로 이관 시 귀사의 경우 전산파일이 아닌 재무 상태 표만 PDF로 제공되는 점 양해 부탁드립니다.
+{/?_추가증빙있음}{?!_추가증빙있음}
+저희는 종합소득세 신고시 대표님께서 사용하신 경비 모두 유불리만 판단하여 필요경비로(+α)처리하였습니다. 해당 지출이 사업과 직접 관련된 비용으로 인정될 수 있는지 여부는 별도로 판단하지 않았습니다.
+{/?!_추가증빙있음}
+이 메시지는 매우 민감한 사항이 포함되어 있습니다. 다른 분들과 메시지 공유하시지 마시고, 외부로 유출되지 않도록 각별히 유의 부탁드리며, 확인하신 후 삭제 부탁드립니다.  감사합니다.
+
+☎070-4652-7423(직통전화)
+🖨032-719-7053
+📧samhotax2006@naver.com`;
+
+const BASIC_VARS = [
+  { key: '고객명', label: '고객명', type: 'text', placeholder: '윤정식' },
+  { key: '개별주의_2025_1', label: '2025년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
+  { key: '개별주의_2025_2', label: '2025년 ②', type: 'text', placeholder: '소득률저조안내' },
+  { key: '개별주의_2025_3', label: '2025년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
+  { key: '개별주의_2024_1', label: '2024년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
+  { key: '개별주의_2024_2', label: '2024년 ②', type: 'text', placeholder: '소득률저조안내' },
+  { key: '개별주의_2024_3', label: '2024년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
+  { key: '개별주의_2023_1', label: '2023년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
+  { key: '개별주의_2023_2', label: '2023년 ②', type: 'text', placeholder: '소득률저조안내' },
+  { key: '개별주의_2023_3', label: '2023년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
+  { key: '국세', label: '국세', type: 'currency', placeholder: '국세' },
+  { key: '지방세', label: '지방세', type: 'currency', placeholder: '지방세' },
+  { key: '매출_당해', label: '당해 매출', type: 'currency', placeholder: '매출' },
+  { key: '매출_전년', label: '전년 매출', type: 'currency', placeholder: '전년 매출' },
+  { key: '소득_당해', label: '당해 소득', type: 'currency', placeholder: '소득' },
+  { key: '소득_전년', label: '전년 소득', type: 'currency', placeholder: '전년 소득' },
+  { key: '소득률', label: '소득률', type: 'calculated', placeholder: '자동' },
+  { key: '소득률_전년', label: '소득률 전년', type: 'calculated', placeholder: '자동' },
+  { key: '이월결손금', label: '이월결손금', type: 'currency', placeholder: '이월결손금' },
+  { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비' },
+  { key: '추가증빙_경비2', label: '추가증빙 필요한 경비 (산출세액)', type: 'currency', placeholder: '경비' },
+  { key: '조정전_소득', label: '조정전 소득 (입력용)', type: 'currency', placeholder: '조정전 소득' },
+  { key: '조정전_산출세액', label: '조정전 산출세액', type: 'calculated', placeholder: '자동' },
+  { key: '조정후_산출세액', label: '조정후 산출세액', type: 'calculated', placeholder: '자동' },
+  { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' }
+];
+
+const DEFAULT_TEMPLATES = {
+  "종합소득세 신고결과 보고": {
+    "기장거래처": {
+      "1. 납부발생": [{ id: 'tpl_pay', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }],
+      "2. 납부없음": [{ id: 'tpl_zero', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }],
+      "3. 환급발생": [{ id: 'tpl_refund', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }]
+    },
+    "신고대리": {
+      "1. 납부발생": [],
+      "2. 납부없음": [],
+      "3. 환급발생": []
+    }
+  }
+};
+
+/* =========================
+   유틸 함수
+   ========================= */
+const formatCurrency = (val) => {
+  if (val === '' || val == null) return '';
+  const isNeg = String(val).startsWith('-');
+  const digits = String(val).replace(/[^\d]/g, '');
+  if (!digits) return isNeg ? '-' : '';
+  const formatted = parseInt(digits).toLocaleString('ko-KR');
+  return isNeg ? `-${formatted}` : formatted;
+};
+const isNegativeValue = (val) => val != null && String(val).startsWith('-');
+const parseNum = (val) => {
+  if (!val) return null;
+  const isNeg = String(val).startsWith('-');
+  const digits = String(val).replace(/[^\d]/g, '');
+  if (!digits) return null;
+  const n = parseInt(digits);
+  return isNeg ? -n : n;
+};
+const calculateIncomeRate = (income, revenue) => {
+  const i = parseNum(income);
+  const r = parseNum(revenue);
+  if (i === null || r === null || r === 0) return '';
+  return ((i / r) * 100).toFixed(1);
+};
+const calculateTax = (income) => {
+  const i = typeof income === 'number' ? income : parseNum(income);
+  if (i === null) return '';
+  if (i <= 0) return '0';
+  let tax;
+  if (i <= 14000000) tax = i * 0.06;
+  else if (i <= 50000000) tax = i * 0.15 - 1260000;
+  else if (i <= 88000000) tax = i * 0.24 - 5760000;
+  else if (i <= 150000000) tax = i * 0.35 - 15440000;
+  else if (i <= 300000000) tax = i * 0.38 - 19940000;
+  else if (i <= 500000000) tax = i * 0.40 - 25940000;
+  else if (i <= 1000000000) tax = i * 0.42 - 35940000;
+  else tax = i * 0.45 - 65940000;
+  return Math.round(tax).toLocaleString('ko-KR');
+};
+const computeCalculated = (key, inputs) => {
+  if (key === '소득률') return calculateIncomeRate(inputs['소득_당해'], inputs['매출_당해']);
+  if (key === '소득률_전년') return calculateIncomeRate(inputs['소득_전년'], inputs['매출_전년']);
+  if (key === '조정전_산출세액') return calculateTax(inputs['조정전_소득']);
+  if (key === '조정후_산출세액') {
+    const before = parseNum(inputs['조정전_소득']);
+    const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
+    if (before === null || before <= 0) return '';
+    if (adjust <= 0) return '';
+    return calculateTax(before - adjust);
+  }
+  return '';
+};
+
+/* localStorage 기반 저장소 (window.storage 대체) */
+const Storage = {
+  async get(key) {
+    try {
+      const item = localStorage.getItem('samho_' + key);
+      return item ? JSON.parse(item) : null;
+    } catch (e) { return null; }
+  },
+  async set(key, value) {
+    try { localStorage.setItem('samho_' + key, JSON.stringify(value)); } catch (e) {}
+  }
+};
+
+const parseBody = (body) => {
+  const root = { children: [] };
+  const stack = [root];
+  let lastIndex = 0;
+  const re = /\{([^}]+)\}/g;
+  let m;
+  while ((m = re.exec(body)) !== null) {
+    if (m.index > lastIndex) {
+      stack[stack.length - 1].children.push({ type: 'text', value: body.slice(lastIndex, m.index) });
+    }
+    const content = m[1].trim();
+    if (content.startsWith('?')) {
+      const trigger = content.slice(1).trim();
+      const node = { type: 'cond', trigger, children: [] };
+      stack[stack.length - 1].children.push(node);
+      stack.push(node);
+    } else if (content.startsWith('/?')) {
+      const trigger = content.slice(2).trim();
+      if (stack.length > 1 && stack[stack.length - 1].trigger === trigger) stack.pop();
+    } else {
+      stack[stack.length - 1].children.push({ type: 'var', key: content });
+    }
+    lastIndex = re.lastIndex;
+  }
+  if (lastIndex < body.length) {
+    stack[stack.length - 1].children.push({ type: 'text', value: body.slice(lastIndex) });
+  }
+  return root.children;
+};
+
+const isCondActive = (trigger, inputs, variables) => {
+  if (trigger.startsWith('!')) return !isCondActive(trigger.slice(1).trim(), inputs, variables);
+  const hasAmount = (val) => {
+    if (!val) return false;
+    const digits = String(val).replace(/[^\d]/g, '');
+    if (!digits) return false;
+    return parseInt(digits) > 0;
+  };
+  if (trigger.endsWith('_환급')) {
+    const base = trigger.slice(0, trigger.length - '_환급'.length);
+    return hasAmount(inputs[base]) && isNegativeValue(inputs[base]);
+  }
+  if (trigger === '환급발생') return ['국세','지방세'].some(k => hasAmount(inputs[k]) && isNegativeValue(inputs[k]));
+  if (trigger === '세금없음') return ['국세','지방세'].every(k => !hasAmount(inputs[k]));
+  if (trigger === '세금있음') return !isCondActive('세금없음', inputs, variables);
+  if (trigger === '_산출세액있음') return hasAmount(inputs['조정전_소득']);
+  if (trigger === '_추가증빙있음') return hasAmount(inputs['추가증빙_경비']) || hasAmount(inputs['추가증빙_경비2']);
+  if (trigger === '소득률') return computeCalculated('소득률', inputs) !== '';
+  if (trigger === '소득률_전년') return computeCalculated('소득률_전년', inputs) !== '';
+  if (trigger.endsWith('_있음')) {
+    const prefix = trigger.slice(0, trigger.length - '_있음'.length) + '_';
+    return Object.keys(inputs).some(k => k.startsWith(prefix) && inputs[k] && String(inputs[k]).trim());
+  }
+  const variable = variables.find(v => v.key === trigger);
+  if (variable?.type === 'switch') return !!inputs[trigger];
+  const value = inputs[trigger];
+  if (variable?.type === 'currency') return hasAmount(value);
+  if (variable?.type === 'calculated') return computeCalculated(trigger, inputs) !== '';
+  return !!(value && String(value).trim());
+};
+
+/* =========================
+   메인 컴포넌트
+   ========================= */
+function App() {
+  const [templates, setTemplates] = useState(DEFAULT_TEMPLATES);
+  const [githubUrl, setGithubUrl] = useState('');
+  const [adminPassword, setAdminPassword] = useState('samho2006');
+  const [selectedCategory] = useState('종합소득세 신고결과 보고');
+  const [selectedType, setSelectedType] = useState('기장거래처');
+  const [selectedButton, setSelectedButton] = useState('1. 납부발생');
+  const [inputs, setInputs] = useState({});
+  const [extraMemo, setExtraMemo] = useState('');
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminMode, setAdminMode] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [toast, setToast] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
+
+  const [splitPos, setSplitPos] = useState(55);
+  const splitContainerRef = useRef(null);
+  const isDragging = useRef(false);
+
+  const inputRefs = useRef([]);
+  const renderedKeys = useRef(new Set());
+  const orderCounter = useRef({ value: 0 });
+  const previewContainerRef = useRef(null);
+  const [focusedKey, setFocusedKey] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const savedUrl = await Storage.get('github_url');
+      const savedPw = await Storage.get('admin_password');
+      const savedTemplates = await Storage.get('cached_templates');
+      const savedSync = await Storage.get('last_sync');
+      const savedSplit = await Storage.get('split_pos');
+      if (savedUrl) setGithubUrl(savedUrl);
+      if (savedPw) setAdminPassword(savedPw);
+      if (savedTemplates) setTemplates(savedTemplates);
+      if (savedSync) setLastSync(savedSync);
+      if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
+      if (savedUrl) {
+        try {
+          const res = await fetch(`${savedUrl}?t=${Date.now()}`, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            setTemplates(data);
+            const now = new Date().toISOString();
+            setLastSync(now);
+            await Storage.set('cached_templates', data);
+            await Storage.set('last_sync', now);
+          }
+        } catch (e) {}
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      if (!isDragging.current) return;
+      const container = splitContainerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const y = clientY - rect.top;
+      const percent = (y / rect.height) * 100;
+      const clamped = Math.max(15, Math.min(85, percent));
+      setSplitPos(clamped);
+    };
+    const handleEnd = () => {
+      if (isDragging.current) {
+        isDragging.current = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        Storage.set('split_pos', splitPos);
+      }
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+    };
+  }, [splitPos]);
+
+  const handleDragStart = (e) => {
+    isDragging.current = true;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+    if (e.preventDefault) e.preventDefault();
+  };
+
+  const showToast = (msg, type = 'success') => {
+    setToast({ message: msg, type });
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const handleRefresh = async () => {
+    if (!githubUrl) { showToast('GitHub URL이 설정되지 않았습니다', 'error'); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`${githubUrl}?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      setTemplates(data);
+      const now = new Date().toISOString();
+      setLastSync(now);
+      await Storage.set('cached_templates', data);
+      await Storage.set('last_sync', now);
+      showToast('최신 템플릿을 불러왔습니다');
+    } catch (e) { showToast('템플릿 불러오기 실패', 'error'); }
+    finally { setLoading(false); }
+  };
+
+  const types = useMemo(() => templates[selectedCategory] ? Object.keys(templates[selectedCategory]) : [], [templates, selectedCategory]);
+  const currentList = templates?.[selectedCategory]?.[selectedType]?.[selectedButton] || [];
+  const currentTemplate = currentList[0] || null;
+
+  useEffect(() => {
+    setInputs({});
+    setExtraMemo('');
+    inputRefs.current = [];
+  }, [selectedCategory, selectedType, selectedButton]);
+
+  const tree = useMemo(() => currentTemplate ? parseBody(currentTemplate.body) : [], [currentTemplate]);
+  const previewParts = useMemo(() => {
+    if (!currentTemplate) return [];
+    let body = currentTemplate.body;
+    const variables = currentTemplate.variables || [];
+    let prev;
+    do {
+      prev = body;
+      body = body.replace(/\{\?(!?[^}]+)\}([\s\S]*?)\{\/\?\1\}/g, (match, key, content) =>
+        isCondActive(key.trim(), inputs, variables) ? content : ''
+      );
+    } while (prev !== body);
+    variables.forEach(v => {
+      let val;
+      if (v.type === 'calculated') {
+        val = computeCalculated(v.key, inputs);
+      } else {
+        val = inputs[v.key] || '';
+        if (v.type === 'currency') {
+          const d = String(val).replace(/[^\d]/g, '');
+          val = d ? parseInt(d).toLocaleString('ko-KR') : '';
+        } else if (v.type === 'switch') {
+          val = '';
+        }
+      }
+      body = body.split(`{${v.key}}`).join(`\u0001${v.key}\u0002${val}\u0003`);
+    });
+    body = body.replace(/\n{3,}/g, '\n\n').trim();
+    if (extraMemo && extraMemo.trim()) body += '\n\n[추가 안내]\n' + extraMemo.trim();
+    const parts = [];
+    let i = 0;
+    while (i < body.length) {
+      const startIdx = body.indexOf('\u0001', i);
+      if (startIdx < 0) {
+        if (i < body.length) parts.push({ type: 'text', content: body.slice(i) });
+        break;
+      }
+      if (startIdx > i) parts.push({ type: 'text', content: body.slice(i, startIdx) });
+      const keyEnd = body.indexOf('\u0002', startIdx);
+      const valueEnd = body.indexOf('\u0003', keyEnd);
+      if (keyEnd < 0 || valueEnd < 0) { parts.push({ type: 'text', content: body.slice(startIdx) }); break; }
+      const key = body.slice(startIdx + 1, keyEnd);
+      const value = body.slice(keyEnd + 1, valueEnd);
+      parts.push({ type: 'var', key, content: value });
+      i = valueEnd + 1;
+    }
+    return parts;
+  }, [currentTemplate, inputs, extraMemo]);
+
+  const plainText = useMemo(() => previewParts.map(p => p.content).join(''), [previewParts]);
+
+  const scrollPreviewToKey = (key) => {
+    const container = previewContainerRef.current;
+    if (!container) return;
+    try {
+      const target = container.querySelector(`[data-key="${CSS.escape(key)}"]`);
+      if (target) target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } catch (er) {}
+  };
+
+  useEffect(() => {
+    if (focusedKey) {
+      const t = setTimeout(() => scrollPreviewToKey(focusedKey), 50);
+      return () => clearTimeout(t);
+    }
+  }, [focusedKey, previewParts]);
+
+  const handleCopy = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(plainText);
+        showToast('클립보드에 복사되었습니다 ✓'); return;
+      }
+    } catch (e) {}
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = plainText;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.left = '0';
+      ta.style.width = '1px'; ta.style.height = '1px';
+      ta.style.padding = '0'; ta.style.border = 'none'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      const prevActive = document.activeElement;
+      ta.focus({ preventScroll: true }); ta.select(); ta.setSelectionRange(0, ta.value.length);
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (er) {}
+      document.body.removeChild(ta);
+      if (prevActive && prevActive.focus) { try { prevActive.focus({ preventScroll: true }); } catch (er) {} }
+      if (ok) { showToast('클립보드에 복사되었습니다 ✓'); return; }
+    } catch (e) {}
+    try {
+      const container = previewContainerRef.current;
+      if (container) {
+        const range = document.createRange();
+        range.selectNodeContents(container);
+        const sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(range);
+        showToast('자동 선택됨 - Ctrl+C를 눌러 복사하세요', 'error'); return;
+      }
+    } catch (e) {}
+    showToast('복사 실패 - 미리보기 영역에서 직접 선택해 복사해 주세요', 'error');
+  };
+
+  const handleInputChange = (key, value, type) => {
+    if (type === 'currency') {
+      setInputs(prev => {
+        const newHasMinus = String(value).includes('-');
+        const digits = String(value).replace(/[^\d]/g, '');
+        if (!digits) return { ...prev, [key]: newHasMinus ? '-' : '' };
+        return { ...prev, [key]: newHasMinus ? `-${digits}` : digits };
+      });
+    } else {
+      setInputs(prev => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    if (passwordInput === adminPassword) {
+      setAdminMode(true); setShowAdminLogin(false); setPasswordInput('');
+    } else showToast('비밀번호가 일치하지 않습니다', 'error');
+  };
+
+  const saveTemplates = async (next) => {
+    setTemplates(next);
+    await Storage.set('cached_templates', next);
+    showToast('저장되었습니다');
+  };
+
+  const formatSync = (iso) => {
+    if (!iso) return '미동기화';
+    const d = new Date(iso);
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
+
+  const renderInput = (variable, order, idx) => {
+    const rawValue = inputs[variable.key] || '';
+    const isOptional = variable.optional;
+    const isNeg = isNegativeValue(rawValue);
+    const goNext = () => { const next = inputRefs.current[order + 1]; if (next) { next.focus(); try { next.select(); } catch (er) {} } };
+    const goPrev = () => { const prev = inputRefs.current[order - 1]; if (prev) { prev.focus(); try { prev.select(); } catch (er) {} } };
+
+    if (variable.type === 'textarea') {
+      return (
+        <textarea key={idx} ref={el => { inputRefs.current[order] = el; }}
+          value={rawValue}
+          onChange={(e) => handleInputChange(variable.key, e.target.value, variable.type)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); goNext(); } }}
+          placeholder={variable.placeholder || variable.label}
+          rows={Math.max(2, (rawValue.match(/\n/g) || []).length + 2)}
+          className={`block w-full my-1 px-3 py-2 rounded-md text-[14px] leading-relaxed border-2 border-dashed focus:outline-none resize-y placeholder:text-slate-400 text-slate-800 ${isOptional ? 'bg-slate-50 border-slate-300 focus:bg-yellow-50 focus:border-yellow-500' : 'bg-blue-50 border-blue-300 focus:bg-yellow-50 focus:border-yellow-500'}`}
+          style={{ fontFamily: 'inherit' }}
+        />
+      );
+    }
+    const displayValue = variable.type === 'currency' ? formatCurrency(rawValue) : rawValue;
+    const placeholderText = variable.placeholder || variable.label;
+    const size = Math.max((displayValue || placeholderText).length + 1, 4);
+    return (
+      <input key={idx} ref={el => { inputRefs.current[order] = el; }} type="text"
+        value={displayValue}
+        onChange={(e) => handleInputChange(variable.key, e.target.value, variable.type)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); goNext(); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); goPrev(); }
+          else if (e.key === 'ArrowRight') {
+            const inp = e.target;
+            if (inp.selectionStart === inp.value.length && inp.selectionEnd === inp.value.length) { e.preventDefault(); goNext(); }
+          } else if (e.key === 'ArrowLeft') {
+            const inp = e.target;
+            if (inp.selectionStart === 0 && inp.selectionEnd === 0) { e.preventDefault(); goPrev(); }
+          }
+        }}
+        onFocus={(e) => {
+          e.target.select(); setFocusedKey(variable.key);
+          setTimeout(() => {
+            try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
+            scrollPreviewToKey(variable.key);
+          }, 0);
+        }}
+        placeholder={placeholderText} size={size}
+        inputMode={variable.type === 'currency' ? 'numeric' : 'text'}
+        className={`inline-block mx-0.5 px-2 py-0.5 rounded-md text-[15px] font-semibold transition-colors focus:outline-none placeholder:font-normal ${isNeg ? 'bg-rose-50 text-rose-900 border-b-2 border-dashed border-rose-500 focus:bg-rose-100 focus:border-rose-600 placeholder:text-rose-300' : 'bg-blue-50 text-blue-900 border-b-2 border-dashed border-blue-500 focus:bg-yellow-100 focus:border-yellow-600 placeholder:text-blue-300'}`}
+        style={{ fontFamily: 'inherit', lineHeight: '1.4' }}
+      />
+    );
+  };
+
+  const renderTree = (nodes, vars) => nodes.map((node, idx) => {
+    if (node.type === 'text') return <React.Fragment key={idx}>{node.value}</React.Fragment>;
+    if (node.type === 'var') {
+      const variable = vars.find(v => v.key === node.key);
+      if (!variable) return <span key={idx} className="text-red-500">{`{${node.key}}`}</span>;
+      if (variable.type === 'calculated') {
+        const val = computeCalculated(node.key, inputs);
+        const placeholderText = variable.placeholder || variable.label;
+        return (
+          <span key={idx} className="inline-block mx-0.5 px-2 py-0.5 rounded-md text-[15px] font-semibold bg-emerald-50 text-emerald-900 border-b-2 border-dashed border-emerald-400">
+            {val || <span className="text-emerald-400 font-normal">{placeholderText}</span>}
+          </span>
+        );
+      }
+      if (renderedKeys.current.has(node.key)) {
+        const rawValue = inputs[node.key] || '';
+        let displayVal;
+        if (variable.type === 'currency') {
+          const d = String(rawValue).replace(/[^\d]/g, '');
+          displayVal = d ? parseInt(d).toLocaleString('ko-KR') : '';
+        } else { displayVal = rawValue; }
+        const placeholderText = variable.placeholder || variable.label;
+        return (
+          <span key={idx} className="inline-block mx-0.5 px-2 py-0.5 rounded-md text-[15px] font-semibold bg-slate-100 text-slate-600 border-b-2 border-dashed border-slate-400">
+            {displayVal || <span className="text-slate-400 font-normal">{placeholderText}</span>}
+          </span>
+        );
+      }
+      renderedKeys.current.add(node.key);
+      const order = orderCounter.current.value++;
+      return renderInput(variable, order, idx);
+    }
+    if (node.type === 'cond') {
+      const variable = vars.find(v => v.key === node.trigger);
+      return (
+        <span key={idx}>
+          {variable?.type === 'switch' && (
+            <label className="inline-flex items-center gap-1.5 mx-1 px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-400 rounded-md text-xs cursor-pointer font-medium text-amber-900 select-none align-middle">
+              <input type="checkbox" checked={!!inputs[node.trigger]}
+                onChange={(e) => setInputs(prev => ({ ...prev, [node.trigger]: e.target.checked }))}
+                className="cursor-pointer" />
+              <span>{variable.label || node.trigger}</span>
+            </label>
+          )}
+          {renderTree(node.children, vars)}
+        </span>
+      );
+    }
+    return null;
+  });
+
+  orderCounter.current.value = 0;
+  renderedKeys.current.clear();
+
+  return (
+    <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
+      {toast && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg shadow-lg text-white font-medium text-sm ${toast.type === 'error' ? 'bg-red-500' : 'bg-slate-900'}`}>
+          {toast.message}
+        </div>
+      )}
+
+      <header className="bg-white border-b border-slate-200 z-30 shadow-sm flex-shrink-0">
+        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
+          <div>
+            <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
+            <p className="text-[11px] text-slate-500">동기화: {formatSync(lastSync)}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={handleRefresh} disabled={loading} className="px-3 py-1.5 hover:bg-slate-100 rounded-lg text-slate-600 text-sm font-medium flex items-center gap-1.5 disabled:opacity-50">
+              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> <span className="hidden sm:inline">새로고침</span>
+            </button>
+            {adminMode ? (
+              <button onClick={() => setAdminMode(false)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium flex items-center gap-1">
+                <Lock size={14} /> 종료
+              </button>
+            ) : (
+              <button onClick={() => setShowAdminLogin(true)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600">
+                <Settings size={17} />
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {showAdminLogin && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Lock size={18} /> 대표 모드 로그인</h2>
+            <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()} placeholder="비밀번호"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none" autoFocus />
+            <div className="flex gap-2">
+              <button onClick={handlePasswordSubmit} className="flex-1 bg-slate-900 text-white py-2 rounded-lg">확인</button>
+              <button onClick={() => { setShowAdminLogin(false); setPasswordInput(''); }} className="px-4 py-2 border border-slate-300 rounded-lg">취소</button>
+            </div>
+            <p className="text-xs text-slate-400 mt-3">초기 비밀번호: samho2006</p>
+          </div>
+        </div>
+      )}
+
+      {adminMode ? (
+        <div className="flex-1 overflow-auto">
+          <AdminPanel templates={templates} githubUrl={githubUrl} onSaveTemplates={saveTemplates}
+            onSaveGithubUrl={async (url) => { setGithubUrl(url); await Storage.set('github_url', url); showToast('GitHub URL 저장됨'); }}
+            onSavePassword={async (pw) => { setAdminPassword(pw); await Storage.set('admin_password', pw); showToast('비밀번호 변경됨'); }}
+            showToast={showToast} />
+        </div>
+      ) : !currentTemplate ? (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-8 text-center text-slate-500 border border-dashed border-slate-300">
+            <p className="font-medium">이 분류에는 아직 템플릿이 없습니다</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {types.map(t => (
+                <button key={t} onClick={() => setSelectedType(t)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${selectedType === t ? 'bg-slate-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'}`}>{t}</button>
+              ))}
+              <span className="text-[11px] text-rose-600 font-medium ml-1 hidden md:inline">💡 음수(-) 입력 시 자동 (환급) 처리</span>
+            </div>
+            <button onClick={handleCopy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow whitespace-nowrap">
+              <Copy size={15} /> 카톡용 복사
+            </button>
+          </div>
+
+          <div ref={splitContainerRef} className="flex-1 flex flex-col min-h-0 relative">
+            <div className="overflow-y-auto bg-slate-50" style={{ height: `${splitPos}%` }}>
+              <div className="max-w-4xl mx-auto p-3">
+                <div className="bg-white rounded-xl px-5 py-5 shadow-sm border border-slate-200">
+                  <div className="whitespace-pre-wrap text-[15px] leading-[2] text-slate-800 break-words">
+                    {renderTree(tree, currentTemplate.variables || [])}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div onMouseDown={handleDragStart} onTouchStart={handleDragStart}
+              className="h-2 bg-slate-200 hover:bg-blue-400 active:bg-blue-500 cursor-row-resize flex items-center justify-center flex-shrink-0 transition-colors group select-none touch-none"
+              title="드래그하여 크기 조절">
+              <GripHorizontal size={16} className="text-slate-500 group-hover:text-white pointer-events-none" />
+            </div>
+
+            <div ref={previewContainerRef} className="overflow-y-auto bg-white" style={{ height: `${100 - splitPos}%` }}>
+              <div className="max-w-4xl mx-auto p-4">
+                <div className="text-[14px] whitespace-pre-wrap leading-relaxed text-slate-800 break-words">
+                  {previewParts.length === 0 ? (
+                    <span className="text-slate-400 italic">위에서 값을 입력하면 여기에 결과가 표시됩니다.</span>
+                  ) : (
+                    previewParts.map((part, idx) => {
+                      if (part.type === 'var') {
+                        return (
+                          <span key={idx} data-key={part.key}
+                            className={focusedKey === part.key ? 'bg-yellow-200 rounded px-0.5 -mx-0.5 transition-colors' : ''}>
+                            {part.content}
+                          </span>
+                        );
+                      }
+                      return <React.Fragment key={idx}>{part.content}</React.Fragment>;
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function AdminPanel({ templates, githubUrl, onSaveTemplates, onSaveGithubUrl, onSavePassword, showToast }) {
+  const [view, setView] = useState('json');
+  const [urlInput, setUrlInput] = useState(githubUrl);
+  const [pwInput, setPwInput] = useState('');
+  const [jsonText, setJsonText] = useState(JSON.stringify(templates, null, 2));
+  useEffect(() => { setJsonText(JSON.stringify(templates, null, 2)); }, [templates]);
+  useEffect(() => { setUrlInput(githubUrl); }, [githubUrl]);
+  const handleSaveJson = () => { try { onSaveTemplates(JSON.parse(jsonText)); } catch (e) { showToast('JSON 형식 오류', 'error'); } };
+  const handleCopyJson = async () => { try { await navigator.clipboard.writeText(JSON.stringify(templates, null, 2)); showToast('JSON 복사 완료'); } catch (e) { showToast('복사 실패', 'error'); } };
+  return (
+    <main className="max-w-5xl mx-auto p-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-900 flex items-center gap-2">
+        <Lock size={16} /> 대표 모드입니다.
+      </div>
+      <div className="flex gap-1 mb-4 border-b border-slate-200">
+        {[{ k: 'json', l: 'JSON / GitHub' }, { k: 'settings', l: '설정' }].map(t => (
+          <button key={t.k} onClick={() => setView(t.k)}
+            className={`px-4 py-2.5 font-semibold text-sm border-b-2 ${view === t.k ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'}`}>{t.l}</button>
+        ))}
+      </div>
+      {view === 'json' && (
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+          <h3 className="font-bold mb-2">GitHub 동기화</h3>
+          <p className="text-xs text-slate-500 mb-2">
+            조건: <code className="bg-amber-100 px-1 rounded">{'{?변수}...{/?변수}'}</code> · 부정: <code className="bg-rose-100 px-1 rounded">{'{?!변수}'}</code> · 자동: <code className="bg-emerald-100 px-1 rounded">소득률</code> <code className="bg-emerald-100 px-1 rounded">소득률_전년</code> <code className="bg-emerald-100 px-1 rounded">_산출세액있음</code>
+          </p>
+          <textarea value={jsonText} onChange={(e) => setJsonText(e.target.value)} rows={18}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono" spellCheck="false" />
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <button onClick={handleSaveJson} className="px-4 py-2 bg-slate-900 text-white rounded-lg flex items-center gap-2 text-sm font-semibold"><Save size={16} /> JSON 적용</button>
+            <button onClick={handleCopyJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-semibold"><Copy size={16} /> JSON 복사</button>
+          </div>
+        </div>
+      )}
+      {view === 'settings' && (
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 space-y-6">
+          <div>
+            <h3 className="font-bold mb-2">GitHub raw URL</h3>
+            <div className="flex gap-2">
+              <input type="text" value={urlInput} onChange={(e) => setUrlInput(e.target.value)}
+                placeholder="https://raw.githubusercontent.com/..." className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+              <button onClick={() => onSaveGithubUrl(urlInput)} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold">저장</button>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">예: https://raw.githubusercontent.com/<b>계정명</b>/<b>저장소명</b>/main/templates.json</p>
+          </div>
+          <div className="pt-6 border-t border-slate-100">
+            <h3 className="font-bold mb-2">비밀번호 변경</h3>
+            <div className="flex gap-2">
+              <input type="password" value={pwInput} onChange={(e) => setPwInput(e.target.value)}
+                placeholder="새 비밀번호" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+              <button onClick={() => { if (pwInput) { onSavePassword(pwInput); setPwInput(''); } }}
+                className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold">변경</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
