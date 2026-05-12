@@ -34,9 +34,7 @@ const SvgIcon = ({ children, size = 16, className = '' }) => (
 );
 const Copy = (props) => <SvgIcon {...props}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></SvgIcon>;
 const Settings = (props) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></SvgIcon>;
-const RefreshCw = (props) => <SvgIcon {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></SvgIcon>;
 const Lock = (props) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></SvgIcon>;
-const Save = (props) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></SvgIcon>;
 const GripHorizontal = (props) => <SvgIcon {...props}><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></SvgIcon>;
 const LogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></SvgIcon>;
 
@@ -164,13 +162,10 @@ const DEFAULT_TEMPLATES = {
   }
 };
 
-// GitHub raw URL — 이 한 줄만 바꾸면 다른 저장소로도 옮길 수 있음
-const DEFAULT_GITHUB_URL = 'https://raw.githubusercontent.com/ctasun/samho-tool-2025/main/templates.json';
-
 // 접근 비밀번호 (외부인 차단용, 직원과 공유)
 const ACCESS_PASSWORD = 'samho0115!';
 
-// 관리자 비밀번호 (템플릿 수정용, 대표만)
+// 관리자 비밀번호 (관리자 모드 진입용, 대표만)
 const ADMIN_PASSWORD_DEFAULT = '04041004';
 
 const formatCurrency = (val) => {
@@ -317,8 +312,6 @@ const isCondActive = (trigger, inputs, variables) => {
 };
 
 function App() {
-  const [templates, setTemplates] = useState(DEFAULT_TEMPLATES);
-  const [githubUrl, setGithubUrl] = useState(DEFAULT_GITHUB_URL);
   const [adminPassword, setAdminPassword] = useState(ADMIN_PASSWORD_DEFAULT);
   const [selectedCategory] = useState('종합소득세 신고결과 보고');
   const [selectedType, setSelectedType] = useState('기장거래처');
@@ -329,8 +322,6 @@ function App() {
   const [adminMode, setAdminMode] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [toast, setToast] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [lastSync, setLastSync] = useState(null);
 
   const [accessGranted, setAccessGranted] = useState(false);
   const [accessInput, setAccessInput] = useState('');
@@ -347,36 +338,17 @@ function App() {
   const previewContainerRef = useRef(null);
   const [focusedKey, setFocusedKey] = useState(null);
 
+  const templates = DEFAULT_TEMPLATES;
+
   useEffect(() => {
     (async () => {
       const savedAccess = await Storage.get('access_granted');
       if (savedAccess === true) setAccessGranted(true);
-      setBootChecking(false);
-
-      const savedUrl = await Storage.get('github_url');
       const savedPw = await Storage.get('admin_password');
-      const savedTemplates = await Storage.get('cached_templates');
-      const savedSync = await Storage.get('last_sync');
-      const savedSplit = await Storage.get('split_pos');
-      const urlToUse = savedUrl || DEFAULT_GITHUB_URL;
-      if (savedUrl) setGithubUrl(savedUrl);
       if (savedPw) setAdminPassword(savedPw);
-      if (savedTemplates) setTemplates(savedTemplates);
-      if (savedSync) setLastSync(savedSync);
+      const savedSplit = await Storage.get('split_pos');
       if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
-      if (urlToUse) {
-        try {
-          const res = await fetch(`${urlToUse}?t=${Date.now()}`, { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            setTemplates(data);
-            const now = new Date().toISOString();
-            setLastSync(now);
-            await Storage.set('cached_templates', data);
-            await Storage.set('last_sync', now);
-          }
-        } catch (e) {}
-      }
+      setBootChecking(false);
     })();
   }, []);
 
@@ -440,23 +412,6 @@ function App() {
     Storage.remove('access_granted');
     setAccessGranted(false);
     setAdminMode(false);
-  };
-
-  const handleRefresh = async () => {
-    if (!githubUrl) { showToast('GitHub URL이 설정되지 않았습니다', 'error'); return; }
-    setLoading(true);
-    try {
-      const res = await fetch(`${githubUrl}?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('fetch failed');
-      const data = await res.json();
-      setTemplates(data);
-      const now = new Date().toISOString();
-      setLastSync(now);
-      await Storage.set('cached_templates', data);
-      await Storage.set('last_sync', now);
-      showToast('최신 템플릿을 불러왔습니다');
-    } catch (e) { showToast('템플릿 불러오기 실패', 'error'); }
-    finally { setLoading(false); }
   };
 
   const types = useMemo(() => templates[selectedCategory] ? Object.keys(templates[selectedCategory]) : [], [templates, selectedCategory]);
@@ -608,18 +563,6 @@ function App() {
     if (passwordInput === adminPassword) {
       setAdminMode(true); setShowAdminLogin(false); setPasswordInput('');
     } else showToast('비밀번호가 일치하지 않습니다', 'error');
-  };
-
-  const saveTemplates = async (next) => {
-    setTemplates(next);
-    await Storage.set('cached_templates', next);
-    showToast('저장되었습니다');
-  };
-
-  const formatSync = (iso) => {
-    if (!iso) return '미동기화';
-    const d = new Date(iso);
-    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   };
 
   const renderInput = (variable, order, idx) => {
@@ -818,14 +761,8 @@ function App() {
 
       <header className="bg-white border-b border-slate-200 z-30 shadow-sm flex-shrink-0">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
-            <p className="text-[11px] text-slate-500">동기화: {formatSync(lastSync)}</p>
-          </div>
+          <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
           <div className="flex items-center gap-2">
-            <button onClick={handleRefresh} disabled={loading} className="px-3 py-1.5 hover:bg-slate-100 rounded-lg text-slate-600 text-sm font-medium flex items-center gap-1.5 disabled:opacity-50">
-              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> <span className="hidden sm:inline">새로고침</span>
-            </button>
             {adminMode ? (
               <button onClick={() => setAdminMode(false)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium flex items-center gap-1">
                 <Lock size={14} /> 종료
@@ -858,10 +795,6 @@ function App() {
       {adminMode ? (
         <div className="flex-1 overflow-auto">
           <AdminPanel
-            templates={templates}
-            githubUrl={githubUrl}
-            onSaveTemplates={saveTemplates}
-            onSaveGithubUrl={async (url) => { setGithubUrl(url); await Storage.set('github_url', url); showToast('GitHub URL 저장됨'); }}
             onSavePassword={async (pw) => { setAdminPassword(pw); await Storage.set('admin_password', pw); showToast('비밀번호 변경됨'); }}
             showToast={showToast}
           />
@@ -950,65 +883,26 @@ function App() {
   );
 }
 
-function AdminPanel({ templates, githubUrl, onSaveTemplates, onSaveGithubUrl, onSavePassword, showToast }) {
-  const [view, setView] = useState('json');
-  const [urlInput, setUrlInput] = useState(githubUrl);
+function AdminPanel({ onSavePassword, showToast }) {
   const [pwInput, setPwInput] = useState('');
-  const [jsonText, setJsonText] = useState(JSON.stringify(templates, null, 2));
-
-  useEffect(() => { setJsonText(JSON.stringify(templates, null, 2)); }, [templates]);
-  useEffect(() => { setUrlInput(githubUrl); }, [githubUrl]);
-
-  const handleSaveJson = () => {
-    try { onSaveTemplates(JSON.parse(jsonText)); } catch (e) { showToast('JSON 형식 오류', 'error'); }
-  };
-  const handleCopyJson = async () => {
-    try { await navigator.clipboard.writeText(JSON.stringify(templates, null, 2)); showToast('JSON 복사 완료'); } catch (e) { showToast('복사 실패', 'error'); }
-  };
 
   return (
     <main className="max-w-5xl mx-auto p-4">
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-900 flex items-center gap-2">
         <Lock size={16} /> 관리자 모드입니다.
       </div>
-      <div className="flex gap-1 mb-4 border-b border-slate-200">
-        {[{ k: 'json', l: 'JSON / GitHub' }, { k: 'settings', l: '설정' }].map(t => (
-          <button key={t.k} onClick={() => setView(t.k)} className={`px-4 py-2.5 font-semibold text-sm border-b-2 ${view === t.k ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'}`}>{t.l}</button>
-        ))}
+      <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+        <h3 className="font-bold mb-2">관리자 비밀번호 변경</h3>
+        <div className="flex gap-2">
+          <input type="password" value={pwInput} onChange={(e) => setPwInput(e.target.value)} placeholder="새 관리자 비밀번호" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+          <button onClick={() => { if (pwInput) { onSavePassword(pwInput); setPwInput(''); } }} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold">변경</button>
+        </div>
+        <p className="text-xs text-slate-500 mt-2">이 PC에만 적용됩니다. 다른 PC에서도 바꾸시려면 각 PC에서 똑같이 진행해야 합니다.</p>
       </div>
-      {view === 'json' && (
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-          <h3 className="font-bold mb-2">GitHub 동기화</h3>
-          <p className="text-xs text-slate-500 mb-2">
-            조건: <code className="bg-amber-100 px-1 rounded">{'{?변수}...{/?변수}'}</code> · 부정: <code className="bg-rose-100 px-1 rounded">{'{?!변수}'}</code> · 입력전용: <code className="bg-violet-100 px-1 rounded">{'{@변수}'}</code> · 자동: <code className="bg-emerald-100 px-1 rounded">소득률</code> <code className="bg-emerald-100 px-1 rounded">_산출세액있음</code>
-          </p>
-          <textarea value={jsonText} onChange={(e) => setJsonText(e.target.value)} rows={18} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono" spellCheck="false" />
-          <div className="flex gap-2 mt-3 flex-wrap">
-            <button onClick={handleSaveJson} className="px-4 py-2 bg-slate-900 text-white rounded-lg flex items-center gap-2 text-sm font-semibold"><Save size={16} /> JSON 적용</button>
-            <button onClick={handleCopyJson} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-semibold"><Copy size={16} /> JSON 복사</button>
-          </div>
-        </div>
-      )}
-      {view === 'settings' && (
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 space-y-6">
-          <div>
-            <h3 className="font-bold mb-2">GitHub raw URL</h3>
-            <div className="flex gap-2">
-              <input type="text" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder="https://raw.githubusercontent.com/..." className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
-              <button onClick={() => onSaveGithubUrl(urlInput)} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold">저장</button>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">기본값: <code className="bg-slate-100 px-1 rounded">{DEFAULT_GITHUB_URL}</code></p>
-          </div>
-          <div className="pt-6 border-t border-slate-100">
-            <h3 className="font-bold mb-2">관리자 비밀번호 변경</h3>
-            <div className="flex gap-2">
-              <input type="password" value={pwInput} onChange={(e) => setPwInput(e.target.value)} placeholder="새 관리자 비밀번호" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
-              <button onClick={() => { if (pwInput) { onSavePassword(pwInput); setPwInput(''); } }} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold">변경</button>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">이 PC에만 적용됩니다. 다른 PC에서도 바꾸시려면 각 PC에서 똑같이 진행해야 합니다.</p>
-          </div>
-        </div>
-      )}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 text-sm text-slate-600">
+        <h3 className="font-bold mb-2 text-slate-800">양식 수정 안내</h3>
+        <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code> 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 Ctrl+F5 새로고침하면 반영됩니다.</p>
+      </div>
     </main>
   );
 }
