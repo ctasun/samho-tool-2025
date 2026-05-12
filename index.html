@@ -424,6 +424,21 @@ function App() {
     inputRefs.current = [];
   }, [selectedCategory, selectedType, selectedButton]);
 
+  // 초기 진입·탭 전환 시 첫 입력 필드(고객명)에 자동 포커스
+  useEffect(() => {
+    if (!accessGranted || adminMode || !currentTemplate) return;
+    const t = setTimeout(() => {
+      const first = inputRefs.current[0];
+      if (first && first.focus) {
+        try {
+          first.focus({ preventScroll: true });
+          if (first.select) first.select();
+        } catch (e) {}
+      }
+    }, 120);
+    return () => clearTimeout(t);
+  }, [accessGranted, adminMode, currentTemplate, selectedType, selectedButton]);
+
   const tree = useMemo(() => currentTemplate ? parseBody(currentTemplate.body) : [], [currentTemplate]);
   const previewParts = useMemo(() => {
     if (!currentTemplate) return [];
