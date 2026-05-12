@@ -325,7 +325,7 @@ function App() {
       const savedSplit = await Storage.get('split_pos');
       if (savedUrl) setGithubUrl(savedUrl);
       if (savedPw) setAdminPassword(savedPw);
-      if (savedTemplates) setTemplates(savedTemplates);
+      if (savedTemplates && Object.keys(savedTemplates).length > 0) setTemplates(savedTemplates);
       if (savedSync) setLastSync(savedSync);
       if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
       if (savedUrl) {
@@ -333,12 +333,13 @@ function App() {
           const res = await fetch(`${savedUrl}?t=${Date.now()}`, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
-            setTemplates(data);
             const now = new Date().toISOString();
             setLastSync(now);
-            await Storage.set('cached_templates', data);
             await Storage.set('last_sync', now);
-          }
+            if (Object.keys(data).length > 0) {
+              setTemplates(data);
+              await Storage.set('cached_templates', data);
+            }
         } catch (e) {}
       }
     })();
@@ -395,11 +396,13 @@ function App() {
       const res = await fetch(`${githubUrl}?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('fetch failed');
       const data = await res.json();
-      setTemplates(data);
       const now = new Date().toISOString();
       setLastSync(now);
-      await Storage.set('cached_templates', data);
       await Storage.set('last_sync', now);
+      if (Object.keys(data).length > 0) {
+        setTemplates(data);
+        await Storage.set('cached_templates', data);
+      }
       showToast('최신 템플릿을 불러왔습니다');
     } catch (e) { showToast('템플릿 불러오기 실패', 'error'); }
     finally { setLoading(false); }
