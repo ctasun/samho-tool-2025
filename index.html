@@ -41,8 +41,7 @@ const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 날짜를 갱신하세요.
-const BUILD_DATE = '2026-05-13 11:22';
-
+const BUILD_DATE = '2026-05-14 14:47';
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 
 {고객명} 대표님.
@@ -344,6 +343,19 @@ function App() {
   const [focusedKey, setFocusedKey] = useState(null);
 
   const templates = DEFAULT_TEMPLATES;
+
+  // 새로고침 버튼이 붙인 캐시 우회용 ?v= 쿼리를 주소창에서 즉시 제거
+  // (브라우저는 이미 ?v= 가 붙은 URL로 페이지를 받아왔으므로 캐시 우회 효과는 유지됨)
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('v')) {
+        url.searchParams.delete('v');
+        const cleaned = url.pathname + (url.search || '') + url.hash;
+        window.history.replaceState({}, '', cleaned);
+      }
+    } catch (e) {}
+  }, []);
 
   useEffect(() => {
     (async () => {
