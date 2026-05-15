@@ -41,7 +41,9 @@ const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 날짜를 갱신하세요.
-const BUILD_DATE = '2026-05-14 14:47';
+const BUILD_DATE = '2026-05-15 17:32';
+
+// ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 
 {고객명} 대표님.
@@ -122,6 +124,69 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 🖨032-719-7053
 📧samhotax2006@naver.com`;
 
+// ===== 신고대리 본문 =====
+const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
+
+{고객명} 선생님,
+안녕하세요.
+김선영세무사입니다.
+
+오랜 시간 기다려 주셔서 감사합니다.
+
+{@담당자멘트}주신자료 모두 충실하게 검토완료하였습니다. 2022년 귀속 종합소득세 신고분부터는 종합소득세 신고시 특이사항이 있는분께만 별도로 유선상 보고를 드리고 있습니다.
+
+2023년 이후 정기조사는 축소되고 수시조사가 강화되었습니다. 종합소득세 신고 후 해명자료제출안내문을 받으셨을 경우 자료제출요구가 이전보다 훨씬 더 많아지고 까다로워졌습니다. 또한 법률개정으로 간이, 정기 지급명세서가 중복 또는 미제출되는 건이 많아짐에 따라 종합소득세 신고 검토시 더 많은 주의가 요구되고 있습니다.
+
+2025년 귀속분 종합소득세 신고 결과 납부하실 금액 안내해 드리겠습니다.
+
+-6월 1일까지 납부하실 금액-{?국세}
+종합소득세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
+지방소득세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?국세_환급}
+종합소득세 환급예정일은 6월말{/?국세_환급}{?지방세_환급}
+지방소득세 환급예정일은 7월말{/?지방세_환급}{?세금없음}
+납부하실 세금 없습니다.{/?세금없음}
+
+종합소득세 신고수수료는 아래 계좌로 입금 부탁드립니다.
+
+농협은행 351-1053-8412-43
+세무법인삼호 남부지점
+
+{?수수료}종합소득세 신고수수료는
+{수수료}원입니다.{?할인적용} (VAT포함, 10%할인 후){/?할인적용}{?!할인적용} (VAT포함){/?!할인적용}{/?수수료}{?할증_있음}
+
+-할증수수료 항목-{?할증_1}
+①{할증_1}{/?할증_1}{?할증_2}
+②{할증_2}{/?할증_2}{?할증_3}
+③{할증_3}{/?할증_3}{?할증_4}
+④{할증_4}{/?할증_4}{?할증_5}
+⑤{할증_5}{/?할증_5}{?할증_부연}
+
+{할증_부연}{/?할증_부연}{/?할증_있음}
+
+현금영수증은 6월말에 발행해 드립니다. 종합소득세 신고대리 고객의 전자신고는 본사 운영지원팀에서 입금 확인 후 일괄진행하고 있습니다. 보고를 받으신 후 익일 오후 5시까지 입금 확인이 되지 않을 경우 기신고분은 세금신고삭제 요청, 미신고분은 접수처리됨을 알려드립니다.
+
+익일로 기한을 말씀드리는 이유는, 종합소득세 신고기한안에 세무대리인을 교체하시어 신고를 마치실 수 있도록 기한의 여유를 드리기 위함입니다.
+
+2024년 종합소득세신고분부터는 3년 연속 종합소득세를 의뢰하신 고객에 한하여 기장대리로 세무대리 권한을 수임하여 신고진행해 드리고 있습니다. 기장대리와 신고대리와의 차이는 세무대리 책임의 지속성입니다. 꾸준히 믿고 맡겨 주신 감사함에 대한 보답으로 위임권한을 변경하여 수임하고 있습니다.
+
+작년 한 해도 정말 수고 많으셨습니다! 올해도 번창하시는 해 되시기를 간곡히, 간절히 기원합니다. 감사합니다. ^^
+
+*다시한 번 수수료 인상 안내드립니다.*
+올해부터 종합소득세 신고수수료가 각 구간별로 5만원씩 10년만에 인상되었습니다. 고객분들의 양해 부탁드립니다. 더불어 4월 사전예약 10%할인은 전년에 이어 의뢰하신 고객께만 제공됩니다.
+
+🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
+{?담당자멘트}
+{담당자멘트}
+{/?담당자멘트}
+종합소득세 신고시 주신 경비 유불리만 판단하여 모두 경비(+α)처리하였습니다.
+
+이 메시지는 매우 민감한 사항이 포함되어 있습니다. 다른 분들과 메시지 공유하시지 마시고, 외부로 유출되지 않도록 각별히 유의 부탁드리며, 확인하신 후 삭제 부탁드립니다. 감사합니다.
+
+☎032-719-7052(대표전화)
+🖨032-719-7053
+📧samhotax2006@naver.com`;
+
+// ===== 기장거래처 변수 =====
 const BASIC_VARS = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '윤정식' },
   { key: '담당자멘트', label: '담당자 추가 멘트', type: 'textarea', placeholder: '담당자가 직접 입력하는 멘트 (대표님!!! 아래에 출력됨)' },
@@ -151,6 +216,22 @@ const BASIC_VARS = [
   { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' }
 ];
 
+// ===== 신고대리 변수 =====
+const BASIC_VARS_REPORT = [
+  { key: '고객명', label: '고객명', type: 'text', placeholder: '홍길동' },
+  { key: '담당자멘트', label: '담당자 추가 멘트', type: 'textarea', placeholder: '담당자가 직접 입력하는 멘트 (🔽 아래에 출력됨)' },
+  { key: '국세', label: '종합소득세', type: 'currency', placeholder: '종합소득세' },
+  { key: '지방세', label: '지방소득세', type: 'currency', placeholder: '지방소득세' },
+  { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' },
+  { key: '할인적용', label: '10% 할인 적용', type: 'switch' },
+  { key: '할증_1', label: '할증수수료 ①', type: 'text', placeholder: '예) 부동산임대' },
+  { key: '할증_2', label: '할증수수료 ②', type: 'text', placeholder: '' },
+  { key: '할증_3', label: '할증수수료 ③', type: 'text', placeholder: '' },
+  { key: '할증_4', label: '할증수수료 ④', type: 'text', placeholder: '' },
+  { key: '할증_5', label: '할증수수료 ⑤', type: 'text', placeholder: '' },
+  { key: '할증_부연', label: '할증수수료 추가 설명', type: 'textarea', placeholder: '①~⑤ 외 추가 안내 (비워두면 출력 안 됨)' }
+];
+
 const DEFAULT_TEMPLATES = {
   "종합소득세 신고결과 보고": {
     "기장거래처": {
@@ -159,9 +240,9 @@ const DEFAULT_TEMPLATES = {
       "3. 환급발생": [{ id: 'tpl_refund', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }]
     },
     "신고대리": {
-      "1. 납부발생": [],
-      "2. 납부없음": [],
-      "3. 환급발생": []
+      "1. 납부발생": [{ id: 'tpl_report_pay', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }],
+      "2. 납부없음": [{ id: 'tpl_report_zero', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }],
+      "3. 환급발생": [{ id: 'tpl_report_refund', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }]
     }
   }
 };
@@ -953,7 +1034,7 @@ function AdminPanel({ onSavePassword, showToast }) {
       </div>
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 text-sm text-slate-600">
         <h3 className="font-bold mb-2 text-slate-800">양식 수정 안내</h3>
-        <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code> 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 헤더의 <strong>새로고침 버튼</strong>(또는 Ctrl+F5)으로 반영됩니다.</p>
+        <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code>(기장거래처)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_REPORT</code>(신고대리) 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 헤더의 <strong>새로고침 버튼</strong>(또는 Ctrl+F5)으로 반영됩니다.</p>
         <p className="mt-2">수정 후 코드 상단의 <code className="bg-white px-1 rounded border border-slate-200">BUILD_DATE</code> 상수도 함께 갱신해 두면 직원이 최신 버전을 받았는지 헤더에서 바로 확인할 수 있습니다.</p>
       </div>
     </main>
