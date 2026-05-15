@@ -40,8 +40,8 @@ const LogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2
 const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></SvgIcon>;
 
 // ===== 빌드 정보 =====
-// 코드 수정 후 GitHub에 push할 때 이 날짜를 갱신하세요.
-const BUILD_DATE = '2026-05-15';
+// 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
+const BUILD_DATE = '2026-05-15 17:32';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -159,9 +159,7 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 ②{할증_2}{/?할증_2}{?할증_3}
 ③{할증_3}{/?할증_3}{?할증_4}
 ④{할증_4}{/?할증_4}{?할증_5}
-⑤{할증_5}{/?할증_5}{?할증_부연}
-
-{할증_부연}{/?할증_부연}{/?할증_있음}
+⑤{할증_5}{/?할증_5}{@할증_부연}{/?할증_있음}
 
 현금영수증은 6월말에 발행해 드립니다. 종합소득세 신고대리 고객의 전자신고는 본사 운영지원팀에서 입금 확인 후 일괄진행하고 있습니다. 보고를 받으신 후 익일 오후 5시까지 입금 확인이 되지 않을 경우 기신고분은 세금신고삭제 요청, 미신고분은 접수처리됨을 알려드립니다.
 
@@ -175,7 +173,9 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 올해부터 종합소득세 신고수수료가 각 구간별로 5만원씩 10년만에 인상되었습니다. 고객분들의 양해 부탁드립니다. 더불어 4월 사전예약 10%할인은 전년에 이어 의뢰하신 고객께만 제공됩니다.
 
 🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
-
+{?할증_부연}
+{할증_부연}
+{/?할증_부연}
 종합소득세 신고시 주신 경비 유불리만 판단하여 모두 경비(+α)처리하였습니다.
 
 이 메시지는 매우 민감한 사항이 포함되어 있습니다. 다른 분들과 메시지 공유하시지 마시고, 외부로 유출되지 않도록 각별히 유의 부탁드리며, 확인하신 후 삭제 부탁드립니다. 감사합니다.
@@ -226,7 +226,7 @@ const BASIC_VARS_REPORT = [
   { key: '할증_3', label: '할증수수료 ③', type: 'text', placeholder: '' },
   { key: '할증_4', label: '할증수수료 ④', type: 'text', placeholder: '' },
   { key: '할증_5', label: '할증수수료 ⑤', type: 'text', placeholder: '' },
-  { key: '할증_부연', label: '할증수수료 추가 설명', type: 'textarea', placeholder: '①~⑤ 외 추가 안내 (비워두면 출력 안 됨)' }
+  { key: '할증_부연', label: '할증수수료 추가 설명', type: 'textarea', placeholder: '①~⑤ 외 추가 안내 (🔽 아래에 출력됨, 비워두면 출력 안 됨)' }
 ];
 
 const DEFAULT_TEMPLATES = {
@@ -885,7 +885,7 @@ function App() {
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
           <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-slate-400 mr-1 hidden sm:inline" title="이 도구가 마지막으로 갱신된 날짜">업데이트 {BUILD_DATE}</span>
+            <span className="text-[11px] text-slate-400 mr-1 hidden sm:inline" title="이 도구가 마지막으로 갱신된 시각">업데이트 {BUILD_DATE}</span>
             <button
               onClick={handleHardReload}
               className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
@@ -1032,7 +1032,7 @@ function AdminPanel({ onSavePassword, showToast }) {
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 text-sm text-slate-600">
         <h3 className="font-bold mb-2 text-slate-800">양식 수정 안내</h3>
         <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code>(기장거래처)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_REPORT</code>(신고대리) 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 헤더의 <strong>새로고침 버튼</strong>(또는 Ctrl+F5)으로 반영됩니다.</p>
-        <p className="mt-2">수정 후 코드 상단의 <code className="bg-white px-1 rounded border border-slate-200">BUILD_DATE</code> 상수도 함께 갱신해 두면 직원이 최신 버전을 받았는지 헤더에서 바로 확인할 수 있습니다.</p>
+        <p className="mt-2">수정 후 코드 상단의 <code className="bg-white px-1 rounded border border-slate-200">BUILD_DATE</code> 상수(<code>YYYY-MM-DD HH:MM</code> 형식)도 함께 갱신해 두면 직원이 최신 버전을 받았는지 헤더에서 바로 확인할 수 있습니다.</p>
       </div>
     </main>
   );
