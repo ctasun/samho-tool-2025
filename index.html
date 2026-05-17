@@ -2,1056 +2,1035 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>세무법인삼호 메시지 도구</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.0/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>종합소득세 시뮬레이터 — 세무법인삼호 남부지점</title>
+<!-- BUILD_DATE: 2026-05-17 15:13 -->
 <style>
-  html, body, #root { height: 100%; margin: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-    -webkit-tap-highlight-color: transparent;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+  line-height: 1.5;
+  font-size: 13px;
+  min-height: 100vh;
+}
+.container { width: 100%; min-width: 640px; max-width: 720px; margin: 0 auto; padding: 8px 10px; }
+
+/* ===== 헤더 ===== */
+.app-header { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.header-bar {
+  flex: 1; background: white; border: 1px solid #e2e8f0; border-radius: 6px;
+  padding: 5px 10px; display: flex; justify-content: space-between;
+  align-items: center; gap: 6px; min-width: 0;
+}
+.header-left { display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: wrap; }
+.header-left h1 { font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; }
+.badge-year {
+  font-size: 10px; padding: 1px 6px; background: #f1f5f9; color: #475569;
+  border-radius: 3px; font-weight: 600; border: 1px solid #e2e8f0; flex-shrink: 0;
+}
+.header-right { display: flex; gap: 6px; align-items: center; font-size: 11px; color: #64748b; flex-shrink: 0; }
+.update-time { white-space: nowrap; }
+.btn-text {
+  font-size: 11px; padding: 3px 9px; border: 1px solid #cbd5e1; border-radius: 4px;
+  background: white; color: #475569; cursor: pointer; font-family: inherit;
+  display: inline-flex; gap: 3px; align-items: center;
+}
+.btn-text:hover { background: #f1f5f9; }
+.btn-print-main {
+  font-size: 12px; padding: 8px 16px; border: none; border-radius: 6px;
+  background: #1e3a8a; color: white; cursor: pointer; font-weight: 600;
+  font-family: inherit; box-shadow: 0 1px 3px rgba(30,58,138,0.25);
+  flex-shrink: 0; white-space: nowrap;
+}
+.btn-print-main:hover { background: #1e40af; }
+.btn-mobile-print {
+  font-size: 11px; padding: 3px 7px; border: 1px solid #1e3a8a; border-radius: 4px;
+  background: white; color: #1e3a8a; cursor: pointer; font-weight: 600;
+  font-family: inherit; display: none;
+}
+.mobile-only { display: none; }
+
+/* ===== 섹션 카드 ===== */
+.card {
+  background: white; border: 1px solid #e2e8f0; border-radius: 6px;
+  padding: 6px 10px; margin-bottom: 5px;
+}
+.card-mu { background: #f8fafc; border-color: #cbd5e1; }
+
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px; gap: 8px; flex-wrap: nowrap;
+}
+.section-title { font-size: 12px; font-weight: 600; color: #1e293b; margin: 0; flex-shrink: 0; white-space: nowrap; }
+.inline-inputs { display: flex; gap: 6px; flex-wrap: nowrap; flex: 1; min-width: 0; justify-content: flex-end; }
+.inline-input {
+  padding: 4px 8px; font-size: 11px; border: 1px solid #cbd5e1;
+  border-radius: 4px; font-family: inherit; background: white; color: #1e293b;
+  text-align: right; font-variant-numeric: tabular-nums; min-width: 0;
+}
+.inline-input:focus { outline: none; border-color: #1e3a8a; box-shadow: 0 0 0 2px rgba(30,58,138,0.1); }
+.inline-input.code { text-align: center; width: 100px; flex-shrink: 0; }
+.inline-input.rev { flex: 1; max-width: 160px; }
+.inline-input.matched { border-color: #1e3a8a; background: #f0f5ff; color: #1e3a8a; font-weight: 600; }
+.inline-input.unmatched { border-color: #be123c; background: #fef2f2; color: #be123c; }
+
+/* ===== 입력 필드 ===== */
+.income-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+.field { display: flex; flex-direction: column; min-width: 0; }
+.field-label { font-size: 10px; font-weight: 500; color: #475569; margin-bottom: 2px; }
+.field-label .accent { color: #1e3a8a; font-weight: 600; }
+.field-hint { font-size: 9px; color: #94a3b8; margin-top: 2px; }
+.field-msg { font-size: 10px; font-weight: 600; margin-top: 2px; }
+.field-msg.info { color: #1e3a8a; }
+.field-msg.warn { color: #be123c; }
+.field-msg.preview { color: #059669; }
+.num-input {
+  width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid #cbd5e1;
+  border-radius: 4px; text-align: right; font-family: inherit; color: #1e293b;
+  background: white; font-variant-numeric: tabular-nums;
+}
+.num-input:focus { outline: none; border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
+.num-input.primary { border: 1.5px solid #1e3a8a; background: #f8fafc; font-weight: 600; }
+.num-input.after { border: 1.5px solid #1e3a8a; background: #f8fafc; font-weight: 700; color: #1e3a8a; }
+.num-input.mu { border: 1.5px solid #64748b; font-weight: 600; }
+.num-input.auto-filled { border-color: #1e3a8a; background: #f0f5ff; }
+
+/* ===== M-U경비 ===== */
+.mu-grid { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 8px; align-items: end; }
+.mu-arrow { text-align: center; font-size: 18px; color: #94a3b8; padding-bottom: 6px; }
+.mu-note { margin-top: 4px; font-size: 9.5px; color: #64748b; }
+
+/* ===== 추가입력 토글 ===== */
+.adv-collapsed {
+  background: white; border: 1px dashed #cbd5e1; border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; gap: 8px; margin-bottom: 5px; transition: background 0.15s;
+}
+.adv-collapsed:hover { background: #f8fafc; }
+.adv-collapsed-label { font-size: 11px; font-weight: 600; color: #334155; }
+.adv-collapsed-hint { font-size: 10px; color: #94a3b8; }
+.adv-collapsed-summary { font-size: 10px; color: #64748b; text-align: right; }
+.adv-collapsed-summary strong { color: #334155; font-weight: 500; }
+
+.adv-expanded {
+  background: white; border: 1.5px solid #1e3a8a; border-radius: 6px;
+  overflow: hidden; margin-bottom: 6px;
+}
+.adv-expanded-header {
+  background: #1e3a8a; color: white; padding: 6px 12px; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; font-size: 11px;
+}
+.adv-expanded-body { padding: 10px 12px; }
+.adv-section { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+.adv-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.adv-section-title { font-size: 11.5px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
+.rrn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.rrn-label { font-size: 11px; font-weight: 600; color: #475569; min-width: 24px; }
+.rrn-input {
+  width: 120px; padding: 4px 8px; font-size: 11px; border: 1px solid #cbd5e1;
+  border-radius: 4px; font-family: inherit; font-variant-numeric: tabular-nums;
+}
+.rrn-input:focus { outline: none; border-color: #1e3a8a; box-shadow: 0 0 0 2px rgba(30,58,138,0.1); }
+.rrn-info { font-size: 11px; color: #64748b; }
+.rrn-info strong { color: #1e293b; font-weight: 600; }
+.rrn-info .elderly-badge {
+  font-size: 10px; padding: 1px 6px; background: #f1f5f9; color: #334155;
+  border: 1px solid #cbd5e1; border-radius: 3px; font-weight: 600; margin-left: 4px;
+}
+.disabled-check { font-size: 11px; color: #475569; display: flex; align-items: center; gap: 3px; }
+.deduction-grid { display: grid; grid-template-columns: 2fr 3fr; gap: 8px; }
+.credit-grid { display: grid; grid-template-columns: 2fr 3fr; gap: 8px; }
+
+/* ===== 절감액 배너 ===== */
+.savings-banner {
+  background: #1e3a8a; color: white; border-radius: 6px; padding: 8px 12px;
+  margin-bottom: 5px; display: flex; justify-content: space-between; align-items: baseline;
+}
+.savings-label { font-size: 12px; font-weight: 500; opacity: 0.92; }
+.savings-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.savings-value .unit { font-size: 12px; font-weight: 400; opacity: 0.85; margin-left: 3px; }
+
+/* ===== 비교 패널 ===== */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.result-panel { background: white; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
+.result-panel.after-panel { border-color: #cbd5e1; }
+.result-header {
+  color: white; padding: 7px 10px; display: flex;
+  justify-content: space-between; align-items: baseline;
+}
+.result-header.before-hdr { background: #475569; }
+.result-header.after-hdr { background: #1e3a8a; }
+.result-header.refund-hdr { background: #047857; }
+.result-header-label { font-size: 10.5px; opacity: 0.9; font-weight: 500; }
+.result-header-value { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.result-header-value .unit { font-size: 10px; font-weight: 400; opacity: 0.85; margin-left: 2px; }
+.result-body { padding: 5px 8px; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.result-body-title { font-size: 10px; font-weight: 700; color: #475569; margin-bottom: 3px; letter-spacing: 0.3px; }
+.result-row { display: flex; justify-content: space-between; padding: 2px 0; color: #475569; gap: 6px; }
+.result-row .val { color: #1e293b; }
+.result-row.sub { font-size: 10px; color: #94a3b8; padding: 1px 0 1px 10px; }
+.result-row.highlight { padding: 3px 5px; margin: 1px -3px; background: #f1f5f9; border-radius: 3px; font-weight: 600; color: #1e293b; }
+.result-row.decided-before { background: #f1f5f9; color: #334155; font-weight: 600; padding: 3px 5px; margin: 1px -3px; border-radius: 3px; }
+.result-row.decided-after { background: #dbeafe; color: #1e3a8a; font-weight: 600; padding: 3px 5px; margin: 1px -3px; border-radius: 3px; }
+.result-row.total-before { background: #e2e8f0; color: #334155; font-weight: 600; padding: 3px 5px; margin: 1px -3px; border-radius: 3px; }
+.result-row.total-after { background: #bfdbfe; color: #1e3a8a; font-weight: 700; padding: 3px 5px; margin: 1px -3px; border-radius: 3px; }
+.result-row.refund { color: #047857; font-weight: 600; }
+.result-row.refund-total { background: #d1fae5; color: #047857; font-weight: 700; padding: 3px 5px; margin: 1px -3px; border-radius: 3px; }
+.result-footnote { padding: 3px 8px; background: #f8fafc; font-size: 9px; color: #64748b; border-top: 1px solid #f1f5f9; }
+
+/* ===== 단서 박스 ===== */
+.disclaimer {
+  margin-top: 5px; padding: 5px 10px; background: #f8fafc;
+  border: 1px solid #e2e8f0; border-radius: 6px; font-size: 10px;
+  color: #64748b; line-height: 1.55;
+}
+.disclaimer strong { color: #334155; }
+
+/* ===== 반응형 (좁힘: 600px 이하 - 헤더 컴팩트) ===== */
+@media (max-width: 600px) {
+  .update-time { display: none; }
+  .header-right .btn-text .btn-label { display: none; }
+  .header-right .btn-text { padding: 4px 8px; }
+}
+
+/* ===== 반응형 (모바일) ===== */
+@media (max-width: 480px) {
+  .container { width: 100% !important; min-width: 0 !important; padding: 8px; }
+  .header-bar { padding: 6px 10px; }
+  .header-left h1 { font-size: 11.5px; }
+  .pc-only { display: none !important; }
+  .mobile-only { display: inline-flex; }
+  .btn-print-main { display: none; }
+  .btn-mobile-print { display: inline-flex; }
+  .header-right { gap: 4px; }
+  .header-right .btn-text { padding: 4px 8px; }
+  .header-right .btn-text .btn-label { display: none; }
+
+  .section-header { flex-wrap: wrap; }
+  .inline-inputs { flex-wrap: wrap; }
+  .inline-input.rev { max-width: none; flex: 1 1 140px; }
+  .income-grid { grid-template-columns: 1fr; }
+  .mu-grid { grid-template-columns: 1fr; gap: 4px; }
+  .mu-arrow { transform: rotate(90deg); padding: 0; line-height: 1; }
+  .deduction-grid, .credit-grid { grid-template-columns: 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .adv-collapsed { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .adv-collapsed-summary { text-align: left; }
+}
+
+/* ===== 인쇄 (A4 1페이지 세로) ===== */
+@media print {
+  @page { size: A4 portrait; margin: 20mm 10mm 10mm 10mm; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  body { background: white !important; font-size: 10px !important; }
+  .container { width: auto !important; min-width: 0 !important; max-width: none !important; padding: 0 !important; }
+  .no-print { display: none !important; }
+  .update-time { display: inline !important; }
+  .btn-label { display: inline !important; }
+  .app-header { margin-bottom: 4px; }
+  .header-bar { padding: 4px 8px; border-color: #94a3b8; }
+  .header-left h1 { font-size: 12px; }
+  .card { padding: 6px 8px !important; margin-bottom: 4px !important; }
+  .card-mu { background: #f8fafc !important; }
+  .savings-banner { padding: 6px 10px; margin-bottom: 4px; }
+  .savings-value { font-size: 18px; }
+  .result-header { padding: 4px 8px; }
+  .result-header-value { font-size: 14px; }
+  .result-body { padding: 5px 8px; font-size: 9.5px; }
+  .result-row { padding: 1px 0; }
+  .result-row.highlight, .result-row.decided-before, .result-row.decided-after,
+  .result-row.total-before, .result-row.total-after, .result-row.refund-total {
+    padding: 2px 5px; margin: 1px -3px;
   }
-  #boot-loader {
-    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    background: #f8fafc; color: #64748b; font-size: 14px;
-  }
+  .result-footnote { font-size: 8px; padding: 2px 8px; }
+  .compare-grid { grid-template-columns: 1fr 1fr !important; gap: 4px; }
+  .num-input, .inline-input, .rrn-input { font-size: 11px; padding: 4px 6px; }
+  .adv-expanded-body { padding: 6px 8px; }
+  .disclaimer { padding: 4px 8px; font-size: 8.5px; margin-top: 4px; }
+  .card, .savings-banner, .result-panel, .compare-grid, .adv-expanded { page-break-inside: avoid; break-inside: avoid; }
+  .adv-collapsed { display: none !important; }
+}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<div id="boot-loader">로딩 중...</div>
-<script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useRef } = React;
 
-// ===== Inline SVG Icons =====
-const SvgIcon = ({ children, size = 16, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {children}
-  </svg>
-);
-const Copy = (props) => <SvgIcon {...props}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></SvgIcon>;
-const Settings = (props) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></SvgIcon>;
-const Lock = (props) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></SvgIcon>;
-const GripHorizontal = (props) => <SvgIcon {...props}><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></SvgIcon>;
-const LogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></SvgIcon>;
-const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></SvgIcon>;
-
-// ===== 빌드 정보 =====
-// 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-15 20:30';
-
-// ===== 기장거래처 본문 =====
-const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
-
-{고객명} 대표님.
-김선영세무사입니다.
-
-기다려주셔서 감사합니다. 많이 궁금하실 것 같아 메시지로 종합소득세 신고 결과를 먼저 보고드립니다.
-
-메시지 확인하신 후 궁금하신 점은 5월 내내 오전 8시부터 오후 10시까지 언제든 연락 주시면 상세히 말씀드리겠습니다. 최하단에 개인직통번호 안내드리겠습니다.
-
--6월 1일까지 납부하실 세금-{?국세}
-국세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
-지방세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?환급발생}
-{/?환급발생}{?국세_환급}
-종합소득세 환급예정일은 6월말{/?국세_환급}{?지방세_환급}
-지방소득세 환급예정일은 7월말{/?지방세_환급}{?세금없음}
-납부하실 세금 없습니다.{/?세금없음}
-
-{?매출_당해}매출  {매출_당해}원{?매출_전년}(전년 {매출_전년}원){/?매출_전년}{/?매출_당해}{?소득_당해}
-소득  {소득_당해}원{?소득_전년}(전년 {소득_전년}원){/?소득_전년}{/?소득_당해}{?소득률}
-소득률  {소득률} %{?소득률_전년}(전년 {소득률_전년} %){/?소득률_전년}{/?소득률}
-
-{?이월결손금}이월결손금    {이월결손금}원(15년간 소득금액에서 공제예정){/?이월결손금}{?추가증빙_경비}
-추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}
-
-{?_산출세액있음}{?_helper}
-조정전 소득  {조정전_소득}원(입력용·미출력)
-{/?_helper}{?조정전_산출세액}조정전 소득에 따른 산출세액 {조정전_산출세액}원
-{/?조정전_산출세액}{?조정후_산출세액}조정후 소득에 따른 산출세액 {조정후_산출세액}원
-{/?조정후_산출세액}{?추가증빙_경비2}추가증빙 필요한 경비  {추가증빙_경비2}원
-{/?추가증빙_경비2}{/?_산출세액있음}{?건보증가없음}
-
-이번 종합소득세 신고로 소득으로 인한 지역건강보험료 증가는 발생하지 않습니다.
-{/?건보증가없음}{?개별주의_있음}
-
--개별주의 안내대상자-{?개별주의_2025_있음}
-
-2025년 귀속{?개별주의_2025_1}
-①{개별주의_2025_1}{/?개별주의_2025_1}{?개별주의_2025_2}
-②{개별주의_2025_2}{/?개별주의_2025_2}{?개별주의_2025_3}
-③{개별주의_2025_3}{/?개별주의_2025_3}{/?개별주의_2025_있음}{?개별주의_2024_있음}
-
-2024년 귀속{?개별주의_2024_1}
-①{개별주의_2024_1}{/?개별주의_2024_1}{?개별주의_2024_2}
-②{개별주의_2024_2}{/?개별주의_2024_2}{?개별주의_2024_3}
-③{개별주의_2024_3}{/?개별주의_2024_3}{/?개별주의_2024_있음}{?개별주의_2023_있음}
-
-2023년 귀속{?개별주의_2023_1}
-①{개별주의_2023_1}{/?개별주의_2023_1}{?개별주의_2023_2}
-②{개별주의_2023_2}{/?개별주의_2023_2}{?개별주의_2023_3}
-③{개별주의_2023_3}{/?개별주의_2023_3}{/?개별주의_2023_있음}{/?개별주의_있음}{?수수료}
-
-종합소득세 신고 수수료는 {수수료}원(부가세 별도)입니다.  종합소득세 신고 수수료는 5월 21일에 CMS로 출금되오니 확인 부탁드립니다(2022년 귀속 종합소득세 신고분부터 종합소득세 신고 수수료 2,000,000원(부가세별도)의 고객분께만 별도의 청구서로 대체하고 있습니다).{/?수수료}
-
-{@담당자멘트}
-
-고객님께 신고는 1년에 한 번 뿐임을 알기에, 보고드리기 전까지 최선의 결과를 내기 위해 온 힘을 다하고 있습니다. 저를 비롯한 전 직원이 다 같은 마음으로 일하고 있습니다. 언제나 그랬듯 내 일처럼 진심으로 성의 있게 일하겠습니다.
-
-처음 저를 찾아주셨던 마음 잊지 않고자 늘 노력합니다. 믿고 맡겨주셔서 항상 감사드립니다.
-
-한 해 동안 사업하시느라 고생 많으셨습니다! 남은 한해도 번창하시기를 간절히 기원합니다. 저를 만나시는 모든 분들께 행운이 깃드시기를 늘 간절히 기원합니다. 감사합니다.
-
-⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬
-
-대표님!!!
-
-{?담당자멘트}{담당자멘트}
-
-{/?담당자멘트}2025년 귀속분 종합소득세 신고는 2026년에도 매출이 유지되거나 떨어질 경우를 가정하였습니다. 만약, 올해 매출이 급격히!!! 늘어날 것으로 예상된다면 소득률을 대폭 상향 조정해야 합니다. 반드시 재신고해야합니다.
-
-국세청에서 발표한 2024년 귀속분까지의 세무조사 현황에 따르면 조사대상자는 전년과 비슷한 수준이나 조사건수당 부과세액이 전년대비 46.6%나 늘어난 171백만원입니다. 건수는 줄이되 난이도를 높이는 기조는 계속될 것으로 예상됩니다.
-
-국세청은 신고시 배부한 신고도움서비스의 개별분석자료 반영여부를 정밀 분석하여 불성실 신고에 대해 사후검증을 강화하겠다고 밝혔습니다(국세청 보도일자. 2026.2.23.).
-{?_추가증빙있음}
-저희는 종합소득세 신고시 대표님께서 사용하신 경비 모두 유불리만 판단하여 필요경비로(+α)처리하였습니다. 추가증빙이 필요한 경비는 사후검증시 소득에 가산되는 금액입니다. 귀사는 타 세무 대리인으로 이관 시 귀사의 경우 전산파일이 아닌 재무 상태 표만 PDF로 제공되는 점 양해 부탁드립니다.
-{/?_추가증빙있음}{?!_추가증빙있음}
-저희는 종합소득세 신고시 대표님께서 사용하신 경비 모두 유불리만 판단하여 필요경비로(+α)처리하였습니다. 해당 지출이 사업과 직접 관련된 비용으로 인정될 수 있는지 여부는 별도로 판단하지 않았습니다.
-{/?!_추가증빙있음}
-이 메시지는 매우 민감한 사항이 포함되어 있습니다. 다른 분들과 메시지 공유하시지 마시고, 외부로 유출되지 않도록 각별히 유의 부탁드리며, 확인하신 후 삭제 부탁드립니다.  감사합니다.
-
-☎070-4652-7423(직통전화)
-🖨032-719-7053
-📧samhotax2006@naver.com`;
-
-// ===== 신고대리 본문 =====
-const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
-
-{고객명} 선생님,
-안녕하세요.
-김선영세무사입니다.
-
-오랜 시간 기다려 주셔서 감사합니다.
-
-주신자료 모두 충실하게 검토완료하였습니다. 2022년 귀속 종합소득세 신고분부터는 종합소득세 신고시 특이사항이 있는분께만 별도로 유선상 보고를 드리고 있습니다.
-
-특이 사항이 있는 고객분들께는 별도로 유선 안내를 드리고 있으니 안심하시기 바랍니다.
-
-2025년 귀속분 종합소득세 신고 결과 납부하실 금액 안내해 드리겠습니다.
-
--6월 1일까지 납부하실 금액-{?국세}
-종합소득세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
-지방소득세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?환급발생}
-{/?환급발생}{?국세_환급}
-종합소득세 환급예정일은 6월말{/?국세_환급}{?지방세_환급}
-지방소득세 환급예정일은 7월말{/?지방세_환급}{?세금없음}
-납부하실 세금 없습니다.{/?세금없음}
-
-종합소득세 신고수수료는 아래 계좌로 입금 부탁드립니다.
-
-농협은행 351-1053-8412-43
-세무법인삼호 남부지점
-
-{?수수료}종합소득세 신고수수료는
-{수수료}원입니다.{?할인적용} (VAT포함, 10%할인 후){/?할인적용}{?!할인적용} (VAT포함){/?!할인적용}{/?수수료}{?할증_있음}
-
--할증수수료 항목-{?할증_1}
-①{할증_1}{/?할증_1}{?할증_2}
-②{할증_2}{/?할증_2}{?할증_3}
-③{할증_3}{/?할증_3}{?할증_4}
-④{할증_4}{/?할증_4}{?할증_5}
-⑤{할증_5}{/?할증_5}{@할증_부연}{/?할증_있음}
-
-현금영수증은 6월말에 발행해 드립니다. 종합소득세 신고대리 고객의 전자신고는 본사 운영지원팀에서 입금 확인 후 일괄진행하고 있습니다. 보고를 받으신 후 익일 오후 5시까지 입금 확인이 되지 않을 경우 기신고분은 세금신고삭제 요청, 미신고분은 접수처리됨을 알려드립니다.
-
-익일로 기한을 말씀드리는 이유는, 종합소득세 신고기한안에 세무대리인을 교체하시어 신고를 마치실 수 있도록 기한의 여유를 드리기 위함입니다.
-
-2024년 종합소득세신고분부터는 3년 연속 종합소득세를 의뢰하신 고객에 한하여 기장대리로 세무대리 권한을 수임하여 신고진행해 드리고 있습니다. 기장대리와 신고대리와의 차이는 세무대리 책임의 지속성입니다. 꾸준히 믿고 맡겨 주신 감사함에 대한 보답으로 위임권한을 변경하여 수임하고 있습니다.
-
-고객님께 신고는 1년에 한 번 뿐임을 알기에, 보고드리기 전까지 최선의 결과를 내기 위해 온 힘을 다하고 있습니다. 저를 비롯한 전 직원이 다 같은 마음으로 일하고 있습니다. 언제나 그랬듯 내 일처럼 진심으로 성의 있게 일하겠습니다.
-
-작년 한 해도 정말 수고 많으셨습니다! 올해도 번창하시는 해 되시기를 간곡히, 간절히 기원합니다. 감사합니다. ^^
-
-🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
-{?할증_부연}
-{할증_부연}
-{/?할증_부연}
-국세청에서 발표한 2024년 귀속분까지의 세무조사 현황에 따르면 조사대상자는 전년과 비슷한 수준이나 조사건수당 부과세액이 전년대비 46.6%나 늘어난 171백만원입니다. 건수는 줄이되 난이도를 높이는 기조는 계속될 것으로 예상됩니다.
-
-2023년 이후 정기조사는 축소, 비정기(수시)조사는 강화되었습니다. 최근 해명자료 제출 안내는 예전보다 요구 수준이 높고 검증도 대폭 강화되었습니다. 또한, 법률개정으로 지급명세서 중복·누락 사례가 많아짐에 따라 종소세 신고 검토가 한층 까다로워졌습니다.
-
-국세청은 신고시 배부한 신고도움서비스의 개별분석자료 반영여부를 정밀 분석하여 불성실 신고에 대해 사후검증을 강화하겠다고 밝혔습니다(국세청 보도일자. 2026.2.23.).
-
-종합소득세 신고시 주신 경비 유불리만 판단하여 모두 경비(+α)처리하였습니다.
-
-이 메시지는 매우 민감한 사항이 포함되어 있습니다. 다른 분들과 메시지 공유하시지 마시고, 외부로 유출되지 않도록 각별히 유의 부탁드리며, 확인하신 후 삭제 부탁드립니다. 감사합니다.
-
-☎032-719-7052(대표전화)
-🖨032-719-7053
-📧samhotax2006@naver.com`;
-
-// ===== 기장거래처 변수 =====
-const BASIC_VARS = [
-  { key: '고객명', label: '고객명', type: 'text', placeholder: '윤정식' },
-  { key: '담당자멘트', label: '담당자 추가 멘트', type: 'textarea', placeholder: '담당자가 직접 입력하는 멘트 (대표님!!! 아래에 출력됨)' },
-  { key: '개별주의_2025_1', label: '2025년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
-  { key: '개별주의_2025_2', label: '2025년 ②', type: 'text', placeholder: '소득률저조안내' },
-  { key: '개별주의_2025_3', label: '2025년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
-  { key: '개별주의_2024_1', label: '2024년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
-  { key: '개별주의_2024_2', label: '2024년 ②', type: 'text', placeholder: '소득률저조안내' },
-  { key: '개별주의_2024_3', label: '2024년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
-  { key: '개별주의_2023_1', label: '2023년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
-  { key: '개별주의_2023_2', label: '2023년 ②', type: 'text', placeholder: '소득률저조안내' },
-  { key: '개별주의_2023_3', label: '2023년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
-  { key: '국세', label: '국세', type: 'currency', placeholder: '국세' },
-  { key: '지방세', label: '지방세', type: 'currency', placeholder: '지방세' },
-  { key: '매출_당해', label: '당해 매출', type: 'currency', placeholder: '매출' },
-  { key: '매출_전년', label: '전년 매출', type: 'currency', placeholder: '전년 매출' },
-  { key: '소득_당해', label: '당해 소득', type: 'currency', placeholder: '소득' },
-  { key: '소득_전년', label: '전년 소득', type: 'currency', placeholder: '전년 소득' },
-  { key: '소득률', label: '소득률', type: 'calculated', placeholder: '자동' },
-  { key: '소득률_전년', label: '소득률 전년', type: 'calculated', placeholder: '자동' },
-  { key: '이월결손금', label: '이월결손금', type: 'currency', placeholder: '이월결손금' },
-  { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비' },
-  { key: '추가증빙_경비2', label: '추가증빙 필요한 경비 (산출세액)', type: 'currency', placeholder: '경비' },
-  { key: '조정전_소득', label: '조정전 소득 (입력용)', type: 'currency', placeholder: '조정전 소득' },
-  { key: '조정전_산출세액', label: '조정전 산출세액', type: 'calculated', placeholder: '자동' },
-  { key: '조정후_산출세액', label: '조정후 산출세액', type: 'calculated', placeholder: '자동' },
-  { key: '건보증가없음', label: '건보증가 없음 안내', type: 'switch' },
-  { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' }
-];
-
-// ===== 신고대리 변수 =====
-const BASIC_VARS_REPORT = [
-  { key: '고객명', label: '고객명', type: 'text', placeholder: '홍길동' },
-  { key: '국세', label: '종합소득세', type: 'currency', placeholder: '종합소득세' },
-  { key: '지방세', label: '지방소득세', type: 'currency', placeholder: '지방소득세' },
-  { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' },
-  { key: '할인적용', label: '10% 할인 적용', type: 'switch' },
-  { key: '할증_1', label: '할증수수료 ①', type: 'text', placeholder: '예) 부동산임대' },
-  { key: '할증_2', label: '할증수수료 ②', type: 'text', placeholder: '' },
-  { key: '할증_3', label: '할증수수료 ③', type: 'text', placeholder: '' },
-  { key: '할증_4', label: '할증수수료 ④', type: 'text', placeholder: '' },
-  { key: '할증_5', label: '할증수수료 ⑤', type: 'text', placeholder: '' },
-  { key: '할증_부연', label: '할증수수료 추가 설명', type: 'textarea', placeholder: '①~⑤ 외 추가 안내 (🔽 아래에 출력됨, 비워두면 출력 안 됨)' }
-];
-
-const DEFAULT_TEMPLATES = {
-  "종합소득세 신고결과 보고": {
-    "기장거래처": {
-      "1. 납부발생": [{ id: 'tpl_pay', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }],
-      "2. 납부없음": [{ id: 'tpl_zero', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }],
-      "3. 환급발생": [{ id: 'tpl_refund', name: '기본', variables: BASIC_VARS, body: SIMPLE_BODY }]
-    },
-    "신고대리": {
-      "1. 납부발생": [{ id: 'tpl_report_pay', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }],
-      "2. 납부없음": [{ id: 'tpl_report_zero', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }],
-      "3. 환급발생": [{ id: 'tpl_report_refund', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }]
-    }
-  }
-};
-
-// 접근 비밀번호 (외부인 차단용, 직원과 공유)
-const ACCESS_PASSWORD = 'samho0115!';
-
-// 관리자 비밀번호 (관리자 모드 진입용, 대표만)
-const ADMIN_PASSWORD_DEFAULT = '04041004';
-
-const formatCurrency = (val) => {
-  if (val === '' || val == null) return '';
-  const isNeg = String(val).startsWith('-');
-  const digits = String(val).replace(/[^\d]/g, '');
-  if (!digits) return isNeg ? '-' : '';
-  const formatted = parseInt(digits).toLocaleString('ko-KR');
-  return isNeg ? `-${formatted}` : formatted;
-};
-
-const isNegativeValue = (val) => val != null && String(val).startsWith('-');
-
-const parseNum = (val) => {
-  if (!val) return null;
-  const isNeg = String(val).startsWith('-');
-  const digits = String(val).replace(/[^\d]/g, '');
-  if (!digits) return null;
-  const n = parseInt(digits);
-  return isNeg ? -n : n;
-};
-
-const calculateIncomeRate = (income, revenue) => {
-  const i = parseNum(income);
-  const r = parseNum(revenue);
-  if (i === null || r === null || r === 0) return '';
-  // 소득이 음수(결손)인 경우 '-' 표시 (소득률 라인은 유지)
-  if (i < 0) return '-';
-  return ((i / r) * 100).toFixed(1);
-};
-
-const calculateTax = (income) => {
-  const i = typeof income === 'number' ? income : parseNum(income);
-  if (i === null) return '';
-  if (i <= 0) return '0';
-  let tax;
-  if (i <= 14000000) tax = i * 0.06;
-  else if (i <= 50000000) tax = i * 0.15 - 1260000;
-  else if (i <= 88000000) tax = i * 0.24 - 5760000;
-  else if (i <= 150000000) tax = i * 0.35 - 15440000;
-  else if (i <= 300000000) tax = i * 0.38 - 19940000;
-  else if (i <= 500000000) tax = i * 0.40 - 25940000;
-  else if (i <= 1000000000) tax = i * 0.42 - 35940000;
-  else tax = i * 0.45 - 65940000;
-  return Math.round(tax).toLocaleString('ko-KR');
-};
-
-const computeCalculated = (key, inputs) => {
-  if (key === '소득률') return calculateIncomeRate(inputs['소득_당해'], inputs['매출_당해']);
-  if (key === '소득률_전년') return calculateIncomeRate(inputs['소득_전년'], inputs['매출_전년']);
-  if (key === '조정전_산출세액') return calculateTax(inputs['조정전_소득']);
-  if (key === '조정후_산출세액') {
-    const before = parseNum(inputs['조정전_소득']);
-    const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
-    if (before === null || before <= 0) return '';
-    if (adjust <= 0) return '';
-    return calculateTax(before - adjust);
-  }
-  return '';
-};
-
-const Storage = {
-  async get(key) {
-    try {
-      const v = localStorage.getItem('samho_' + key);
-      return v ? JSON.parse(v) : null;
-    } catch (e) { return null; }
-  },
-  async set(key, value) {
-    try {
-      localStorage.setItem('samho_' + key, JSON.stringify(value));
-    } catch (e) {}
-  },
-  async remove(key) {
-    try {
-      localStorage.removeItem('samho_' + key);
-    } catch (e) {}
-  }
-};
-
-const parseBody = (body) => {
-  const root = { children: [] };
-  const stack = [root];
-  let lastIndex = 0;
-  const re = /\{([^}]+)\}/g;
-  let m;
-  while ((m = re.exec(body)) !== null) {
-    if (m.index > lastIndex) {
-      stack[stack.length - 1].children.push({ type: 'text', value: body.slice(lastIndex, m.index) });
-    }
-    const content = m[1].trim();
-    if (content.startsWith('?')) {
-      const trigger = content.slice(1).trim();
-      const node = { type: 'cond', trigger, children: [] };
-      stack[stack.length - 1].children.push(node);
-      stack.push(node);
-    } else if (content.startsWith('/?')) {
-      const trigger = content.slice(2).trim();
-      if (stack.length > 1 && stack[stack.length - 1].trigger === trigger) stack.pop();
-    } else if (content.startsWith('@')) {
-      // 입력 전용 마커: 에디터에서만 입력 필드를 표시하고, 최종 출력(클립보드)에는 포함되지 않음
-      const key = content.slice(1).trim();
-      stack[stack.length - 1].children.push({ type: 'inputonly', key });
-    } else {
-      stack[stack.length - 1].children.push({ type: 'var', key: content });
-    }
-    lastIndex = re.lastIndex;
-  }
-  if (lastIndex < body.length) {
-    stack[stack.length - 1].children.push({ type: 'text', value: body.slice(lastIndex) });
-  }
-  return root.children;
-};
-
-const isCondActive = (trigger, inputs, variables) => {
-  if (trigger.startsWith('!')) return !isCondActive(trigger.slice(1).trim(), inputs, variables);
-  const hasAmount = (val) => {
-    if (!val) return false;
-    const digits = String(val).replace(/[^\d]/g, '');
-    if (!digits) return false;
-    return parseInt(digits) > 0;
-  };
-  if (trigger.endsWith('_환급')) {
-    const base = trigger.slice(0, trigger.length - '_환급'.length);
-    return hasAmount(inputs[base]) && isNegativeValue(inputs[base]);
-  }
-  if (trigger === '환급발생') return ['국세', '지방세'].some(k => hasAmount(inputs[k]) && isNegativeValue(inputs[k]));
-  if (trigger === '세금없음') return ['국세', '지방세'].every(k => !hasAmount(inputs[k]));
-  if (trigger === '세금있음') return !isCondActive('세금없음', inputs, variables);
-  if (trigger === '_산출세액있음') return hasAmount(inputs['조정전_소득']);
-  if (trigger === '_추가증빙있음') return hasAmount(inputs['추가증빙_경비']) || hasAmount(inputs['추가증빙_경비2']);
-  if (trigger === '소득률') return computeCalculated('소득률', inputs) !== '';
-  if (trigger === '소득률_전년') return computeCalculated('소득률_전년', inputs) !== '';
-  if (trigger.endsWith('_있음')) {
-    const prefix = trigger.slice(0, trigger.length - '_있음'.length) + '_';
-    return Object.keys(inputs).some(k => k.startsWith(prefix) && inputs[k] && String(inputs[k]).trim());
-  }
-  const variable = variables.find(v => v.key === trigger);
-  if (variable?.type === 'switch') return !!inputs[trigger];
-  const value = inputs[trigger];
-  if (variable?.type === 'currency') return hasAmount(value);
-  if (variable?.type === 'calculated') return computeCalculated(trigger, inputs) !== '';
-  return !!(value && String(value).trim());
-};
-
-function App() {
-  const [adminPassword, setAdminPassword] = useState(ADMIN_PASSWORD_DEFAULT);
-  const [selectedCategory] = useState('종합소득세 신고결과 보고');
-  const [selectedType, setSelectedType] = useState('기장거래처');
-  const [selectedButton, setSelectedButton] = useState('1. 납부발생');
-  const [inputs, setInputs] = useState({});
-  const [extraMemo, setExtraMemo] = useState('');
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminMode, setAdminMode] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [toast, setToast] = useState(null);
-
-  const [accessGranted, setAccessGranted] = useState(false);
-  const [accessInput, setAccessInput] = useState('');
-  const [accessError, setAccessError] = useState(false);
-  const [bootChecking, setBootChecking] = useState(true);
-
-  const [splitPos, setSplitPos] = useState(55);
-  const splitContainerRef = useRef(null);
-  const isDragging = useRef(false);
-
-  const inputRefs = useRef([]);
-  const renderedKeys = useRef(new Set());
-  const orderCounter = useRef({ value: 0 });
-  const previewContainerRef = useRef(null);
-  const [focusedKey, setFocusedKey] = useState(null);
-
-  const templates = DEFAULT_TEMPLATES;
-
-  // 새로고침 버튼이 붙인 캐시 우회용 ?v= 쿼리를 주소창에서 즉시 제거
-  // (브라우저는 이미 ?v= 가 붙은 URL로 페이지를 받아왔으므로 캐시 우회 효과는 유지됨)
-  useEffect(() => {
-    try {
-      const url = new URL(window.location.href);
-      if (url.searchParams.has('v')) {
-        url.searchParams.delete('v');
-        const cleaned = url.pathname + (url.search || '') + url.hash;
-        window.history.replaceState({}, '', cleaned);
-      }
-    } catch (e) {}
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const savedAccess = await Storage.get('access_granted');
-      if (savedAccess === true) setAccessGranted(true);
-      const savedPw = await Storage.get('admin_password');
-      if (savedPw) setAdminPassword(savedPw);
-      const savedSplit = await Storage.get('split_pos');
-      if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
-      setBootChecking(false);
-    })();
-  }, []);
-
-  useEffect(() => {
-    const handleMove = (e) => {
-      if (!isDragging.current) return;
-      const container = splitContainerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const y = clientY - rect.top;
-      const percent = (y / rect.height) * 100;
-      const clamped = Math.max(15, Math.min(85, percent));
-      setSplitPos(clamped);
-    };
-    const handleEnd = () => {
-      if (isDragging.current) {
-        isDragging.current = false;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-        Storage.set('split_pos', splitPos);
-      }
-    };
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleEnd);
-    window.addEventListener('touchmove', handleMove, { passive: false });
-    window.addEventListener('touchend', handleEnd);
-    return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleMove);
-      window.removeEventListener('touchend', handleEnd);
-    };
-  }, [splitPos]);
-
-  const handleDragStart = (e) => {
-    isDragging.current = true;
-    document.body.style.cursor = 'row-resize';
-    document.body.style.userSelect = 'none';
-    if (e.preventDefault) e.preventDefault();
-  };
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ message: msg, type });
-    setTimeout(() => setToast(null), 2500);
-  };
-
-  const handleAccessSubmit = () => {
-    if (accessInput === ACCESS_PASSWORD) {
-      setAccessGranted(true);
-      Storage.set('access_granted', true);
-      setAccessInput('');
-      setAccessError(false);
-    } else {
-      setAccessError(true);
-    }
-  };
-
-  const handleAccessLogout = () => {
-    if (!confirm('이 PC에서 로그아웃하시겠습니까? 다음에 다시 비밀번호를 입력해야 합니다.')) return;
-    Storage.remove('access_granted');
-    setAccessGranted(false);
-    setAdminMode(false);
-  };
-
-  // 캐시를 우회하여 GitHub에서 최신 버전을 받아오는 강력 새로고침
-  const handleHardReload = () => {
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set('v', Date.now().toString());
-      window.location.replace(url.toString());
-    } catch (e) {
-      window.location.reload();
-    }
-  };
-
-  const types = useMemo(() => templates[selectedCategory] ? Object.keys(templates[selectedCategory]) : [], [templates, selectedCategory]);
-  const currentList = templates?.[selectedCategory]?.[selectedType]?.[selectedButton] || [];
-  const currentTemplate = currentList[0] || null;
-
-  useEffect(() => {
-    setInputs({});
-    setExtraMemo('');
-    inputRefs.current = [];
-  }, [selectedCategory, selectedType, selectedButton]);
-
-  // 초기 진입·탭 전환 시 첫 입력 필드(고객명)에 자동 포커스
-  useEffect(() => {
-    if (!accessGranted || adminMode || !currentTemplate) return;
-    const t = setTimeout(() => {
-      const first = inputRefs.current[0];
-      if (first && first.focus) {
-        try {
-          first.focus({ preventScroll: true });
-          if (first.select) first.select();
-        } catch (e) {}
-      }
-    }, 120);
-    return () => clearTimeout(t);
-  }, [accessGranted, adminMode, currentTemplate, selectedType, selectedButton]);
-
-  const tree = useMemo(() => currentTemplate ? parseBody(currentTemplate.body) : [], [currentTemplate]);
-  const previewParts = useMemo(() => {
-    if (!currentTemplate) return [];
-    let body = currentTemplate.body;
-    const variables = currentTemplate.variables || [];
-    // 입력 전용 마커 ({@변수명})는 최종 출력에 포함되지 않음 — 에디터 표시용일 뿐
-    body = body.replace(/\{@[^}]+\}/g, '');
-    let prev;
-    do {
-      prev = body;
-      body = body.replace(/\{\?(!?[^}]+)\}([\s\S]*?)\{\/\?\1\}/g, (match, key, content) => {
-        return isCondActive(key.trim(), inputs, variables) ? content : '';
-      });
-    } while (prev !== body);
-    variables.forEach(v => {
-      let val;
-      if (v.type === 'calculated') {
-        val = computeCalculated(v.key, inputs);
-      } else {
-        val = inputs[v.key] || '';
-        if (v.type === 'currency') {
-          // 음수 부호(-) 보존을 위해 formatCurrency 재사용
-          val = formatCurrency(val);
-        } else if (v.type === 'switch') {
-          val = '';
-        }
-      }
-      body = body.split(`{${v.key}}`).join(`\u0001${v.key}\u0002${val}\u0003`);
-    });
-    body = body.replace(/\n{3,}/g, '\n\n').trim();
-    if (extraMemo && extraMemo.trim()) {
-      body += '\n\n[추가 안내]\n' + extraMemo.trim();
-    }
-    const parts = [];
-    let i = 0;
-    while (i < body.length) {
-      const startIdx = body.indexOf('\u0001', i);
-      if (startIdx < 0) {
-        if (i < body.length) parts.push({ type: 'text', content: body.slice(i) });
-        break;
-      }
-      if (startIdx > i) parts.push({ type: 'text', content: body.slice(i, startIdx) });
-      const keyEnd = body.indexOf('\u0002', startIdx);
-      const valueEnd = body.indexOf('\u0003', keyEnd);
-      if (keyEnd < 0 || valueEnd < 0) {
-        parts.push({ type: 'text', content: body.slice(startIdx) });
-        break;
-      }
-      const key = body.slice(startIdx + 1, keyEnd);
-      const value = body.slice(keyEnd + 1, valueEnd);
-      parts.push({ type: 'var', key, content: value });
-      i = valueEnd + 1;
-    }
-    return parts;
-  }, [currentTemplate, inputs, extraMemo]);
-
-  const plainText = useMemo(() => previewParts.map(p => p.content).join(''), [previewParts]);
-
-  const scrollPreviewToKey = (key) => {
-    const container = previewContainerRef.current;
-    if (!container) return;
-    const target = container.querySelector(`[data-key="${key}"]`);
-    if (target) {
-      try { target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
-    }
-  };
-
-  useEffect(() => {
-    if (focusedKey) {
-      const t = setTimeout(() => scrollPreviewToKey(focusedKey), 50);
-      return () => clearTimeout(t);
-    }
-  }, [focusedKey, previewParts]);
-
-  const handleCopy = async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(plainText);
-        showToast('클립보드에 복사되었습니다 ✓');
-        return;
-      }
-    } catch (e) {}
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = plainText;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.top = '0';
-      ta.style.left = '0';
-      ta.style.width = '1px';
-      ta.style.height = '1px';
-      ta.style.padding = '0';
-      ta.style.border = 'none';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      const prevActive = document.activeElement;
-      ta.focus({ preventScroll: true });
-      ta.select();
-      ta.setSelectionRange(0, ta.value.length);
-      let ok = false;
-      try { ok = document.execCommand('copy'); } catch (er) {}
-      document.body.removeChild(ta);
-      if (prevActive && prevActive.focus) {
-        try { prevActive.focus({ preventScroll: true }); } catch (er) {}
-      }
-      if (ok) { showToast('클립보드에 복사되었습니다 ✓'); return; }
-    } catch (e) {}
-    try {
-      const container = previewContainerRef.current;
-      if (container) {
-        const range = document.createRange();
-        range.selectNodeContents(container);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        showToast('자동 선택됨 - Ctrl+C를 눌러 복사하세요', 'error');
-        return;
-      }
-    } catch (e) {}
-    showToast('복사 실패 - 미리보기 영역에서 직접 선택해 복사해 주세요', 'error');
-  };
-
-  const handleInputChange = (key, value, type) => {
-    if (type === 'currency') {
-      setInputs(prev => {
-        const newHasMinus = String(value).includes('-');
-        const digits = String(value).replace(/[^\d]/g, '');
-        if (!digits) return { ...prev, [key]: newHasMinus ? '-' : '' };
-        return { ...prev, [key]: newHasMinus ? `-${digits}` : digits };
-      });
-    } else {
-      setInputs(prev => ({ ...prev, [key]: value }));
-    }
-  };
-
-  const handlePasswordSubmit = () => {
-    if (passwordInput === adminPassword) {
-      setAdminMode(true); setShowAdminLogin(false); setPasswordInput('');
-    } else showToast('비밀번호가 일치하지 않습니다', 'error');
-  };
-
-  const renderInput = (variable, order, idx) => {
-    const rawValue = inputs[variable.key] || '';
-    const isOptional = variable.optional;
-    const isNeg = isNegativeValue(rawValue);
-    const goNext = () => {
-      const next = inputRefs.current[order + 1];
-      if (next) { next.focus(); try { next.select(); } catch (er) {} }
-    };
-    const goPrev = () => {
-      const prev = inputRefs.current[order - 1];
-      if (prev) { prev.focus(); try { prev.select(); } catch (er) {} }
-    };
-
-    if (variable.type === 'textarea') {
-      return (
-        <textarea
-          key={idx}
-          ref={el => { inputRefs.current[order] = el; }}
-          value={rawValue}
-          onChange={(e) => handleInputChange(variable.key, e.target.value, variable.type)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); goNext(); } }}
-          onFocus={(e) => {
-            setFocusedKey(variable.key);
-            setTimeout(() => {
-              try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
-              scrollPreviewToKey(variable.key);
-            }, 0);
-          }}
-          placeholder={variable.placeholder || variable.label}
-          rows={Math.max(2, (rawValue.match(/\n/g) || []).length + 2)}
-          className={`block w-full my-1 px-3 py-2 rounded-md text-[14px] leading-relaxed border-2 border-dashed focus:outline-none resize-y placeholder:text-slate-400 text-slate-800 ${
-            isOptional ? 'bg-slate-50 border-slate-300 focus:bg-yellow-50 focus:border-yellow-500' : 'bg-blue-50 border-blue-300 focus:bg-yellow-50 focus:border-yellow-500'
-          }`}
-          style={{ fontFamily: 'inherit' }}
-        />
-      );
-    }
-    const displayValue = variable.type === 'currency' ? formatCurrency(rawValue) : rawValue;
-    const placeholderText = variable.placeholder || variable.label;
-    const size = Math.max((displayValue || placeholderText).length + 1, 4);
-    return (
-      <input
-        key={idx}
-        ref={el => { inputRefs.current[order] = el; }}
-        type="text"
-        value={displayValue}
-        onChange={(e) => handleInputChange(variable.key, e.target.value, variable.type)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === 'ArrowDown') {
-            e.preventDefault(); goNext();
-          } else if (e.key === 'ArrowUp') {
-            e.preventDefault(); goPrev();
-          } else if (e.key === 'ArrowRight') {
-            const inp = e.target;
-            if (inp.selectionStart === inp.value.length && inp.selectionEnd === inp.value.length) {
-              e.preventDefault(); goNext();
-            }
-          } else if (e.key === 'ArrowLeft') {
-            const inp = e.target;
-            if (inp.selectionStart === 0 && inp.selectionEnd === 0) {
-              e.preventDefault(); goPrev();
-            }
-          }
-        }}
-        onFocus={(e) => {
-          e.target.select();
-          setFocusedKey(variable.key);
-          setTimeout(() => {
-            try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
-            scrollPreviewToKey(variable.key);
-          }, 0);
-        }}
-        placeholder={placeholderText}
-        size={size}
-        inputMode={variable.type === 'currency' ? 'numeric' : 'text'}
-        className={`inline-block mx-0.5 px-2 py-0.5 rounded-md text-[15px] font-semibold transition-colors focus:outline-none placeholder:font-normal ${
-          isNeg
-            ? 'bg-rose-50 text-rose-900 border-b-2 border-dashed border-rose-500 focus:bg-rose-100 focus:border-rose-600 placeholder:text-rose-300'
-            : 'bg-blue-50 text-blue-900 border-b-2 border-dashed border-blue-500 focus:bg-yellow-100 focus:border-yellow-600 placeholder:text-blue-300'
-        }`}
-        style={{ fontFamily: 'inherit', lineHeight: '1.4' }}
-      />
-    );
-  };
-
-  const renderTree = (nodes, vars) => {
-    return nodes.map((node, idx) => {
-      if (node.type === 'text') return <React.Fragment key={idx}>{node.value}</React.Fragment>;
-      if (node.type === 'inputonly') {
-        // 입력 전용 마커: 에디터 화면에 입력 필드를 표시. 최종 출력에는 포함되지 않음.
-        const variable = vars.find(v => v.key === node.key);
-        if (!variable) return <span key={idx} className="text-red-500">{`{@${node.key}}`}</span>;
-        // 이후 같은 키의 {변수명}은 출력 위치 표시(읽기 전용 미리보기)로 렌더링
-        renderedKeys.current.add(node.key);
-        const order = orderCounter.current.value++;
-        return renderInput(variable, order, idx);
-      }
-      if (node.type === 'var') {
-        const variable = vars.find(v => v.key === node.key);
-        if (!variable) return <span key={idx} className="text-red-500">{`{${node.key}}`}</span>;
-
-        if (variable.type === 'calculated') {
-          const val = computeCalculated(node.key, inputs);
-          const placeholderText = variable.placeholder || variable.label;
-          return (
-            <span key={idx} className="inline-block mx-0.5 px-2 py-0.5 rounded-md text-[15px] font-semibold bg-emerald-50 text-emerald-900 border-b-2 border-dashed border-emerald-400">
-              {val || <span className="text-emerald-400 font-normal">{placeholderText}</span>}
-            </span>
-          );
-        }
-
-        if (renderedKeys.current.has(node.key)) {
-          const rawValue = inputs[node.key] || '';
-          let displayVal;
-          if (variable.type === 'currency') {
-            // 음수 부호(-) 보존을 위해 formatCurrency 재사용
-            displayVal = formatCurrency(rawValue);
-          } else {
-            displayVal = rawValue;
-          }
-          return (
-            <span key={idx} className="inline-block mx-0.5 px-2 py-0.5 rounded-md text-[14px] font-medium bg-violet-50 text-violet-700 border-b-2 border-dashed border-violet-400" title="출력 위치">
-              {displayVal || <span className="text-violet-400 font-normal text-[12px]">↓ 출력 위치</span>}
-            </span>
-          );
-        }
-        renderedKeys.current.add(node.key);
-
-        const order = orderCounter.current.value++;
-        return renderInput(variable, order, idx);
-      }
-      if (node.type === 'cond') {
-        const variable = vars.find(v => v.key === node.trigger);
-        return (
-          <span key={idx}>
-            {variable?.type === 'switch' && (
-              <label className="inline-flex items-center gap-1.5 mx-1 px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-400 rounded-md text-xs cursor-pointer font-medium text-amber-900 select-none align-middle">
-                <input
-                  type="checkbox"
-                  checked={!!inputs[node.trigger]}
-                  onChange={(e) => setInputs(prev => ({ ...prev, [node.trigger]: e.target.checked }))}
-                  className="cursor-pointer"
-                />
-                <span>{variable.label || node.trigger}</span>
-              </label>
-            )}
-            {renderTree(node.children, vars)}
-          </span>
-        );
-      }
-      return null;
-    });
-  };
-
-  orderCounter.current.value = 0;
-  renderedKeys.current.clear();
-
-  // ===== 부팅 중 (localStorage 읽는 동안 잠깐) =====
-  if (bootChecking) {
-    return <div className="h-screen flex items-center justify-center bg-slate-50 text-slate-400 text-sm">로딩 중...</div>;
-  }
-
-  // ===== 접근 비밀번호 게이트 =====
-  if (!accessGranted) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-md border border-slate-200">
-          <h2 className="text-lg font-bold mb-1 text-slate-900">세무법인삼호 메시지 도구</h2>
-          <p className="text-xs text-slate-500 mb-4">사내 전용 도구입니다. 비밀번호를 입력해주세요.</p>
-          <input
-            type="password"
-            value={accessInput}
-            onChange={(e) => { setAccessInput(e.target.value); setAccessError(false); }}
-            onKeyDown={(e) => e.key === 'Enter' && handleAccessSubmit()}
-            placeholder="비밀번호"
-            className={`w-full px-3 py-2 border rounded-lg mb-3 focus:ring-2 focus:outline-none ${accessError ? 'border-red-400 focus:ring-red-300' : 'border-slate-300 focus:ring-blue-500'}`}
-            autoFocus
-          />
-          {accessError && <p className="text-xs text-red-600 mb-3">비밀번호가 일치하지 않습니다.</p>}
-          <button onClick={handleAccessSubmit} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-lg font-semibold text-sm">입장</button>
-          <p className="text-[11px] text-slate-400 mt-4 text-center">한 번 입력하면 이 PC에서는 다음부터 자동으로 열립니다.</p>
-          <p className="text-[10px] text-slate-300 mt-2 text-center">업데이트 {BUILD_DATE}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
-      {toast && (
-        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg shadow-lg text-white font-medium text-sm ${toast.type === 'error' ? 'bg-red-500' : 'bg-slate-900'}`}>
-          {toast.message}
-        </div>
-      )}
-
-      <header className="bg-white border-b border-slate-200 z-30 shadow-sm flex-shrink-0">
-        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
-          <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-slate-400 mr-1 hidden sm:inline" title="이 도구가 마지막으로 갱신된 시각">업데이트 {BUILD_DATE}</span>
-            <button
-              onClick={handleHardReload}
-              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
-              title="새로고침 (최신 양식 받기)"
-            >
-              <RefreshCw size={16} />
-            </button>
-            {adminMode ? (
-              <button onClick={() => setAdminMode(false)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium flex items-center gap-1">
-                <Lock size={14} /> 종료
-              </button>
-            ) : (
-              <button onClick={() => setShowAdminLogin(true)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600" title="관리자 모드">
-                <Settings size={17} />
-              </button>
-            )}
-            <button onClick={handleAccessLogout} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600" title="로그아웃">
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {showAdminLogin && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Lock size={18} /> 관리자 모드 로그인</h2>
-            <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()} placeholder="관리자 비밀번호" className="w-full px-3 py-2 border border-slate-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none" autoFocus />
-            <div className="flex gap-2">
-              <button onClick={handlePasswordSubmit} className="flex-1 bg-slate-900 text-white py-2 rounded-lg">확인</button>
-              <button onClick={() => { setShowAdminLogin(false); setPasswordInput(''); }} className="px-4 py-2 border border-slate-300 rounded-lg">취소</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {adminMode ? (
-        <div className="flex-1 overflow-auto">
-          <AdminPanel
-            onSavePassword={async (pw) => { setAdminPassword(pw); await Storage.set('admin_password', pw); showToast('비밀번호 변경됨'); }}
-            showToast={showToast}
-          />
-        </div>
-      ) : !currentTemplate ? (
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl p-8 text-center text-slate-500 border border-dashed border-slate-300">
-            <p className="font-medium">이 분류에는 아직 템플릿이 없습니다</p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {types.map(t => (
-                <button
-                  key={t}
-                  onClick={() => setSelectedType(t)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${selectedType === t ? 'bg-slate-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'}`}
-                >
-                  {t}
-                </button>
-              ))}
-              <span className="text-[11px] text-rose-600 font-medium ml-1 hidden md:inline">💡 음수(-) 입력 시 자동 (환급) 처리</span>
-            </div>
-            <button onClick={handleCopy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow whitespace-nowrap">
-              <Copy size={15} /> 카톡용 복사
-            </button>
-          </div>
-
-          <div ref={splitContainerRef} className="flex-1 flex flex-col min-h-0 relative">
-            <div
-              className="overflow-y-auto bg-slate-50"
-              style={{ height: `${splitPos}%` }}
-            >
-              <div className="max-w-4xl mx-auto p-3">
-                <div className="bg-white rounded-xl px-5 py-5 shadow-sm border border-slate-200">
-                  <div className="whitespace-pre-wrap text-[15px] leading-[2] text-slate-800 break-words">
-                    {renderTree(tree, currentTemplate.variables || [])}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              onMouseDown={handleDragStart}
-              onTouchStart={handleDragStart}
-              className="h-2 bg-slate-200 hover:bg-blue-400 active:bg-blue-500 cursor-row-resize flex items-center justify-center flex-shrink-0 transition-colors group select-none touch-none"
-              title="드래그하여 크기 조절"
-            >
-              <GripHorizontal size={16} className="text-slate-500 group-hover:text-white pointer-events-none" />
-            </div>
-
-            <div
-              ref={previewContainerRef}
-              className="overflow-y-auto bg-white"
-              style={{ height: `${100 - splitPos}%` }}
-            >
-              <div className="max-w-4xl mx-auto p-4">
-                <div className="text-[14px] whitespace-pre-wrap leading-relaxed text-slate-800 break-words">
-                  {previewParts.length === 0 ? (
-                    <span className="text-slate-400 italic">위에서 값을 입력하면 여기에 결과가 표시됩니다.</span>
-                  ) : (
-                    previewParts.map((part, idx) => {
-                      if (part.type === 'var') {
-                        return (
-                          <span
-                            key={idx}
-                            data-key={part.key}
-                            className={focusedKey === part.key ? 'bg-yellow-200 rounded px-0.5 -mx-0.5 transition-colors' : ''}
-                          >
-                            {part.content}
-                          </span>
-                        );
-                      }
-                      return <React.Fragment key={idx}>{part.content}</React.Fragment>;
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+<div class="container">
+
+<!-- ===== 헤더 ===== -->
+<div class="app-header">
+  <div class="header-bar">
+    <div class="header-left">
+      <span style="font-size:14px;">📊</span>
+      <h1>종합소득세 시뮬레이터</h1>
+      <span class="badge-year">2026 귀속</span>
     </div>
-  );
-}
+    <div class="header-right no-print">
+      <span class="update-time pc-only">업데이트 <span id="update-time-val">...</span></span>
+      <button class="btn-text pc-only" id="btn-update" title="페이지 새로고침"><span>🔄</span><span class="btn-label">업데이트</span></button>
+      <button class="btn-text" id="btn-reset" title="모든 입력 초기화"><span>↻</span><span class="btn-label">초기화</span></button>
+      <button class="btn-mobile-print" id="btn-print-mobile" title="인쇄">🖨️</button>
+    </div>
+  </div>
+  <button class="btn-print-main no-print pc-only" id="btn-print-main" title="A4 1페이지 세로 인쇄">🖨️ 인쇄</button>
+</div>
 
-function AdminPanel({ onSavePassword, showToast }) {
-  const [pwInput, setPwInput] = useState('');
+<!-- ===== ① 종합소득금액 ===== -->
+<div class="card">
+  <div class="section-header">
+    <h2 class="section-title">① 종합소득금액</h2>
+    <div class="inline-inputs">
+      <input type="text" class="inline-input rev" id="revenue" placeholder="총수입금액 입력" data-nav="primary">
+      <input type="text" class="inline-input code" id="businessCode" placeholder="업종코드 입력" maxlength="6" data-nav="primary">
+    </div>
+  </div>
+  <div class="income-grid">
+    <div class="field">
+      <label class="field-label">사업소득금액 <span class="accent">▶ 시작</span></label>
+      <input type="text" class="num-input primary" id="businessIncome" data-nav="primary" data-first="true">
+      <span class="field-hint" id="biz-hint">총수입 − 필요경비 (예: 15000000+10000000)</span>
+      <span class="field-msg" id="biz-msg" style="display:none;"></span>
+    </div>
+    <div class="field">
+      <label class="field-label">근로소득금액</label>
+      <input type="text" class="num-input" id="laborIncome" data-nav="primary">
+      <span class="field-hint">총급여 − 근로소득공제</span>
+    </div>
+    <div class="field">
+      <label class="field-label">기타 종합소득금액</label>
+      <input type="text" class="num-input" id="otherIncome" data-nav="primary">
+      <span class="field-hint">이자·배당·연금·기타</span>
+    </div>
+  </div>
+</div>
 
-  return (
-    <main className="max-w-5xl mx-auto p-4">
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-900 flex items-center gap-2">
-        <Lock size={16} /> 관리자 모드입니다. (빌드 {BUILD_DATE})
+<!-- ===== ② M-U경비 (반영 시뮬레이션) ===== -->
+<div class="card card-mu">
+  <div class="mu-grid">
+    <div class="field">
+      <label class="field-label">② M-U경비 (반영 시뮬레이션)</label>
+      <input type="text" class="num-input mu" id="muExpense" data-nav="primary">
+    </div>
+    <div class="mu-arrow">→</div>
+    <div class="field">
+      <label class="field-label"><span style="color:#1e3a8a; font-weight:600;">사업소득금액 (반영 후)</span></label>
+      <input type="text" class="num-input after" id="businessIncomeAfter" data-nav="primary">
+    </div>
+  </div>
+  <div class="mu-note">※ 양방향 동기화 — M-U경비 ↔ 반영 후 어느 칸에 입력해도 다른 칸 자동 갱신</div>
+</div>
+
+<!-- ===== 추가입력 토글 ===== -->
+<div class="adv-collapsed no-print" id="adv-collapsed" tabindex="-1">
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0;">
+    <span class="adv-collapsed-label">▼ 추가입력</span>
+    <span class="adv-collapsed-hint">소득공제·세액공제·기납부세액</span>
+  </div>
+  <div class="adv-collapsed-summary">적용 중: <strong id="adv-summary">인적공제 1,500,000 · 세액공제 70,000 · 기납부 0</strong></div>
+</div>
+
+<div class="adv-expanded" id="adv-expanded" style="display:none;">
+  <div class="adv-expanded-header" id="adv-expanded-header">
+    <span style="font-weight:600;">▲ 추가입력 (펼침)</span>
+    <span style="opacity:0.85;">클릭하여 닫기</span>
+  </div>
+  <div class="adv-expanded-body">
+    <div class="adv-section">
+      <div class="adv-section-title">소득공제 (인적공제 · 국민연금 · 기타)</div>
+      <div class="rrn-row">
+        <span class="rrn-label">본인</span>
+        <input type="text" class="rrn-input" id="selfRrn" placeholder="YYMMDD-S" maxlength="8" data-nav="primary">
+        <label class="disabled-check"><input type="checkbox" id="selfDisabled" tabindex="-1"> 장애인</label>
+        <span class="rrn-info" id="self-info">미입력 → 기본공제만</span>
       </div>
-      <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-        <h3 className="font-bold mb-2">관리자 비밀번호 변경</h3>
-        <div className="flex gap-2">
-          <input type="password" value={pwInput} onChange={(e) => setPwInput(e.target.value)} placeholder="새 관리자 비밀번호" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
-          <button onClick={() => { if (pwInput) { onSavePassword(pwInput); setPwInput(''); } }} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold">변경</button>
+      <div class="deduction-grid">
+        <div class="field">
+          <label class="field-label">국민연금보험료</label>
+          <input type="text" class="num-input" id="pensionPremium" data-nav="primary">
         </div>
-        <p className="text-xs text-slate-500 mt-2">이 PC에만 적용됩니다. 다른 PC에서도 바꾸시려면 각 PC에서 똑같이 진행해야 합니다.</p>
+        <div class="field">
+          <label class="field-label">기타 소득공제 <span style="color:#94a3b8; font-weight:400;">(신용카드·주택자금 등)</span></label>
+          <input type="text" class="num-input" id="otherDeduction" data-nav="primary">
+        </div>
       </div>
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 text-sm text-slate-600">
-        <h3 className="font-bold mb-2 text-slate-800">양식 수정 안내</h3>
-        <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code>(기장거래처)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_REPORT</code>(신고대리) 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 헤더의 <strong>새로고침 버튼</strong>(또는 Ctrl+F5)으로 반영됩니다.</p>
-        <p className="mt-2">수정 후 코드 상단의 <code className="bg-white px-1 rounded border border-slate-200">BUILD_DATE</code> 상수(<code>YYYY-MM-DD HH:MM</code> 형식)도 함께 갱신해 두면 직원이 최신 버전을 받았는지 헤더에서 바로 확인할 수 있습니다.</p>
+    </div>
+    <div class="credit-grid">
+      <div class="field">
+        <div class="adv-section-title">세액공제</div>
+        <label class="field-label">기본: 표준세액공제</label>
+        <input type="text" class="num-input" id="taxCredit" data-nav="primary">
       </div>
-    </main>
-  );
+      <div class="field">
+        <div class="adv-section-title">기납부세액</div>
+        <label class="field-label">원천징수·중간예납 <span style="color:#94a3b8; font-weight:400;">(결정세액에서 차감)</span></label>
+        <input type="text" class="num-input" id="prepaid" data-nav="primary">
+        <span class="field-msg" id="prepaid-msg" style="display:none;"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 절감액 강조 ===== -->
+<div class="savings-banner" id="savings-banner">
+  <span class="savings-label">절감액 (실질 총부담 차이) · 실시간</span>
+  <span class="savings-value" id="savings-value">0<span class="unit">원</span></span>
+</div>
+
+<!-- ===== 비교 패널 ===== -->
+<div class="compare-grid">
+  <div class="result-panel">
+    <div class="result-header before-hdr" id="result-header-before">
+      <span class="result-header-label">반영 전 · 실질 총부담</span>
+      <span class="result-header-value" id="total-burden-before">0<span class="unit">원</span></span>
+    </div>
+    <div class="result-body" id="result-body-before"></div>
+  </div>
+  <div class="result-panel after-panel">
+    <div class="result-header after-hdr" id="result-header-after">
+      <span class="result-header-label">반영 후 · 실질 총부담</span>
+      <span class="result-header-value" id="total-burden-after">0<span class="unit">원</span></span>
+    </div>
+    <div class="result-body" id="result-body-after"></div>
+  </div>
+</div>
+
+<!-- ===== 단서 ===== -->
+<div class="disclaimer">
+  <strong>건보+장기요양 8.13%</strong> = 7.19% × 1.1314 (2026년 지역가입자 통합요율)<br>
+  <strong>기본 적용값</strong> · 종합소득공제 = 인적공제 본인 1,500,000 (만 70세 이상 시 +1,000,000) · 표준세액공제 70,000 · 기납부세액 0<br>
+  <strong>인적용역 자동환산</strong> · 업종코드 940xxx 입력 시 단순경비율 자동 환산 + 원천징수 3% 자동<br>
+  <strong>※ 단순 추정치</strong> · 실제 신고 결과와 차이 가능 · 건보료는 부과점수(재산분) 제외 소득분만
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ===== 상수 ===== */
+var TAX_YEAR = 2026;
+var WITHHOLDING_RATE = 0.03;
+var HEALTH_RATE = 0.0719;
+var LTC_RATIO = 0.1314;
+var FOUR_M = 40000000;
+
+var BRACKETS = [
+  { limit: 14000000,    rate: 0.06, deduction: 0 },
+  { limit: 50000000,    rate: 0.15, deduction: 1260000 },
+  { limit: 88000000,    rate: 0.24, deduction: 5760000 },
+  { limit: 150000000,   rate: 0.35, deduction: 15440000 },
+  { limit: 300000000,   rate: 0.38, deduction: 19940000 },
+  { limit: 500000000,   rate: 0.40, deduction: 25940000 },
+  { limit: 1000000000,  rate: 0.42, deduction: 35940000 },
+  { limit: Infinity,    rate: 0.45, deduction: 65940000 }
+];
+
+var BUSINESS_CODES = {
+  "940100":{name:"작가",basic:58.7,excess:42.2},
+  "940200":{name:"화가 및 관련예술가",basic:68.0,excess:55.2},
+  "940301":{name:"작곡가",basic:49.7,excess:29.6},
+  "940302":{name:"배우 등",basic:29.0,excess:10.6},
+  "940303":{name:"모델",basic:40.9,excess:17.3},
+  "940304":{name:"가수",basic:13.5,excess:4.2},
+  "940305":{name:"성악가 등",basic:61.6,excess:46.2},
+  "940306":{name:"1인미디어콘텐츠창작자",basic:64.1,excess:49.7},
+  "940500":{name:"연예보조서비스",basic:70.9,excess:59.3},
+  "940600":{name:"자문·감독·지도·고문료",basic:58.4,excess:41.8},
+  "940901":{name:"바둑기사",basic:62.6,excess:47.6},
+  "940902":{name:"꽃꽂이 및 요리교사",basic:81.8,excess:74.5},
+  "940903":{name:"재단사 및 학원강사",basic:61.7,excess:46.4},
+  "940904":{name:"직업운동가",basic:54.5,excess:36.3},
+  "940905":{name:"유흥접객원 및 댄서",basic:61.7,excess:46.4},
+  "940906":{name:"보험설계사",basic:77.6,excess:68.6},
+  "940907":{name:"음료품배달원",basic:80.0,excess:72.0},
+  "940908":{name:"서적 및 화장품외판원",basic:75.0,excess:65.0},
+  "940909":{name:"컴퓨터프로그래머",basic:64.1,excess:49.7},
+  "940910":{name:"다단계판매원 후원수당",basic:67.8,excess:54.9},
+  "940911":{name:"기타 모집수당·채권회수수당",basic:67.7,excess:54.8},
+  "940912":{name:"개인간병인",basic:80.2,excess:72.3},
+  "940913":{name:"대리운전기사",basic:73.7,excess:63.2},
+  "940914":{name:"골프장캐디",basic:74.3,excess:64.0},
+  "940915":{name:"목욕관리사",basic:78.2,excess:69.5},
+  "940916":{name:"행사도우미",basic:69.8,excess:57.7},
+  "940917":{name:"심부름용역원",basic:71.5,excess:60.1},
+  "940918":{name:"퀵서비스배달원",basic:79.4,excess:71.2},
+  "940919":{name:"이삿짐운반원",basic:74.2,excess:63.9},
+  "940920":{name:"학습지 방문강사",basic:75.0,excess:65.0},
+  "940921":{name:"교육교구 방문강사",basic:75.6,excess:65.8},
+  "940922":{name:"대여제품 방문점검원",basic:75.0,excess:65.0},
+  "940923":{name:"대출모집인",basic:67.5,excess:54.5},
+  "940924":{name:"신용카드회원모집인",basic:71.3,excess:59.8},
+  "940925":{name:"방과후강사",basic:69.3,excess:57.0},
+  "940926":{name:"소프트웨어프리랜서",basic:64.4,excess:50.2},
+  "940927":{name:"관광통역안내사",basic:64.1,excess:49.7},
+  "940928":{name:"어린이통학버스기사",basic:72.4,excess:61.4},
+  "940929":{name:"중고자동차판매원",basic:75.0,excess:65.0}
+};
+
+/* ===== 상태 ===== */
+var state = {
+  revenue: 0,
+  businessCode: "",
+  bizAutoDisabled: false,
+  businessIncome: 0,
+  businessAutoFilled: false,
+  laborIncome: 0,
+  otherIncome: 0,
+  muExpense: 0,
+  selfRrn: "",
+  selfDisabled: false,
+  pensionPremium: 0,
+  otherDeduction: 0,
+  taxCredit: 70000,
+  prepaid: 0
+};
+
+/* ===== 유틸 ===== */
+function fmt(n) {
+  if (!n || isNaN(n)) return "0";
+  return Math.floor(Math.abs(n)).toLocaleString("ko-KR");
 }
 
-const rootEl = document.getElementById('root');
-const loader = document.getElementById('boot-loader');
-ReactDOM.createRoot(rootEl).render(<App />);
-if (loader) loader.remove();
+function evalExpression(raw) {
+  if (raw == null) return { valid:false, value:null, hasOperator:false };
+  var cleaned = String(raw).replace(/[,\s]/g, "");
+  if (cleaned === "") return { valid:true, value:0, hasOperator:false };
+  var hasOp = /[+\-*/]/.test(cleaned.slice(1)) || /^[*/]/.test(cleaned);
+  if (!/^[\d+\-*/.()]+$/.test(cleaned)) return { valid:false, value:null, hasOperator:hasOp };
+  try {
+    var r = (new Function('"use strict"; return ('+cleaned+');'))();
+    if (typeof r !== 'number' || !isFinite(r)) return { valid:false, value:null, hasOperator:hasOp };
+    return { valid:true, value:Math.floor(r), hasOperator:hasOp };
+  } catch (e) {
+    return { valid:false, value:null, hasOperator:hasOp };
+  }
+}
+
+function parseRrn(rrn) {
+  var c = (rrn || "").replace(/[^\d]/g, "");
+  if (c.length < 6) return null;
+  var yy = parseInt(c.substring(0,2), 10);
+  var mm = parseInt(c.substring(2,4), 10);
+  var dd = parseInt(c.substring(4,6), 10);
+  if (isNaN(yy) || isNaN(mm) || isNaN(dd)) return null;
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+  var century, gender = null;
+  if (c.length >= 7) {
+    var s = parseInt(c.charAt(6), 10);
+    if (s === 9 || s === 0) century = 1800;
+    else if (s === 1 || s === 2) century = 1900;
+    else if (s === 3 || s === 4) century = 2000;
+    else if (s === 5 || s === 6) century = 1900;
+    else if (s === 7 || s === 8) century = 2000;
+    else century = 1900;
+    gender = s % 2 === 1 ? "남" : "여";
+  } else {
+    var curYY = new Date().getFullYear() % 100;
+    century = yy <= curYY + 5 ? 2000 : 1900;
+  }
+  var birthYear = century + yy;
+  var age = TAX_YEAR - birthYear;
+  return { age:age, birthYear:birthYear, gender:gender };
+}
+
+function formatRrnDisplay(rrn) {
+  var c = (rrn || "").replace(/[^\d]/g, "").substring(0, 7);
+  if (c.length <= 6) return c;
+  return c.substring(0,6) + "-" + c.substring(6,7);
+}
+
+function calcBusinessIncomeFromRevenue(rev, info) {
+  if (!info || !rev || rev <= 0) return 0;
+  if (rev <= FOUR_M) return Math.floor(rev * (1 - info.basic/100));
+  var baseExp = FOUR_M * (info.basic/100);
+  var excessExp = (rev - FOUR_M) * (info.excess/100);
+  return Math.floor(rev - baseExp - excessExp);
+}
+
+function calcTax(base) {
+  if (base <= 0) return 0;
+  for (var i = 0; i < BRACKETS.length; i++) {
+    var b = BRACKETS[i];
+    if (base <= b.limit) return Math.floor(base * b.rate - b.deduction);
+  }
+  return 0;
+}
+
+function findMaxBaseZeroTax(taxCredit) {
+  if (taxCredit <= 0) return 0;
+  var lower = 0;
+  for (var i = 0; i < BRACKETS.length; i++) {
+    var b = BRACKETS[i];
+    var cand = Math.ceil((taxCredit + 1 + b.deduction) / b.rate) - 1;
+    var s = 0;
+    while (cand > 0 && Math.floor(cand * b.rate - b.deduction) > taxCredit && s < 5) { cand--; s++; }
+    s = 0;
+    while (Math.floor((cand + 1) * b.rate - b.deduction) <= taxCredit && s < 5) { cand++; s++; }
+    if (cand >= lower && cand <= b.limit) return cand;
+    if (cand > b.limit) { lower = b.limit; continue; }
+    return lower;
+  }
+  return BRACKETS[BRACKETS.length-1].limit;
+}
+
+function annualHealth(income) {
+  if (income <= 0) return 0;
+  return Math.floor(income * HEALTH_RATE * (1 + LTC_RATIO));
+}
+
+/* ===== 시나리오 계산 ===== */
+function calcScenario(businessIncomeVal) {
+  var totalIncome = businessIncomeVal + state.laborIncome + state.otherIncome;
+  var selfInfo = parseRrn(state.selfRrn);
+  var basicDed = 1500000;
+  var elderlyCnt = (selfInfo && selfInfo.age >= 70) ? 1 : 0;
+  var elderlyDed = elderlyCnt * 1000000;
+  var disabledCnt = state.selfDisabled ? 1 : 0;
+  var disabledDed = disabledCnt * 2000000;
+  var personalDed = basicDed + elderlyDed + disabledDed;
+  var totalDed = personalDed + state.pensionPremium + state.otherDeduction;
+  var taxBase = Math.max(0, totalIncome - totalDed);
+  var calcTaxVal = calcTax(taxBase);
+  var decidedTax = Math.max(0, calcTaxVal - state.taxCredit);
+  var finalTax = decidedTax - state.prepaid;
+  var isZeroPrepaid = state.prepaid === 0;
+  var isRefund = !isZeroPrepaid && finalTax < 0;
+  var headerBase = isZeroPrepaid ? decidedTax : Math.abs(finalTax);
+  var localTax = Math.floor(headerBase * 0.1);
+  var totalBurden = headerBase + localTax;
+  var healthIns = (!isRefund && totalIncome > 0) ? annualHealth(totalIncome) : 0;
+  var realTotalBurden = totalBurden + healthIns;
+  return {
+    totalIncome:totalIncome, personalDed:personalDed, totalDed:totalDed,
+    taxBase:taxBase, calcTaxVal:calcTaxVal, decidedTax:decidedTax,
+    finalTax:finalTax, isZeroPrepaid:isZeroPrepaid, isRefund:isRefund,
+    headerBase:headerBase, localTax:localTax, totalBurden:totalBurden,
+    healthIns:healthIns, realTotalBurden:realTotalBurden,
+    elderlyCnt:elderlyCnt, disabledCnt:disabledCnt
+  };
+}
+
+/* ===== 결과 패널 렌더링 ===== */
+function renderResultBody(r, isAfter) {
+  var html = '';
+  html += '<div class="result-body-title">상세 계산 내역</div>';
+  html += '<div class="result-row"><span>종합소득금액</span><span class="val">'+fmt(r.totalIncome)+'</span></div>';
+  html += '<div class="result-row"><span>(−) 종합소득공제</span><span class="val">'+fmt(r.totalDed)+'</span></div>';
+
+  var subParts = ['본인'];
+  if (r.elderlyCnt > 0) subParts.push('경로');
+  if (r.disabledCnt > 0) subParts.push('장애');
+  html += '<div class="result-row sub"><span>인적공제 ('+subParts.join('·')+')</span><span>'+fmt(r.personalDed)+'</span></div>';
+  if (state.pensionPremium > 0) html += '<div class="result-row sub"><span>국민연금보험료</span><span>'+fmt(state.pensionPremium)+'</span></div>';
+  if (state.otherDeduction > 0) html += '<div class="result-row sub"><span>기타 소득공제</span><span>'+fmt(state.otherDeduction)+'</span></div>';
+
+  html += '<div class="result-row highlight"><span>= 과세표준</span><span>'+fmt(r.taxBase)+'</span></div>';
+  html += '<div class="result-row"><span>산출세액</span><span class="val">'+fmt(r.calcTaxVal)+'</span></div>';
+  html += '<div class="result-row"><span>(−) 세액공제</span><span class="val">'+fmt(state.taxCredit)+'</span></div>';
+
+  var decidedCls = isAfter ? 'decided-after' : 'decided-before';
+  html += '<div class="result-row '+decidedCls+'"><span>= 결정세액</span><span>'+fmt(r.decidedTax)+'</span></div>';
+
+  if (!r.isZeroPrepaid) {
+    html += '<div class="result-row"><span>(−) 기납부세액</span><span class="val">'+fmt(state.prepaid)+'</span></div>';
+    var finalLabel = r.isRefund ? '환급예정세액 (소득세분)' : '차감납부할 세액 (소득세분)';
+    var finalCls = r.isRefund ? 'refund' : '';
+    html += '<div class="result-row '+finalCls+'"><span>'+finalLabel+'</span><span class="val">'+fmt(Math.abs(r.finalTax))+'</span></div>';
+  }
+
+  var localLabel = r.isRefund ? '지방소득세 환급 (×10%)' : '지방소득세 (×10%)';
+  html += '<div class="result-row '+(r.isRefund?'refund':'')+'"><span>'+localLabel+'</span><span class="val">'+fmt(r.localTax)+'</span></div>';
+
+  if (r.isRefund) {
+    html += '<div class="result-row refund-total"><span>총 환급예정세액</span><span>'+fmt(r.totalBurden)+'</span></div>';
+  } else {
+    var totalCls = isAfter ? 'total-after' : 'total-before';
+    html += '<div class="result-row '+totalCls+'"><span>총 부담세액 (소계)</span><span>'+fmt(r.totalBurden)+'</span></div>';
+    html += '<div class="result-row '+totalCls+'"><span>건보+장기요양 (×8.13%)</span><span>'+fmt(r.healthIns)+'</span></div>';
+  }
+  return html;
+}
+
+function renderAll() {
+  var bizAfter = Math.max(0, state.businessIncome - state.muExpense);
+  var before = calcScenario(state.businessIncome);
+  var after = calcScenario(bizAfter);
+
+  var beforeHdrVal = before.isRefund ? before.totalBurden : before.realTotalBurden;
+  var afterHdrVal = after.isRefund ? after.totalBurden : after.realTotalBurden;
+  document.getElementById('total-burden-before').innerHTML = fmt(beforeHdrVal) + '<span class="unit">원</span>';
+  document.getElementById('total-burden-after').innerHTML = fmt(afterHdrVal) + '<span class="unit">원</span>';
+
+  var hdrBefore = document.getElementById('result-header-before');
+  var hdrAfter = document.getElementById('result-header-after');
+  hdrBefore.className = 'result-header ' + (before.isRefund ? 'refund-hdr' : 'before-hdr');
+  hdrAfter.className = 'result-header ' + (after.isRefund ? 'refund-hdr' : 'after-hdr');
+  hdrBefore.querySelector('.result-header-label').textContent = before.isRefund ? '반영 전 · 환급예정' : '반영 전 · 실질 총부담';
+  hdrAfter.querySelector('.result-header-label').textContent = after.isRefund ? '반영 후 · 환급예정' : '반영 후 · 실질 총부담';
+
+  document.getElementById('result-body-before').innerHTML = renderResultBody(before, false);
+  document.getElementById('result-body-after').innerHTML = renderResultBody(after, true);
+
+  var beforeTotal = before.isRefund ? -before.totalBurden : before.realTotalBurden;
+  var afterTotal = after.isRefund ? -after.totalBurden : after.realTotalBurden;
+  var savings = beforeTotal - afterTotal;
+  var sv = document.getElementById('savings-value');
+  if (Math.abs(savings) < 0.5) sv.innerHTML = '0<span class="unit">원</span>';
+  else if (savings > 0) sv.innerHTML = '−' + fmt(savings) + '<span class="unit">원</span>';
+  else sv.innerHTML = '+' + fmt(Math.abs(savings)) + '<span class="unit">원</span>';
+
+  var sumParts = [];
+  sumParts.push('인적공제 ' + fmt(before.personalDed));
+  if (state.pensionPremium > 0) sumParts.push('국민연금 ' + fmt(state.pensionPremium));
+  if (state.otherDeduction > 0) sumParts.push('기타공제 ' + fmt(state.otherDeduction));
+  sumParts.push('세액공제 ' + fmt(state.taxCredit));
+  sumParts.push('기납부 ' + fmt(state.prepaid));
+  document.getElementById('adv-summary').textContent = sumParts.join(' · ');
+
+  renderSelfInfo();
+}
+
+function renderSelfInfo() {
+  var info = parseRrn(state.selfRrn);
+  var el = document.getElementById('self-info');
+  if (!info) { el.innerHTML = '미입력 → 기본공제만'; return; }
+  var html = '만<strong> ' + info.age + '세</strong> <span style="color:#94a3b8;">(' + info.birthYear;
+  if (info.gender) html += '·' + info.gender;
+  html += ')</span>';
+  if (info.age >= 70) html += '<span class="elderly-badge">경로우대 자동</span>';
+  el.innerHTML = html;
+}
+
+/* ===== 자동환산 (업종코드·원천징수·결정세액0 임계점) ===== */
+function recalcBizAuto() {
+  var info = BUSINESS_CODES[state.businessCode] || null;
+  var active = !!info && state.revenue > 0 && !state.bizAutoDisabled;
+  var bizMsg = document.getElementById('biz-msg');
+  var bizHint = document.getElementById('biz-hint');
+  var bizInput = document.getElementById('businessIncome');
+  var prepaidMsg = document.getElementById('prepaid-msg');
+  var prepaidInput = document.getElementById('prepaid');
+  var afterInput = document.getElementById('businessIncomeAfter');
+
+  if (active) {
+    var auto = calcBusinessIncomeFromRevenue(state.revenue, info);
+    var autoPrepaid = Math.floor(state.revenue * WITHHOLDING_RATE);
+    state.businessIncome = auto;
+    state.prepaid = autoPrepaid;
+    bizInput.value = auto > 0 ? fmt(auto) : '';
+    bizInput.classList.add('auto-filled');
+    bizMsg.style.display = '';
+    bizMsg.className = 'field-msg info';
+    bizMsg.textContent = '🔄 ' + info.name + ' · 단순경비율 자동환산';
+    bizHint.style.display = 'none';
+
+    prepaidInput.value = autoPrepaid > 0 ? fmt(autoPrepaid) : '';
+    prepaidInput.classList.add('auto-filled');
+    prepaidMsg.style.display = '';
+    prepaidMsg.className = 'field-msg info';
+    prepaidMsg.textContent = '🔄 수입금액 × 3% 자동';
+    state.businessAutoFilled = false;
+
+    var after = Math.max(0, auto - state.muExpense);
+    afterInput.value = after > 0 ? fmt(after) : '';
+  } else {
+    bizInput.classList.remove('auto-filled');
+    prepaidInput.classList.remove('auto-filled');
+    if (!state.businessAutoFilled) {
+      bizMsg.style.display = 'none';
+      bizHint.style.display = '';
+      prepaidMsg.style.display = 'none';
+    }
+  }
+
+  if (!active && state.businessAutoFilled && state.prepaid > 0) {
+    var maxBase = findMaxBaseZeroTax(state.taxCredit);
+    var selfInfo = parseRrn(state.selfRrn);
+    var elderlyDed = (selfInfo && selfInfo.age >= 70) ? 1000000 : 0;
+    var disabledDed = state.selfDisabled ? 2000000 : 0;
+    var personalDed = 1500000 + elderlyDed + disabledDed;
+    var totalDed = personalDed + state.pensionPremium + state.otherDeduction;
+    var maxBiz = Math.max(0, maxBase + totalDed - state.laborIncome - state.otherIncome);
+    state.businessIncome = maxBiz;
+    bizInput.value = maxBiz > 0 ? fmt(maxBiz) : '';
+    bizInput.classList.add('auto-filled');
+    bizMsg.style.display = '';
+    bizHint.style.display = 'none';
+    if (maxBiz > 0) {
+      bizMsg.className = 'field-msg info';
+      bizMsg.textContent = '🔄 결정세액 0 임계점 · 100% 환급 한도';
+    } else {
+      bizMsg.className = 'field-msg warn';
+      bizMsg.textContent = '⚠️ 100% 환급 불가 (다른 소득으로 결정세액>0)';
+    }
+    var after2 = Math.max(0, maxBiz - state.muExpense);
+    afterInput.value = after2 > 0 ? fmt(after2) : '';
+  }
+  renderAll();
+}
+
+/* ===== 식 입력 처리 ===== */
+function setupExprInput(el, onCommit, opts) {
+  opts = opts || {};
+  var draft = null;
+  el.addEventListener('input', function() {
+    var raw = el.value;
+    var cleaned = raw.replace(/[,\s]/g, '');
+    var hasOp = /[+\-*/]/.test(cleaned.slice(1)) || /^[*/]/.test(cleaned);
+    if (hasOp) {
+      draft = raw;
+      var r = evalExpression(raw);
+      if (opts.previewEl) {
+        if (r.valid && r.hasOperator) {
+          opts.previewEl.style.display = '';
+          opts.previewEl.className = 'field-msg preview';
+          opts.previewEl.textContent = '= ' + fmt(r.value) + ' (Enter·Tab 시 적용)';
+          if (opts.hintEl) opts.hintEl.style.display = 'none';
+        } else if (!r.valid) {
+          opts.previewEl.style.display = '';
+          opts.previewEl.className = 'field-msg warn';
+          opts.previewEl.textContent = '식 오류 — 확인 필요';
+          if (opts.hintEl) opts.hintEl.style.display = 'none';
+        }
+      }
+    } else {
+      draft = null;
+      var num = cleaned.replace(/[^\d]/g, '');
+      var val = num === '' ? 0 : parseInt(num, 10);
+      if (isNaN(val)) val = 0;
+      onCommit(val);
+      if (opts.previewEl) opts.previewEl.style.display = 'none';
+      if (opts.hintEl) opts.hintEl.style.display = '';
+    }
+  });
+  el.addEventListener('focus', function() { el.select(); });
+  el.addEventListener('blur', function() {
+    if (draft !== null) {
+      var r = evalExpression(draft);
+      if (r.valid && r.value !== null) {
+        onCommit(r.value);
+        el.value = r.value > 0 ? fmt(r.value) : '';
+      }
+      draft = null;
+      if (opts.previewEl) opts.previewEl.style.display = 'none';
+      if (opts.hintEl) opts.hintEl.style.display = '';
+    }
+  });
+}
+
+/* ===== 키보드 네비게이션 ===== */
+function getVisibleNavInputs() {
+  var all = Array.prototype.slice.call(document.querySelectorAll('input[data-nav="primary"]'));
+  return all.filter(function(el) { return el.offsetParent !== null; });
+}
+function moveFocus(current, delta) {
+  var list = getVisibleNavInputs();
+  var idx = list.indexOf(current);
+  if (idx === -1) return;
+  var next = idx + delta;
+  if (next >= 0 && next < list.length) {
+    list[next].focus();
+    setTimeout(function() { if (list[next].select) list[next].select(); }, 0);
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName !== 'INPUT') return;
+  if (e.target.type === 'checkbox') return;
+  if (e.key === 'Enter') { e.preventDefault(); moveFocus(e.target, 1); return; }
+  if (e.key === 'ArrowDown') { e.preventDefault(); moveFocus(e.target, 1); return; }
+  if (e.key === 'ArrowUp') { e.preventDefault(); moveFocus(e.target, -1); return; }
+  if (e.key === 'ArrowLeft') {
+    if (e.target.selectionStart !== 0) return;
+    e.preventDefault(); moveFocus(e.target, -1); return;
+  }
+  if (e.key === 'ArrowRight') {
+    if (e.target.selectionEnd !== e.target.value.length) return;
+    e.preventDefault(); moveFocus(e.target, 1); return;
+  }
+});
+
+/* ===== 토글 ===== */
+function toggleAdv() {
+  var c = document.getElementById('adv-collapsed');
+  var e = document.getElementById('adv-expanded');
+  if (e.style.display === 'none' || !e.style.display) {
+    c.style.display = 'none'; e.style.display = 'block';
+  } else {
+    c.style.display = 'flex'; e.style.display = 'none';
+  }
+}
+document.getElementById('adv-collapsed').addEventListener('click', toggleAdv);
+document.getElementById('adv-expanded-header').addEventListener('click', toggleAdv);
+
+/* ===== 버튼 ===== */
+function doPrint() { window.print(); }
+function doUpdate() { window.location.reload(); }
+function doReset() {
+  state.revenue = 0; state.businessCode = ""; state.bizAutoDisabled = false;
+  state.businessIncome = 0; state.businessAutoFilled = false;
+  state.laborIncome = 0; state.otherIncome = 0; state.muExpense = 0;
+  state.selfRrn = ""; state.selfDisabled = false;
+  state.pensionPremium = 0; state.otherDeduction = 0;
+  state.taxCredit = 70000; state.prepaid = 0;
+
+  document.getElementById('revenue').value = '';
+  var codeEl = document.getElementById('businessCode');
+  codeEl.value = ''; codeEl.classList.remove('matched', 'unmatched');
+  document.getElementById('businessIncome').value = '';
+  document.getElementById('businessIncome').classList.remove('auto-filled');
+  document.getElementById('laborIncome').value = '';
+  document.getElementById('otherIncome').value = '';
+  document.getElementById('muExpense').value = '';
+  document.getElementById('businessIncomeAfter').value = '';
+  document.getElementById('selfRrn').value = '';
+  document.getElementById('selfDisabled').checked = false;
+  document.getElementById('pensionPremium').value = '';
+  document.getElementById('otherDeduction').value = '';
+  document.getElementById('taxCredit').value = fmt(70000);
+  document.getElementById('prepaid').value = '';
+  document.getElementById('prepaid').classList.remove('auto-filled');
+  document.getElementById('biz-msg').style.display = 'none';
+  document.getElementById('biz-hint').style.display = '';
+  document.getElementById('prepaid-msg').style.display = 'none';
+  renderAll();
+  document.getElementById('businessIncome').focus();
+}
+
+document.getElementById('btn-print-main').addEventListener('click', doPrint);
+document.getElementById('btn-print-mobile').addEventListener('click', doPrint);
+document.getElementById('btn-update').addEventListener('click', doUpdate);
+document.getElementById('btn-reset').addEventListener('click', doReset);
+
+/* ===== 입력 바인딩 ===== */
+setupExprInput(document.getElementById('revenue'), function(v) {
+  state.revenue = v;
+  state.bizAutoDisabled = false;
+  recalcBizAuto();
+});
+
+var codeEl = document.getElementById('businessCode');
+codeEl.addEventListener('input', function() {
+  var v = codeEl.value.replace(/[^\d]/g, '').substring(0, 6);
+  codeEl.value = v;
+  state.businessCode = v;
+  state.bizAutoDisabled = false;
+  var info = BUSINESS_CODES[v] || null;
+  codeEl.classList.remove('matched', 'unmatched');
+  if (info) codeEl.classList.add('matched');
+  else if (v.length === 6) codeEl.classList.add('unmatched');
+  recalcBizAuto();
+});
+codeEl.addEventListener('focus', function() { codeEl.select(); });
+
+setupExprInput(document.getElementById('businessIncome'), function(v) {
+  state.businessIncome = v;
+  if (state.businessCode && BUSINESS_CODES[state.businessCode] && state.revenue > 0) {
+    state.bizAutoDisabled = true;
+    document.getElementById('biz-msg').style.display = 'none';
+    document.getElementById('biz-hint').style.display = '';
+    document.getElementById('businessIncome').classList.remove('auto-filled');
+  }
+  state.businessAutoFilled = false;
+  var after = Math.max(0, v - state.muExpense);
+  document.getElementById('businessIncomeAfter').value = after > 0 ? fmt(after) : '';
+  renderAll();
+}, {
+  previewEl: document.getElementById('biz-msg'),
+  hintEl: document.getElementById('biz-hint')
+});
+
+setupExprInput(document.getElementById('laborIncome'), function(v) {
+  state.laborIncome = v; renderAll();
+});
+setupExprInput(document.getElementById('otherIncome'), function(v) {
+  state.otherIncome = v; renderAll();
+});
+
+setupExprInput(document.getElementById('muExpense'), function(v) {
+  state.muExpense = v;
+  var after = Math.max(0, state.businessIncome - v);
+  document.getElementById('businessIncomeAfter').value = after > 0 ? fmt(after) : '';
+  renderAll();
+});
+
+setupExprInput(document.getElementById('businessIncomeAfter'), function(v) {
+  state.muExpense = Math.max(0, state.businessIncome - v);
+  document.getElementById('muExpense').value = state.muExpense > 0 ? fmt(state.muExpense) : '';
+  renderAll();
+});
+
+var rrnEl = document.getElementById('selfRrn');
+rrnEl.addEventListener('input', function() {
+  var raw = rrnEl.value.replace(/[^\d]/g, '').substring(0, 7);
+  state.selfRrn = raw;
+  rrnEl.value = formatRrnDisplay(raw);
+  renderAll();
+});
+rrnEl.addEventListener('focus', function() { rrnEl.select(); });
+
+document.getElementById('selfDisabled').addEventListener('change', function(e) {
+  state.selfDisabled = e.target.checked;
+  renderAll();
+});
+
+setupExprInput(document.getElementById('pensionPremium'), function(v) {
+  state.pensionPremium = v; renderAll();
+});
+setupExprInput(document.getElementById('otherDeduction'), function(v) {
+  state.otherDeduction = v; renderAll();
+});
+setupExprInput(document.getElementById('taxCredit'), function(v) {
+  state.taxCredit = v; renderAll();
+});
+
+setupExprInput(document.getElementById('prepaid'), function(v) {
+  state.prepaid = v;
+  if (state.businessCode && BUSINESS_CODES[state.businessCode] && state.revenue > 0) {
+    state.bizAutoDisabled = true;
+    state.businessAutoFilled = false;
+  } else {
+    if (v > 0 && state.businessIncome === 0 && !state.businessAutoFilled) {
+      state.businessAutoFilled = true;
+    } else if (v === 0 && state.businessAutoFilled) {
+      state.businessAutoFilled = false;
+      state.businessIncome = 0;
+      document.getElementById('businessIncome').value = '';
+      document.getElementById('businessIncome').classList.remove('auto-filled');
+      document.getElementById('biz-msg').style.display = 'none';
+      document.getElementById('biz-hint').style.display = '';
+    }
+  }
+  recalcBizAuto();
+}, { previewEl: document.getElementById('prepaid-msg') });
+
+/* ===== GitHub API 최종 업데이트 시각 ===== */
+(function() {
+  var el = document.getElementById('update-time-val');
+  fetch('https://api.github.com/repos/ctasun/tax-calculators/commits?path=jonghap/index.html&per_page=1')
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function(arr) {
+      var iso = arr && arr[0] && arr[0].commit && arr[0].commit.committer && arr[0].commit.committer.date;
+      if (!iso) { el.textContent = '확인 불가'; return; }
+      var utc = new Date(iso);
+      var kst = new Date(utc.getTime() + 9 * 3600 * 1000);
+      var pad = function(n) { return String(n).padStart(2, '0'); };
+      el.textContent = kst.getUTCFullYear() + '-' + pad(kst.getUTCMonth()+1) + '-' + pad(kst.getUTCDate()) + ' ' + pad(kst.getUTCHours()) + ':' + pad(kst.getUTCMinutes());
+    })
+    .catch(function() { el.textContent = '확인 불가'; });
+})();
+
+/* ===== 초기화 ===== */
+document.getElementById('taxCredit').value = fmt(state.taxCredit);
+renderAll();
+setTimeout(function() {
+  var first = document.querySelector('input[data-first="true"]');
+  if (first) { first.focus(); first.select(); }
+}, 100);
+
 </script>
 </body>
 </html>
