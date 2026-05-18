@@ -41,7 +41,7 @@ const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-18 19:46';
+const BUILD_DATE = '2026-05-18 20:12';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -54,7 +54,7 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 메시지 확인하신 후 궁금하신 점은 5월 내내 오전 8시부터 오후 10시까지 언제든 연락 주시면 상세히 말씀드리겠습니다. 최하단에 개인직통번호 안내드리겠습니다.
 
 -6월 1일까지 납부하실 세금-{?국세}
-국세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
+국　세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
 지방세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?기납부_전액환급}
 (기납부세액 전액 환급){/?기납부_전액환급}{?환급발생}
 {/?환급발생}{?국세_환급}
@@ -67,14 +67,21 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 소득률  {소득률} %{?소득률_전년}(전년 {소득률_전년} %){/?소득률_전년}{/?소득률}
 
 {?이월결손금}이월결손금    {이월결손금}원(15년간 소득금액에서 공제예정){/?이월결손금}{?추가증빙_경비}
-추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}
+추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}{#(이월결손금 있는 업체는 여기에 기입)}
 
 {?_산출세액있음}{?_helper}
-조정전 소득  {조정전_소득}원(입력용·미출력)
+조정후 소득  {조정후_소득}원(입력용·미출력)
 {/?_helper}{?조정전_산출세액}조정전 소득에 따른 산출세액 {조정전_산출세액}원
 {/?조정전_산출세액}{?조정후_산출세액}조정후 소득에 따른 산출세액 {조정후_산출세액}원
 {/?조정후_산출세액}{?추가증빙_경비2}추가증빙 필요한 경비  {추가증빙_경비2}원
-{/?추가증빙_경비2}{/?_산출세액있음}{?건보증가없음}
+{/?추가증빙_경비2}{?_절세효과있음}
+
+[절세효과]
+종합소득세 절감 {종합소득세_절감}원(적용세율 {적용세율_조정전}%)
+지방소득세 절감 {지방소득세_절감}원(적용세율 {지방세율_조정전}%)
+건강보험료 절감 {건강보험료_절감}원(적용세율 8.13%)
+절세액 합계 {절세액_합계}원
+{/?_절세효과있음}{/?_산출세액있음}{?건보증가없음}
 
 이번 종합소득세 신고로 소득으로 인한 지역건강보험료 증가는 발생하지 않습니다.
 {/?건보증가없음}{?개별주의_있음}
@@ -107,12 +114,10 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 한 해 동안 사업하시느라 고생 많으셨습니다! 남은 한해도 번창하시기를 간절히 기원합니다. 저를 만나시는 모든 분들께 행운이 깃드시기를 늘 간절히 기원합니다. 감사합니다.
 
 ⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬
-
-대표님!!!
-
-{?담당자멘트}{담당자멘트}
-
-{/?담당자멘트}2025년 귀속분 종합소득세 신고는 2026년에도 매출이 유지되거나 떨어질 경우를 가정하였습니다. 만약, 올해 매출이 급격히!!! 늘어날 것으로 예상된다면 소득률을 대폭 상향 조정해야 합니다. 반드시 재신고해야합니다.
+{?담당자멘트}
+{담당자멘트}
+{/?담당자멘트}
+2025년 귀속분 종합소득세 신고는 2026년에도 매출이 유지되거나 떨어질 경우를 가정하였습니다. 만약, 올해 매출이 급격히!!! 늘어날 것으로 예상된다면 소득률을 대폭 상향 조정해야 합니다. 반드시 재신고해야합니다.
 
 국세청에서 발표한 2024년 귀속분까지의 세무조사 현황에 따르면 조사대상자는 전년과 비슷한 수준이나 조사건수당 부과세액이 전년대비 46.6%나 늘어난 171백만원입니다. 건수는 줄이되 난이도를 높이는 기조는 계속될 것으로 예상됩니다.
 
@@ -242,7 +247,7 @@ ${[1,2,3,4,5].map(buildBoxBlock).join('\n')}{?수수료_합계_VAT포함}
 // ===== 기장거래처 변수 =====
 const BASIC_VARS = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '윤정식' },
-  { key: '담당자멘트', label: '담당자 추가 멘트', type: 'textarea', placeholder: '담당자가 직접 입력하는 멘트 (대표님!!! 아래에 출력됨)' },
+  { key: '담당자멘트', label: '담당자 추가 멘트', type: 'textarea', placeholder: '담당자가 입력하는 멘트 (⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬ 아래에 출력됨)' },
   { key: '개별주의_2025_1', label: '2025년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
   { key: '개별주의_2025_2', label: '2025년 ②', type: 'text', placeholder: '소득률저조안내' },
   { key: '개별주의_2025_3', label: '2025년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
@@ -264,9 +269,15 @@ const BASIC_VARS = [
   { key: '이월결손금', label: '이월결손금', type: 'currency', placeholder: '이월결손금' },
   { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비' },
   { key: '추가증빙_경비2', label: '추가증빙 필요한 경비 (산출세액)', type: 'currency', placeholder: '경비' },
-  { key: '조정전_소득', label: '조정전 소득 (입력용)', type: 'currency', placeholder: '조정전 소득' },
+  { key: '조정후_소득', label: '조정후 소득 (입력용)', type: 'currency', placeholder: '조정후 소득' },
   { key: '조정전_산출세액', label: '조정전 산출세액', type: 'calculated', placeholder: '자동' },
   { key: '조정후_산출세액', label: '조정후 산출세액', type: 'calculated', placeholder: '자동' },
+  { key: '종합소득세_절감', label: '종합소득세 절감(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '지방소득세_절감', label: '지방소득세 절감(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '건강보험료_절감', label: '건강보험료 절감(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '절세액_합계', label: '절세액 합계(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '적용세율_조정전', label: '적용세율 조정전(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '지방세율_조정전', label: '지방세율 조정전(자동)', type: 'calculated', placeholder: '자동' },
   { key: '건보증가없음', label: '건보증가 없음 안내', type: 'switch' },
   { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' }
 ];
@@ -385,17 +396,78 @@ const calculateTax = (income) => {
   return Math.round(tax).toLocaleString('ko-KR');
 };
 
+// 누진구간 세율(%)을 반환 — 양수 소득만 의미 있음
+const getProgressiveRate = (income) => {
+  if (income == null || income <= 0) return '';
+  if (income <= 14000000) return '6';
+  if (income <= 50000000) return '15';
+  if (income <= 88000000) return '24';
+  if (income <= 150000000) return '35';
+  if (income <= 300000000) return '38';
+  if (income <= 500000000) return '40';
+  if (income <= 1000000000) return '42';
+  return '45';
+};
+
 const computeCalculated = (key, inputs) => {
   if (key === '소득률') return calculateIncomeRate(inputs['소득_당해'], inputs['매출_당해']);
   if (key === '소득률_전년') return calculateIncomeRate(inputs['소득_전년'], inputs['매출_전년']);
-  if (key === '조정전_산출세액') return calculateTax(inputs['조정전_소득']);
-  if (key === '조정후_산출세액') {
-    const before = parseNum(inputs['조정전_소득']);
+
+  // 기장거래처 산출세액 — 메커니즘 반전:
+  //   입력: 조정후 소득 (실제 신고된 사업소득금액)
+  //   계산: 조정전 소득 = 조정후 소득 + 추가증빙_경비2
+  if (key === '조정전_산출세액') {
+    const after = parseNum(inputs['조정후_소득']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
-    if (before === null || before <= 0) return '';
-    if (adjust <= 0) return '';
-    return calculateTax(before - adjust);
+    if (after === null || after <= 0) return '';
+    return calculateTax(after + adjust);
   }
+  if (key === '조정후_산출세액') {
+    const after = parseNum(inputs['조정후_소득']);
+    if (after === null || after <= 0) return '';
+    return calculateTax(after);
+  }
+  if (key === '종합소득세_절감') {
+    const after = parseNum(inputs['조정후_소득']);
+    const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
+    if (after === null || after <= 0 || adjust <= 0) return '';
+    const taxBefore = parseNum(calculateTax(after + adjust));
+    const taxAfter = parseNum(calculateTax(after));
+    if (taxBefore === null || taxAfter === null) return '';
+    const saving = taxBefore - taxAfter;
+    if (saving <= 0) return '';
+    return saving.toLocaleString('ko-KR');
+  }
+  if (key === '지방소득세_절감') {
+    const g = parseNum(computeCalculated('종합소득세_절감', inputs));
+    if (g === null) return '';
+    return Math.round(g * 0.1).toLocaleString('ko-KR');
+  }
+  if (key === '건강보험료_절감') {
+    const adjust = parseNum(inputs['추가증빙_경비2']);
+    if (adjust === null || adjust <= 0) return '';
+    return Math.round(adjust * 0.0813).toLocaleString('ko-KR');
+  }
+  if (key === '절세액_합계') {
+    const g = parseNum(computeCalculated('종합소득세_절감', inputs)) || 0;
+    const j = parseNum(computeCalculated('지방소득세_절감', inputs)) || 0;
+    const h = parseNum(computeCalculated('건강보험료_절감', inputs)) || 0;
+    const total = g + j + h;
+    if (total <= 0) return '';
+    return total.toLocaleString('ko-KR');
+  }
+  if (key === '적용세율_조정전') {
+    const after = parseNum(inputs['조정후_소득']);
+    const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
+    if (after === null || after <= 0) return '';
+    return getProgressiveRate(after + adjust);
+  }
+  if (key === '지방세율_조정전') {
+    const rate = parseFloat(computeCalculated('적용세율_조정전', inputs));
+    if (isNaN(rate)) return '';
+    return (rate * 0.1).toFixed(1);
+  }
+
   // 신고대리: 수수료 표시 = 수수료(공급가액) × (할인 시 0.9) × 1.1 (VAT 포함)
   if (key === '수수료_표시') {
     const fee = parseNum(inputs['수수료']);
@@ -457,15 +529,7 @@ const computeCalculated = (key, inputs) => {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
     if (after === null || cost === null) return '';
-    const before = after + cost;
-    if (before <= 14000000) return '6';
-    if (before <= 50000000) return '15';
-    if (before <= 88000000) return '24';
-    if (before <= 150000000) return '35';
-    if (before <= 300000000) return '38';
-    if (before <= 500000000) return '40';
-    if (before <= 1000000000) return '42';
-    return '45';
+    return getProgressiveRate(after + cost);
   }
   // 기장(인건비추가): 지방세율 = 적용세율 × 0.1 (소수 1자리)
   if (key === '지방세율') {
@@ -529,6 +593,10 @@ const parseBody = (body) => {
       // 입력 전용 마커: 에디터에서만 입력 필드를 표시하고, 최종 출력(클립보드)에는 포함되지 않음
       const key = content.slice(1).trim();
       stack[stack.length - 1].children.push({ type: 'inputonly', key });
+    } else if (content.startsWith('#')) {
+      // 안내 힌트 마커: 에디터에만 회색 작은 글씨로 표시, 카톡 출력에는 포함되지 않음
+      const hintText = content.slice(1).trim();
+      stack[stack.length - 1].children.push({ type: 'hint', value: hintText });
     } else {
       stack[stack.length - 1].children.push({ type: 'var', key: content });
     }
@@ -555,7 +623,8 @@ const isCondActive = (trigger, inputs, variables) => {
   if (trigger === '환급발생') return ['국세', '지방세'].some(k => hasAmount(inputs[k]) && isNegativeValue(inputs[k]));
   if (trigger === '세금없음') return ['국세', '지방세'].every(k => !hasAmount(inputs[k]));
   if (trigger === '세금있음') return !isCondActive('세금없음', inputs, variables);
-  if (trigger === '_산출세액있음') return hasAmount(inputs['조정전_소득']);
+  if (trigger === '_산출세액있음') return hasAmount(inputs['조정후_소득']);
+  if (trigger === '_절세효과있음') return computeCalculated('종합소득세_절감', inputs) !== '';
   if (trigger === '_추가증빙있음') return hasAmount(inputs['추가증빙_경비']) || hasAmount(inputs['추가증빙_경비2']);
   if (trigger === '_복수') {
     // 기장(인건비추가): 박스 이름이 채워진 게 2개 이상이면 true
@@ -574,6 +643,37 @@ const isCondActive = (trigger, inputs, variables) => {
   if (variable?.type === 'currency') return hasAmount(value);
   if (variable?.type === 'calculated') return computeCalculated(trigger, inputs) !== '';
   return !!(value && String(value).trim());
+};
+
+// ===== 카톡 출력 정렬: 국세/지방세, 종합소득세/지방소득세 라벨 쌍의 숫자 우측 정렬 =====
+// 같은 라벨 군에 속하는 두 줄이 연속해서 나올 때, 짧은 쪽 라벨 뒤에 일반 공백을 더해 자리수를 맞춤.
+// (예: "국　세 100,000,000원" / "지방세  10,000,000원")
+const ALIGN_PAIRS = [
+  ['국　세', '지방세'],
+  ['종합소득세', '지방소득세']
+];
+const alignAmountLines = (text) => {
+  if (!text) return text;
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length - 1; i++) {
+    const a = lines[i];
+    const b = lines[i + 1];
+    let matched = null;
+    for (const [labA, labB] of ALIGN_PAIRS) {
+      if (a.startsWith(labA + ' ') && b.startsWith(labB + ' ')) {
+        matched = [labA, labB];
+        break;
+      }
+    }
+    if (!matched) continue;
+    const [labA, labB] = matched;
+    const aRest = a.slice(labA.length + 1);
+    const bRest = b.slice(labB.length + 1);
+    const max = Math.max(aRest.length, bRest.length);
+    lines[i]     = labA + ' ' + aRest.padStart(max, ' ');
+    lines[i + 1] = labB + ' ' + bRest.padStart(max, ' ');
+  }
+  return lines.join('\n');
 };
 
 function App() {
@@ -735,6 +835,8 @@ function App() {
     const variables = currentTemplate.variables || [];
     // 입력 전용 마커 ({@변수명})는 최종 출력에 포함되지 않음 — 에디터 표시용일 뿐
     body = body.replace(/\{@[^}]+\}/g, '');
+    // 안내 힌트 마커 ({#텍스트})도 최종 출력에 포함되지 않음 — 에디터 표시용일 뿐
+    body = body.replace(/\{#[^}]+\}/g, '');
     let prev;
     do {
       prev = body;
@@ -784,7 +886,11 @@ function App() {
     return parts;
   }, [currentTemplate, inputs, extraMemo]);
 
-  const plainText = useMemo(() => previewParts.map(p => p.content).join(''), [previewParts]);
+  // 카톡 복사용 텍스트 (라벨 쌍 자동 정렬 적용)
+  const plainText = useMemo(() => {
+    const raw = previewParts.map(p => p.content).join('');
+    return alignAmountLines(raw);
+  }, [previewParts]);
 
   const scrollPreviewToKey = (key) => {
     const container = previewContainerRef.current;
@@ -957,6 +1063,18 @@ function App() {
   const renderTree = (nodes, vars) => {
     return nodes.map((node, idx) => {
       if (node.type === 'text') return <React.Fragment key={idx}>{node.value}</React.Fragment>;
+      if (node.type === 'hint') {
+        // 안내 힌트: 회색 작은 글씨로 표시. 클릭/입력 불가, 카톡 출력에 포함되지 않음.
+        return (
+          <span
+            key={idx}
+            className="inline-block mx-0.5 px-1.5 py-0 text-[12px] italic text-slate-400 select-none align-middle"
+            title="에디터에만 표시되는 안내문구 (카톡 출력에는 포함되지 않음)"
+          >
+            {node.value}
+          </span>
+        );
+      }
       if (node.type === 'inputonly') {
         // 입력 전용 마커: 에디터 화면에 입력 필드를 표시. 최종 출력에는 포함되지 않음.
         const variable = vars.find(v => v.key === node.key);
