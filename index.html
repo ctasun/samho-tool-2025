@@ -41,7 +41,7 @@ const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-17 18:51';
+const BUILD_DATE = '2026-05-18 11:13';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -108,6 +108,8 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 
 ⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬
 
+대표님!!!
+
 {?담당자멘트}{담당자멘트}
 
 {/?담당자멘트}2025년 귀속분 종합소득세 신고는 2026년에도 매출이 유지되거나 떨어질 경우를 가정하였습니다. 만약, 올해 매출이 급격히!!! 늘어날 것으로 예상된다면 소득률을 대폭 상향 조정해야 합니다. 반드시 재신고해야합니다.
@@ -155,7 +157,7 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 세무법인삼호 남부지점
 
 {?수수료}종합소득세 신고수수료는
-{수수료}원입니다.{?할인적용} (VAT포함, 10%할인 후){/?할인적용}{?!할인적용} (VAT포함){/?!할인적용}{/?수수료}{?할증_있음}
+{수수료_표시}원입니다.{?할인적용} (VAT포함, 10%할인 후){/?할인적용}{?!할인적용} (VAT포함){/?!할인적용}{/?수수료}{?할증_있음}
 
 -할증수수료 항목-{?할증_1}
 ①{할증_1}{/?할증_1}{?할증_2}
@@ -196,7 +198,6 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 const buildBoxBlock = (n) => `{?박스${n}_이름}
 ⏬{박스${n}_이름} 선생님
 {?박스${n}_요청사항}{박스${n}_요청사항}
-
 {/?박스${n}_요청사항}-환급받으실 세금-
 종합소득세 {박스${n}_국세}원{?박스${n}_국세_환급}(환급){/?박스${n}_국세_환급}
 지방소득세 {박스${n}_지방세}원{?박스${n}_지방세_환급}(환급){/?박스${n}_지방세_환급}
@@ -210,7 +211,7 @@ const buildBoxBlock = (n) => `{?박스${n}_이름}
 const SIMPLE_BODY_COMBINED = `【종합소득세 신고결과보고】
 
 {고객명} 대표님.
-{?추가경비_총액}
+
 추가로 필요경비에 반영한 금액은 총 {추가경비_총액}원입니다.
 
 요청하신 사항에 맞게 종합소득세 신고완료하였습니다. 대표님의 매출액 중 {부담없음_매출}원은 종합소득세 및 지역건보료 부담이 없습니다.
@@ -221,11 +222,16 @@ const SIMPLE_BODY_COMBINED = `【종합소득세 신고결과보고】
  · 지방소득세 {지방세절감}원 (적용세율 {지방세율}%)
  · 건강보험료 {건보절감}원 (적용세율 8.13%)
 
-{?_복수}아래 분들 모두 다음에도 경비에 반영하실 수 있도록 전액환급(최대치 환급)으로 처리하였습니다. 추가 필요경비 반영한 분들의 수수료는 합산하여 5월 {CMS출금일}일 CMS로 이체되오니 잔고확인 부탁드립니다.{/?_복수}{?!_복수}아래 분 다음에도 경비에 반영하실 수 있도록 전액환급(최대치 환급)으로 처리하였습니다. 추가 필요경비 반영한 분의 수수료는 5월 {CMS출금일}일 CMS로 이체되오니 잔고확인 부탁드립니다.{/?!_복수}
-{/?추가경비_총액}{?!추가경비_총액}
-의뢰하신 종합소득세 신고결과 보고드립니다. 신고수수료는 5월 {CMS출금일}일 CMS로 이체되오니 잔고확인 부탁드립니다.
-{/?!추가경비_총액}
-${[1,2,3,4,5].map(buildBoxBlock).join('\n')}
+{?_복수}아래 분들 모두 다음에도 경비에 반영하실 수 있도록 전액환급(최대치 환급)으로 처리하였습니다.{/?_복수}{?!_복수}아래 분 다음에도 경비에 반영하실 수 있도록 전액환급(최대치 환급)으로 처리하였습니다.{/?!_복수} 추가 필요경비 반영한 분들의 수수료는 합산하여 5월 26일 CMS로 이체되오니 잔고확인 부탁드립니다.
+${[1,2,3,4,5].map(buildBoxBlock).join('\n')}{?수수료_합계_VAT포함}
+
+총 합계 금액 : {수수료_합계_VAT포함}원(부가세포함){/?수수료_합계_VAT포함}{?계좌안내}
+
+-이체하실 계좌 안내-
+
+농협은행 351-1053-8412-43
+세무법인삼호 남부지점
+{/?계좌안내}
 
 이 메시지는 매우 민감한 사항이 포함되어 있습니다. 다른 분들과 메시지 공유하시지 마시고, 외부로 유출되지 않도록 각별히 유의 부탁드리며, 확인하신 후 삭제 부탁드립니다.  감사합니다.
 
@@ -236,7 +242,7 @@ ${[1,2,3,4,5].map(buildBoxBlock).join('\n')}
 // ===== 기장거래처 변수 =====
 const BASIC_VARS = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '윤정식' },
-  { key: '담당자멘트', label: '거래처 요청사항', type: 'textarea', placeholder: '거래처 요청사항 기입\n예) 대표님 본인의 대출, 피부양자, 기본공제대상자 등등' },
+  { key: '담당자멘트', label: '담당자 추가 멘트', type: 'textarea', placeholder: '담당자가 직접 입력하는 멘트 (대표님!!! 아래에 출력됨)' },
   { key: '개별주의_2025_1', label: '2025년 ①', type: 'text', placeholder: '증명서류 과소수취 안내자' },
   { key: '개별주의_2025_2', label: '2025년 ②', type: 'text', placeholder: '소득률저조안내' },
   { key: '개별주의_2025_3', label: '2025년 ③', type: 'text', placeholder: '고소득 인적용역사업자 필요경비 안내' },
@@ -270,7 +276,8 @@ const BASIC_VARS_REPORT = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '홍길동' },
   { key: '국세', label: '종합소득세', type: 'currency', placeholder: '종합소득세' },
   { key: '지방세', label: '지방소득세', type: 'currency', placeholder: '지방소득세' },
-  { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' },
+  { key: '수수료', label: '신고 수수료 (부가세별도)', type: 'currency', placeholder: '공급가액' },
+  { key: '수수료_표시', label: '수수료 표시(자동)', type: 'calculated', placeholder: '자동' },
   { key: '할인적용', label: '10% 할인 적용', type: 'switch' },
   { key: '할증_1', label: '할증수수료 ①', type: 'text', placeholder: '예) 부동산임대' },
   { key: '할증_2', label: '할증수수료 ②', type: 'text', placeholder: '' },
@@ -283,7 +290,7 @@ const BASIC_VARS_REPORT = [
 // ===== 기장+신고대리 변수 =====
 const COMBINED_BOX_VARS = [1,2,3,4,5].flatMap(n => [
   { key: `박스${n}_이름`, label: `${n}번 성명`, type: 'text', placeholder: '성명' },
-  { key: `박스${n}_요청사항`, label: `${n}번 요청사항`, type: 'textarea', placeholder: '요청사항 (한 줄)', singleLine: true },
+  { key: `박스${n}_요청사항`, label: `${n}번 요청사항`, type: 'text', placeholder: '요청사항 (한 줄)' },
   { key: `박스${n}_국세`, label: `${n}번 종합소득세`, type: 'currency', placeholder: '종합소득세' },
   { key: `박스${n}_지방세`, label: `${n}번 지방소득세`, type: 'currency', placeholder: '지방소득세' },
   { key: `박스${n}_전액환급`, label: '(기납부세액 전액환급)변경', type: 'switch' },
@@ -292,7 +299,6 @@ const COMBINED_BOX_VARS = [1,2,3,4,5].flatMap(n => [
 
 const BASIC_VARS_COMBINED = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '홍길동' },
-  { key: 'CMS출금일', label: 'CMS 출금일(일)', type: 'text', placeholder: '예) 26' },
   { key: '추가경비_총액', label: '추가경비 총액', type: 'currency', placeholder: '추가경비 총액' },
   { key: '부담없음_매출', label: '부담없음 매출(자동)', type: 'calculated', placeholder: '자동' },
   { key: '반영후_소득', label: '반영후 소득', type: 'currency', placeholder: '반영후 소득' },
@@ -303,7 +309,9 @@ const BASIC_VARS_COMBINED = [
   { key: '건보절감', label: '건강보험료 절감(자동)', type: 'calculated', placeholder: '자동' },
   { key: '적용세율', label: '적용세율(자동)', type: 'calculated', placeholder: '자동' },
   { key: '지방세율', label: '지방세율(자동)', type: 'calculated', placeholder: '자동' },
-  ...COMBINED_BOX_VARS
+  ...COMBINED_BOX_VARS,
+  { key: '수수료_합계_VAT포함', label: '총 합계 금액(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '계좌안내', label: '이체 계좌 안내 출력', type: 'switch' }
 ];
 
 const DEFAULT_TEMPLATES = {
@@ -388,6 +396,14 @@ const computeCalculated = (key, inputs) => {
     if (adjust <= 0) return '';
     return calculateTax(before - adjust);
   }
+  // 신고대리: 수수료 표시 = 수수료(공급가액) × (할인 시 0.9) × 1.1 (VAT 포함)
+  if (key === '수수료_표시') {
+    const fee = parseNum(inputs['수수료']);
+    if (fee === null || fee <= 0) return '';
+    const discount = !!inputs['할인적용'];
+    const final = discount ? fee * 0.9 * 1.1 : fee * 1.1;
+    return Math.round(final).toLocaleString('ko-KR');
+  }
   // 기장+신고대리: 추가경비_총액과 부담없음_매출은 동일 값
   if (key === '부담없음_매출') {
     const raw = inputs['추가경비_총액'] || '';
@@ -456,6 +472,17 @@ const computeCalculated = (key, inputs) => {
     const rate = parseFloat(computeCalculated('적용세율', inputs));
     if (isNaN(rate)) return '';
     return (rate * 0.1).toFixed(1);
+  }
+  // 기장+신고대리: 박스1~5 수수료 합 × 1.1 (VAT 포함). 이름이 입력된 박스만 합산.
+  if (key === '수수료_합계_VAT포함') {
+    let sum = 0;
+    for (let n = 1; n <= 5; n++) {
+      if (inputs[`박스${n}_이름`] && String(inputs[`박스${n}_이름`]).trim()) {
+        sum += parseNum(inputs[`박스${n}_수수료`]) || 0;
+      }
+    }
+    if (sum <= 0) return '';
+    return Math.round(sum * 1.1).toLocaleString('ko-KR');
   }
   return '';
 };
@@ -856,25 +883,13 @@ function App() {
     };
 
     if (variable.type === 'textarea') {
-      const isSingleLine = !!variable.singleLine;
       return (
         <textarea
           key={idx}
           ref={el => { inputRefs.current[order] = el; }}
           value={rawValue}
-          onChange={(e) => {
-            const v = isSingleLine ? e.target.value.replace(/\n/g, '') : e.target.value;
-            handleInputChange(variable.key, v, variable.type);
-          }}
-          onKeyDown={(e) => {
-            if (isSingleLine && e.key === 'Enter') {
-              e.preventDefault();
-              goNext();
-            } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-              e.preventDefault();
-              goNext();
-            }
-          }}
+          onChange={(e) => handleInputChange(variable.key, e.target.value, variable.type)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); goNext(); } }}
           onFocus={(e) => {
             setFocusedKey(variable.key);
             setTimeout(() => {
@@ -883,9 +898,7 @@ function App() {
             }, 0);
           }}
           placeholder={variable.placeholder || variable.label}
-          rows={isSingleLine
-            ? Math.max(2, Math.ceil(rawValue.length / 35) + 1)
-            : Math.max(2, (rawValue.match(/\n/g) || []).length + 2)}
+          rows={Math.max(2, (rawValue.match(/\n/g) || []).length + 2)}
           className={`block w-full my-1 px-3 py-2 rounded-md text-[14px] leading-relaxed border-2 border-dashed focus:outline-none resize-y placeholder:text-slate-400 text-slate-800 ${
             isOptional ? 'bg-slate-50 border-slate-300 focus:bg-yellow-50 focus:border-yellow-500' : 'bg-blue-50 border-blue-300 focus:bg-yellow-50 focus:border-yellow-500'
           }`}
@@ -895,7 +908,7 @@ function App() {
     }
     const displayValue = variable.type === 'currency' ? formatCurrency(rawValue) : rawValue;
     const placeholderText = variable.placeholder || variable.label;
-    const size = Math.max((displayValue || placeholderText).length + 1, variable.minSize || 4);
+    const size = Math.max((displayValue || placeholderText).length + 1, 4);
     return (
       <input
         key={idx}
