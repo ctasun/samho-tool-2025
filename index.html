@@ -41,7 +41,7 @@ const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-18 11:13';
+const BUILD_DATE = '2026-05-18 19:46';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -194,7 +194,7 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 🖨032-719-7053
 📧samhotax2006@naver.com`;
 
-// ===== 기장+신고대리 본문 (5명까지 박스 반복) =====
+// ===== 기장(인건비추가) 본문 (5명까지 박스 반복) =====
 const buildBoxBlock = (n) => `{?박스${n}_이름}
 ⏬{박스${n}_이름} 선생님
 {?박스${n}_요청사항}{박스${n}_요청사항}
@@ -287,7 +287,7 @@ const BASIC_VARS_REPORT = [
   { key: '할증_부연', label: '할증수수료 추가 설명', type: 'textarea', placeholder: '①~⑤ 외 추가 안내 (🔽 아래에 출력됨, 비워두면 출력 안 됨)' }
 ];
 
-// ===== 기장+신고대리 변수 =====
+// ===== 기장(인건비추가) 변수 =====
 const COMBINED_BOX_VARS = [1,2,3,4,5].flatMap(n => [
   { key: `박스${n}_이름`, label: `${n}번 성명`, type: 'text', placeholder: '성명' },
   { key: `박스${n}_요청사항`, label: `${n}번 요청사항`, type: 'text', placeholder: '요청사항 (한 줄)' },
@@ -326,7 +326,7 @@ const DEFAULT_TEMPLATES = {
       "2. 납부없음": [{ id: 'tpl_report_zero', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }],
       "3. 환급발생": [{ id: 'tpl_report_refund', name: '기본', variables: BASIC_VARS_REPORT, body: SIMPLE_BODY_REPORT }]
     },
-    "기장+신고대리": {
+    "기장(인건비추가)": {
       "1. 납부발생": [{ id: 'tpl_combined_pay', name: '기본', variables: BASIC_VARS_COMBINED, body: SIMPLE_BODY_COMBINED }],
       "2. 납부없음": [{ id: 'tpl_combined_zero', name: '기본', variables: BASIC_VARS_COMBINED, body: SIMPLE_BODY_COMBINED }],
       "3. 환급발생": [{ id: 'tpl_combined_refund', name: '기본', variables: BASIC_VARS_COMBINED, body: SIMPLE_BODY_COMBINED }]
@@ -404,21 +404,21 @@ const computeCalculated = (key, inputs) => {
     const final = discount ? fee * 0.9 * 1.1 : fee * 1.1;
     return Math.round(final).toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 추가경비_총액과 부담없음_매출은 동일 값
+  // 기장(인건비추가): 추가경비_총액과 부담없음_매출은 동일 값
   if (key === '부담없음_매출') {
     const raw = inputs['추가경비_총액'] || '';
     const digits = String(raw).replace(/[^\d]/g, '');
     if (!digits) return '';
     return parseInt(digits).toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 반영전 소득 = 반영후 소득 + 추가경비 총액
+  // 기장(인건비추가): 반영전 소득 = 반영후 소득 + 추가경비 총액
   if (key === '반영전_소득') {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
     if (after === null || cost === null) return '';
     return (after + cost).toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 종합소득세 절감 = 반영전 산출세액 − 반영후 산출세액
+  // 기장(인건비추가): 종합소득세 절감 = 반영전 산출세액 − 반영후 산출세액
   if (key === '국세절감') {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
@@ -431,19 +431,19 @@ const computeCalculated = (key, inputs) => {
     if (saving <= 0) return '';
     return saving.toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 지방소득세 절감 = 종합소득세 절감 × 10%
+  // 기장(인건비추가): 지방소득세 절감 = 종합소득세 절감 × 10%
   if (key === '지방세절감') {
     const gukSaving = parseNum(computeCalculated('국세절감', inputs));
     if (gukSaving === null) return '';
     return Math.round(gukSaving * 0.1).toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 건강보험료 절감 = 추가경비 총액 × 8.13% (2026년 직장가입자: 건보 7.19% + 장기요양 13.14%)
+  // 기장(인건비추가): 건강보험료 절감 = 추가경비 총액 × 8.13% (2026년 직장가입자: 건보 7.19% + 장기요양 13.14%)
   if (key === '건보절감') {
     const cost = parseNum(inputs['추가경비_총액']);
     if (cost === null || cost <= 0) return '';
     return Math.round(cost * 0.0813).toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 절세액 합계 = 국세절감 + 지방세절감 + 건보절감
+  // 기장(인건비추가): 절세액 합계 = 국세절감 + 지방세절감 + 건보절감
   if (key === '절세액') {
     const g = parseNum(computeCalculated('국세절감', inputs)) || 0;
     const j = parseNum(computeCalculated('지방세절감', inputs)) || 0;
@@ -452,7 +452,7 @@ const computeCalculated = (key, inputs) => {
     if (total <= 0) return '';
     return total.toLocaleString('ko-KR');
   }
-  // 기장+신고대리: 적용세율 = 반영전 소득의 누진구간 세율 (%)
+  // 기장(인건비추가): 적용세율 = 반영전 소득의 누진구간 세율 (%)
   if (key === '적용세율') {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
@@ -467,13 +467,13 @@ const computeCalculated = (key, inputs) => {
     if (before <= 1000000000) return '42';
     return '45';
   }
-  // 기장+신고대리: 지방세율 = 적용세율 × 0.1 (소수 1자리)
+  // 기장(인건비추가): 지방세율 = 적용세율 × 0.1 (소수 1자리)
   if (key === '지방세율') {
     const rate = parseFloat(computeCalculated('적용세율', inputs));
     if (isNaN(rate)) return '';
     return (rate * 0.1).toFixed(1);
   }
-  // 기장+신고대리: 박스1~5 수수료 합 × 1.1 (VAT 포함). 이름이 입력된 박스만 합산.
+  // 기장(인건비추가): 박스1~5 수수료 합 × 1.1 (VAT 포함). 이름이 입력된 박스만 합산.
   if (key === '수수료_합계_VAT포함') {
     let sum = 0;
     for (let n = 1; n <= 5; n++) {
@@ -558,7 +558,7 @@ const isCondActive = (trigger, inputs, variables) => {
   if (trigger === '_산출세액있음') return hasAmount(inputs['조정전_소득']);
   if (trigger === '_추가증빙있음') return hasAmount(inputs['추가증빙_경비']) || hasAmount(inputs['추가증빙_경비2']);
   if (trigger === '_복수') {
-    // 기장+신고대리: 박스 이름이 채워진 게 2개 이상이면 true
+    // 기장(인건비추가): 박스 이름이 채워진 게 2개 이상이면 true
     const names = ['박스1_이름','박스2_이름','박스3_이름','박스4_이름','박스5_이름'];
     return names.filter(k => inputs[k] && String(inputs[k]).trim()).length >= 2;
   }
@@ -1214,7 +1214,7 @@ function AdminPanel({ onSavePassword, showToast }) {
       </div>
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 text-sm text-slate-600">
         <h3 className="font-bold mb-2 text-slate-800">양식 수정 안내</h3>
-        <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code>(기장거래처)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_REPORT</code>(신고대리)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_COMBINED</code>(기장+신고대리) 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 헤더의 <strong>새로고침 버튼</strong>(또는 Ctrl+F5)으로 반영됩니다.</p>
+        <p>본문 양식은 <code className="bg-white px-1 rounded border border-slate-200">index.html</code> 파일 안의 <code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY</code>(기장거래처)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_REPORT</code>(신고대리)·<code className="bg-white px-1 rounded border border-slate-200">SIMPLE_BODY_COMBINED</code>(기장(인건비추가)) 부분을 직접 수정해야 합니다. GitHub에서 파일을 편집 → Commit → 직원 PC에서 헤더의 <strong>새로고침 버튼</strong>(또는 Ctrl+F5)으로 반영됩니다.</p>
         <p className="mt-2">수정 후 코드 상단의 <code className="bg-white px-1 rounded border border-slate-200">BUILD_DATE</code> 상수(<code>YYYY-MM-DD HH:MM</code> 형식)도 함께 갱신해 두면 직원이 최신 버전을 받았는지 헤더에서 바로 확인할 수 있습니다.</p>
       </div>
     </main>
