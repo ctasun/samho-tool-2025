@@ -94,7 +94,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-18 23:39';
+const BUILD_DATE = '2026-05-19 00:00';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -122,17 +122,16 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 이월결손금    {이월결손금}원(향후 15년간 소득금액에서 공제예정){?추가증빙_경비}
 추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}{/?이월결손금}{#이월결손금 업체 중 추가증빙 입력한 업체만 입력할 것}
 
-{?_산출세액있음}{?_helper}
-조정후 소득  {조정후_소득}원(입력용·미출력)
-{/?_helper}{?조정전_산출세액}조정전 소득에 따른 산출세액 {조정전_산출세액}원
+{?_산출세액있음}{?조정전_산출세액}조정전 소득에 따른 산출세액 {조정전_산출세액}원
 {/?조정전_산출세액}{?조정후_산출세액}조정후 소득에 따른 산출세액 {조정후_산출세액}원
 {/?조정후_산출세액}{?추가증빙_경비2}추가증빙 필요한 경비  {추가증빙_경비2}원
-{/?추가증빙_경비2}{/?_산출세액있음}{?_절세효과있음}
+{/?추가증빙_경비2}{?추가인건비}추가인건비  {추가인건비}원
+{/?추가인건비}{/?_산출세액있음}{?_절세효과있음}
 
 [절세효과]
-종합소득세 절감 {종합소득세_절감}원(적용세율 {적용세율_조정전}%)
-지방소득세 절감 {지방소득세_절감}원(적용세율 {지방세율_조정전}%)
-건강보험료 절감 {건강보험료_절감}원(적용세율 8.13%)
+종합소득세 {종합소득세_절감}원(적용세율 {적용세율_조정전}%)
+지방소득세 {지방소득세_절감}원(적용세율 {지방세율_조정전}%)
+건강보험료 {건강보험료_절감}원(적용세율 8.13%)
 절세액 합계 {절세액_합계}원
 {/?_절세효과있음}{?건보증가없음}
 
@@ -323,12 +322,12 @@ const BASIC_VARS = [
   // 추가증빙 필요한 경비: 이월결손금이 입력된 경우에만 입력 가능 (disabled 처리 + 카톡 출력 자동 제외)
   { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비', dependsOn: '이월결손금' },
   { key: '추가증빙_경비2', label: '추가증빙 필요한 경비 (산출세액)', type: 'currency', placeholder: '경비' },
-  { key: '조정후_소득', label: '조정후 소득 (입력용)', type: 'currency', placeholder: '조정후 소득' },
+  { key: '추가인건비', label: '추가인건비', type: 'currency', placeholder: '추가인건비' },
   { key: '조정전_산출세액', label: '조정전 산출세액', type: 'calculated', placeholder: '자동' },
   { key: '조정후_산출세액', label: '조정후 산출세액', type: 'calculated', placeholder: '자동' },
-  { key: '종합소득세_절감', label: '종합소득세 절감(자동)', type: 'calculated', placeholder: '자동' },
-  { key: '지방소득세_절감', label: '지방소득세 절감(자동)', type: 'calculated', placeholder: '자동' },
-  { key: '건강보험료_절감', label: '건강보험료 절감(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '종합소득세_절감', label: '종합소득세(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '지방소득세_절감', label: '지방소득세(자동)', type: 'calculated', placeholder: '자동' },
+  { key: '건강보험료_절감', label: '건강보험료(자동)', type: 'calculated', placeholder: '자동' },
   { key: '절세액_합계', label: '절세액 합계(자동)', type: 'calculated', placeholder: '자동' },
   { key: '적용세율_조정전', label: '적용세율 조정전(자동)', type: 'calculated', placeholder: '자동' },
   { key: '지방세율_조정전', label: '지방세율 조정전(자동)', type: 'calculated', placeholder: '자동' },
@@ -467,25 +466,29 @@ const computeCalculated = (key, inputs) => {
   if (key === '소득률') return calculateIncomeRate(inputs['소득_당해'], inputs['매출_당해']);
   if (key === '소득률_전년') return calculateIncomeRate(inputs['소득_전년'], inputs['매출_전년']);
 
-  // 기장거래처 산출세액 — 메커니즘 반전:
-  //   입력: 조정후 소득 (실제 신고된 사업소득금액)
-  //   계산: 조정전 소득 = 조정후 소득 + 추가증빙_경비2
+  // ===== 기장거래처 산출세액 =====
+  // 입력: 위쪽 '소득_당해' (실제 신고된 사업소득금액 = 조정후 소득) + 추가증빙_경비2 + 추가인건비
+  // 조정전 소득 = 소득_당해 + 추가증빙_경비2 + 추가인건비
+  // 조정후 산출세액 = 소득_당해의 누진세
   if (key === '조정전_산출세액') {
-    const after = parseNum(inputs['조정후_소득']);
+    const after = parseNum(inputs['소득_당해']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
+    const labor = parseNum(inputs['추가인건비']) || 0;
     if (after === null || after <= 0) return '';
-    return calculateTax(after + adjust);
+    return calculateTax(after + adjust + labor);
   }
   if (key === '조정후_산출세액') {
-    const after = parseNum(inputs['조정후_소득']);
+    const after = parseNum(inputs['소득_당해']);
     if (after === null || after <= 0) return '';
     return calculateTax(after);
   }
   if (key === '종합소득세_절감') {
-    const after = parseNum(inputs['조정후_소득']);
+    const after = parseNum(inputs['소득_당해']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
-    if (after === null || after <= 0 || adjust <= 0) return '';
-    const taxBefore = parseNum(calculateTax(after + adjust));
+    const labor = parseNum(inputs['추가인건비']) || 0;
+    const sum = adjust + labor;
+    if (after === null || after <= 0 || sum <= 0) return '';
+    const taxBefore = parseNum(calculateTax(after + sum));
     const taxAfter = parseNum(calculateTax(after));
     if (taxBefore === null || taxAfter === null) return '';
     const saving = taxBefore - taxAfter;
@@ -498,9 +501,12 @@ const computeCalculated = (key, inputs) => {
     return Math.round(g * 0.1).toLocaleString('ko-KR');
   }
   if (key === '건강보험료_절감') {
-    const adjust = parseNum(inputs['추가증빙_경비2']);
-    if (adjust === null || adjust <= 0) return '';
-    return Math.round(adjust * 0.0813).toLocaleString('ko-KR');
+    // 추가증빙_경비2 + 추가인건비를 합산하여 8.13% 적용
+    const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
+    const labor = parseNum(inputs['추가인건비']) || 0;
+    const sum = adjust + labor;
+    if (sum <= 0) return '';
+    return Math.round(sum * 0.0813).toLocaleString('ko-KR');
   }
   if (key === '절세액_합계') {
     const g = parseNum(computeCalculated('종합소득세_절감', inputs)) || 0;
@@ -511,10 +517,11 @@ const computeCalculated = (key, inputs) => {
     return total.toLocaleString('ko-KR');
   }
   if (key === '적용세율_조정전') {
-    const after = parseNum(inputs['조정후_소득']);
+    const after = parseNum(inputs['소득_당해']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
+    const labor = parseNum(inputs['추가인건비']) || 0;
     if (after === null || after <= 0) return '';
-    return getProgressiveRate(after + adjust);
+    return getProgressiveRate(after + adjust + labor);
   }
   if (key === '지방세율_조정전') {
     const rate = parseFloat(computeCalculated('적용세율_조정전', inputs));
@@ -691,8 +698,12 @@ const isCondActive = (trigger, inputs, variables) => {
   if (trigger === '환급발생') return ['국세', '지방세'].some(k => hasAmount(inputs[k]) && isNegativeValue(inputs[k]));
   if (trigger === '세금없음') return ['국세', '지방세'].every(k => !hasAmount(inputs[k]));
   if (trigger === '세금있음') return !isCondActive('세금없음', inputs, variables);
-  if (trigger === '_산출세액있음') return hasAmount(inputs['조정후_소득']);
+  // ===== 산출세액 블록 트리거 =====
+  // 위쪽 '소득_당해'에 양수 값이 있으면 산출세액 블록을 표시
+  if (trigger === '_산출세액있음') return hasAmount(inputs['소득_당해']);
   if (trigger === '_절세효과있음') return computeCalculated('종합소득세_절감', inputs) !== '';
+  // ===== 추가증빙 안내문 트리거 =====
+  // 추가증빙_경비, 추가증빙_경비2만 판정 (추가인건비는 별도 안내문 트리거 안 됨)
   if (trigger === '_추가증빙있음') return hasAmount(inputs['추가증빙_경비']) || hasAmount(inputs['추가증빙_경비2']);
   if (trigger === '_복수') {
     // 기장(인건비추가): 박스 이름이 채워진 게 2개 이상이면 true
@@ -1069,13 +1080,31 @@ function App() {
     // 종속 변수가 있으면 종속 조건이 채워지지 않은 동안 입력 잠금(disabled)
     const isDisabled = !!variable.dependsOn && !isDependencySatisfied(variable, inputs);
 
+    // disabled된 필드는 건너뛰고 다음/이전 활성 필드로 이동
+    // (예: 이월결손금이 비어있어 추가증빙_경비가 잠겨 있을 때, 엔터/방향키로 그 필드를 건너뜀)
     const goNext = () => {
-      const next = inputRefs.current[order + 1];
-      if (next) { next.focus(); try { next.select(); } catch (er) {} }
+      let i = order + 1;
+      while (i < inputRefs.current.length) {
+        const next = inputRefs.current[i];
+        if (next && !next.disabled) {
+          next.focus();
+          try { next.select(); } catch (er) {}
+          return;
+        }
+        i++;
+      }
     };
     const goPrev = () => {
-      const prev = inputRefs.current[order - 1];
-      if (prev) { prev.focus(); try { prev.select(); } catch (er) {} }
+      let i = order - 1;
+      while (i >= 0) {
+        const prev = inputRefs.current[i];
+        if (prev && !prev.disabled) {
+          prev.focus();
+          try { prev.select(); } catch (er) {}
+          return;
+        }
+        i--;
+      }
     };
 
     if (variable.type === 'textarea') {
