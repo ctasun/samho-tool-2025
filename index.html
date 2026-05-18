@@ -36,12 +36,13 @@ const Copy = (props) => <SvgIcon {...props}><rect x="9" y="9" width="13" height=
 const Settings = (props) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></SvgIcon>;
 const Lock = (props) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></SvgIcon>;
 const GripHorizontal = (props) => <SvgIcon {...props}><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></SvgIcon>;
+const GripVertical = (props) => <SvgIcon {...props}><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></SvgIcon>;
 const LogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></SvgIcon>;
 const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></SvgIcon>;
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-18 20:12';
+const BUILD_DATE = '2026-05-18 20:45';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -49,7 +50,7 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 {고객명} 대표님.
 김선영세무사입니다.
 
-기다려주셔서 감사합니다. 많이 궁금하실 것 같아 메시지로 종합소득세 신고 결과를 먼저 보고드립니다.
+올해로 이 업을 한 지 딱 20년이 되었습니다. 그런데도 매년 이 순간만큼은 늘 긴장됩니다. 기다려주셔서 감사합니다. 많이 궁금하실 것 같아 메시지로 종합소득세 신고 결과를 먼저 보고드립니다.
 
 메시지 확인하신 후 궁금하신 점은 5월 내내 오전 8시부터 오후 10시까지 언제든 연락 주시면 상세히 말씀드리겠습니다. 최하단에 개인직통번호 안내드리겠습니다.
 
@@ -67,21 +68,21 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 소득률  {소득률} %{?소득률_전년}(전년 {소득률_전년} %){/?소득률_전년}{/?소득률}
 
 {?이월결손금}이월결손금    {이월결손금}원(15년간 소득금액에서 공제예정){/?이월결손금}{?추가증빙_경비}
-추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}{#(이월결손금 있는 업체는 여기에 기입)}
+추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}{#결손업체만 입력할 것}
 
 {?_산출세액있음}{?_helper}
 조정후 소득  {조정후_소득}원(입력용·미출력)
 {/?_helper}{?조정전_산출세액}조정전 소득에 따른 산출세액 {조정전_산출세액}원
 {/?조정전_산출세액}{?조정후_산출세액}조정후 소득에 따른 산출세액 {조정후_산출세액}원
 {/?조정후_산출세액}{?추가증빙_경비2}추가증빙 필요한 경비  {추가증빙_경비2}원
-{/?추가증빙_경비2}{?_절세효과있음}
+{/?추가증빙_경비2}{/?_산출세액있음}{?_절세효과있음}
 
 [절세효과]
 종합소득세 절감 {종합소득세_절감}원(적용세율 {적용세율_조정전}%)
 지방소득세 절감 {지방소득세_절감}원(적용세율 {지방세율_조정전}%)
 건강보험료 절감 {건강보험료_절감}원(적용세율 8.13%)
 절세액 합계 {절세액_합계}원
-{/?_절세효과있음}{/?_산출세액있음}{?건보증가없음}
+{/?_절세효과있음}{?건보증가없음}
 
 이번 종합소득세 신고로 소득으로 인한 지역건강보험료 증가는 발생하지 않습니다.
 {/?건보증가없음}{?개별주의_있음}
@@ -267,7 +268,8 @@ const BASIC_VARS = [
   { key: '소득률', label: '소득률', type: 'calculated', placeholder: '자동' },
   { key: '소득률_전년', label: '소득률 전년', type: 'calculated', placeholder: '자동' },
   { key: '이월결손금', label: '이월결손금', type: 'currency', placeholder: '이월결손금' },
-  { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비' },
+  // 추가증빙 필요한 경비: 이월결손금이 입력된 경우에만 입력 가능 (disabled 처리 + 카톡 출력 자동 제외)
+  { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비', dependsOn: '이월결손금' },
   { key: '추가증빙_경비2', label: '추가증빙 필요한 경비 (산출세액)', type: 'currency', placeholder: '경비' },
   { key: '조정후_소득', label: '조정후 소득 (입력용)', type: 'currency', placeholder: '조정후 소득' },
   { key: '조정전_산출세액', label: '조정전 산출세액', type: 'calculated', placeholder: '자동' },
@@ -551,6 +553,20 @@ const computeCalculated = (key, inputs) => {
   return '';
 };
 
+// 종속 변수(dependsOn)의 값이 채워져 있는지 확인.
+// currency 타입을 가정 — 숫자 0 또는 빈 값은 "비어있음"으로 간주.
+const isDependencySatisfied = (variable, inputs) => {
+  if (!variable || !variable.dependsOn) return true;
+  const depVal = inputs[variable.dependsOn];
+  if (depVal == null) return false;
+  const s = String(depVal).trim();
+  if (!s) return false;
+  const digits = s.replace(/[^\d]/g, '');
+  if (!digits) return false;
+  if (parseInt(digits) === 0) return false;
+  return true;
+};
+
 const Storage = {
   async get(key) {
     try {
@@ -638,6 +654,10 @@ const isCondActive = (trigger, inputs, variables) => {
     return Object.keys(inputs).some(k => k.startsWith(prefix) && inputs[k] && String(inputs[k]).trim());
   }
   const variable = variables.find(v => v.key === trigger);
+  // 종속 변수(dependsOn) 안전장치:
+  //   직원이 추가증빙_경비를 먼저 입력한 뒤 이월결손금을 지운 경우에도
+  //   카톡 출력에서 추가증빙_경비 라인이 자동으로 제외되도록 함.
+  if (variable?.dependsOn && !isDependencySatisfied(variable, inputs)) return false;
   if (variable?.type === 'switch') return !!inputs[trigger];
   const value = inputs[trigger];
   if (variable?.type === 'currency') return hasAmount(value);
@@ -693,6 +713,7 @@ function App() {
   const [accessError, setAccessError] = useState(false);
   const [bootChecking, setBootChecking] = useState(true);
 
+  // 좌우 분할 위치(%). 좌측 에디터 너비 비율. 기존 상하 분할 키(split_pos)와 분리.
   const [splitPos, setSplitPos] = useState(55);
   const splitContainerRef = useRef(null);
   const isDragging = useRef(false);
@@ -724,7 +745,8 @@ function App() {
       if (savedAccess === true) setAccessGranted(true);
       const savedPw = await Storage.get('admin_password');
       if (savedPw) setAdminPassword(savedPw);
-      const savedSplit = await Storage.get('split_pos');
+      // 좌우 분할 위치 — 기존 상하 분할 키(split_pos)와는 별도 키 사용
+      const savedSplit = await Storage.get('split_pos_lr');
       if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
       setBootChecking(false);
     })();
@@ -736,9 +758,10 @@ function App() {
       const container = splitContainerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const y = clientY - rect.top;
-      const percent = (y / rect.height) * 100;
+      // 좌우 분할 — 가로(clientX) 기준
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const x = clientX - rect.left;
+      const percent = (x / rect.width) * 100;
       const clamped = Math.max(15, Math.min(85, percent));
       setSplitPos(clamped);
     };
@@ -747,7 +770,7 @@ function App() {
         isDragging.current = false;
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
-        Storage.set('split_pos', splitPos);
+        Storage.set('split_pos_lr', splitPos);
       }
     };
     window.addEventListener('mousemove', handleMove);
@@ -764,7 +787,7 @@ function App() {
 
   const handleDragStart = (e) => {
     isDragging.current = true;
-    document.body.style.cursor = 'row-resize';
+    document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
     if (e.preventDefault) e.preventDefault();
   };
@@ -979,6 +1002,10 @@ function App() {
     const rawValue = inputs[variable.key] || '';
     const isOptional = variable.optional;
     const isNeg = isNegativeValue(rawValue);
+
+    // 종속 변수가 있으면 종속 조건이 채워지지 않은 동안 입력 잠금(disabled)
+    const isDisabled = !!variable.dependsOn && !isDependencySatisfied(variable, inputs);
+
     const goNext = () => {
       const next = inputRefs.current[order + 1];
       if (next) { next.focus(); try { next.select(); } catch (er) {} }
@@ -1012,9 +1039,32 @@ function App() {
         />
       );
     }
+
     const displayValue = variable.type === 'currency' ? formatCurrency(rawValue) : rawValue;
-    const placeholderText = variable.placeholder || variable.label;
+    const placeholderText = isDisabled ? '🔒 잠김' : (variable.placeholder || variable.label);
     const size = Math.max((displayValue || placeholderText).length + 1, 4);
+
+    // 잠김(disabled) 상태 — 회색 톤. 종속변수 입력 시 자동 활성화.
+    if (isDisabled) {
+      return (
+        <input
+          key={idx}
+          ref={el => { inputRefs.current[order] = el; }}
+          type="text"
+          value=""
+          disabled
+          readOnly
+          placeholder={placeholderText}
+          size={size}
+          tabIndex={-1}
+          aria-disabled="true"
+          title="이월결손금이 입력되어야 활성화됩니다"
+          className="inline-block mx-0.5 px-2 py-0.5 rounded-md text-[15px] font-medium bg-slate-100 text-slate-400 border-b-2 border-dashed border-slate-300 cursor-not-allowed placeholder:text-slate-400"
+          style={{ fontFamily: 'inherit', lineHeight: '1.4' }}
+        />
+      );
+    }
+
     return (
       <input
         key={idx}
@@ -1256,10 +1306,11 @@ function App() {
             </button>
           </div>
 
-          <div ref={splitContainerRef} className="flex-1 flex flex-col min-h-0 relative">
+          {/* ===== 좌우 분할 컨테이너 ===== */}
+          <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 relative">
             <div
               className="overflow-y-auto bg-slate-50"
-              style={{ height: `${splitPos}%` }}
+              style={{ width: `${splitPos}%` }}
             >
               <div className="max-w-4xl mx-auto p-3">
                 <div className="bg-white rounded-xl px-5 py-5 shadow-sm border border-slate-200">
@@ -1273,16 +1324,16 @@ function App() {
             <div
               onMouseDown={handleDragStart}
               onTouchStart={handleDragStart}
-              className="h-2 bg-slate-200 hover:bg-blue-400 active:bg-blue-500 cursor-row-resize flex items-center justify-center flex-shrink-0 transition-colors group select-none touch-none"
-              title="드래그하여 크기 조절"
+              className="w-2 bg-slate-200 hover:bg-blue-400 active:bg-blue-500 cursor-col-resize flex items-center justify-center flex-shrink-0 transition-colors group select-none touch-none"
+              title="드래그하여 너비 조절"
             >
-              <GripHorizontal size={16} className="text-slate-500 group-hover:text-white pointer-events-none" />
+              <GripVertical size={16} className="text-slate-500 group-hover:text-white pointer-events-none" />
             </div>
 
             <div
               ref={previewContainerRef}
               className="overflow-y-auto bg-white"
-              style={{ height: `${100 - splitPos}%` }}
+              style={{ width: `${100 - splitPos}%` }}
             >
               <div className="max-w-4xl mx-auto p-4">
                 <div className="text-[14px] whitespace-pre-wrap leading-relaxed text-slate-800 break-words">
