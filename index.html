@@ -18,6 +18,55 @@
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     background: #f8fafc; color: #64748b; font-size: 14px;
   }
+
+  /* ===== 스크롤바 명시 스타일 =====
+     좌측 에디터·우측 미리보기 모두 스크롤바가 항상 보이게.
+     - 두께 12px (Chrome 기본 약 15~17px보다 약간 가늘지만 트랙이 또렷이 보임)
+     - thumb는 회색조, hover 시 진해짐 → 마우스로 잡기 쉬움
+     - .always-scroll 클래스를 적용한 영역에만 한정 적용 */
+  .always-scroll {
+    scrollbar-width: auto;            /* Firefox — auto: 시스템 기본 두께 */
+    scrollbar-color: #94a3b8 #f1f5f9;  /* Firefox thumb / track */
+  }
+  .always-scroll::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  .always-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;              /* slate-100 */
+    border-radius: 6px;
+  }
+  .always-scroll::-webkit-scrollbar-thumb {
+    background: #94a3b8;              /* slate-400 */
+    border-radius: 6px;
+    border: 2px solid #f1f5f9;        /* 트랙 색으로 패딩 효과 */
+  }
+  .always-scroll::-webkit-scrollbar-thumb:hover {
+    background: #64748b;              /* slate-500 */
+  }
+  .always-scroll::-webkit-scrollbar-thumb:active {
+    background: #475569;              /* slate-600 */
+  }
+
+  /* 인쇄 시: 에디터 영역만 100% 폭으로 펼치고, 헤더·탭바·토스트·드래그핸들·미리보기 패널은 숨김
+     입력박스(<input>/<textarea>)는 그대로 출력되어 직원이 손으로 채워서 사용할 수 있는 용지로 활용 가능 */
+  @media print {
+    body { background: #ffffff !important; }
+    .no-print { display: none !important; }
+    .print-full-width { width: 100% !important; }
+    /* 포커스 외곽선/그림자 제거 */
+    input:focus, textarea:focus { box-shadow: none !important; outline: none !important; }
+    /* 입력박스는 평면적인 테두리만 남겨 인쇄 시 가독성 확보 */
+    input, textarea {
+      background: #fff !important;
+      box-shadow: none !important;
+    }
+    /* 자동계산 배지·체크박스 라벨의 배경색은 회색조로 — 잉크 절약 + 흑백 프린터 호환 */
+    .print-mono-bg { background: #f5f5f5 !important; color: #000 !important; border-color: #999 !important; }
+    /* 인쇄 시에는 스크롤바 영역이 잘려서 출력되지 않도록 일반 overflow로 복귀 */
+    .always-scroll { overflow: visible !important; }
+    @page { size: A4; margin: 12mm; }
+  }
 </style>
 </head>
 <body>
@@ -39,10 +88,13 @@ const GripHorizontal = (props) => <SvgIcon {...props}><circle cx="12" cy="9" r="
 const GripVertical = (props) => <SvgIcon {...props}><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></SvgIcon>;
 const LogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></SvgIcon>;
 const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></SvgIcon>;
+const Eye = (props) => <SvgIcon {...props}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></SvgIcon>;
+const EyeOff = (props) => <SvgIcon {...props}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a17.94 17.94 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 7 10 7a17.71 17.71 0 0 1-2.13 3.06"/><line x1="1" y1="1" x2="23" y2="23"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/></SvgIcon>;
+const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></SvgIcon>;
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-18 21:30';
+const BUILD_DATE = '2026-05-18 23:39';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -50,7 +102,7 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 {고객명} 대표님.
 김선영세무사입니다.
 
-올해로 이 업을 한 지 딱 20년이 되었습니다. 그런데도 매년 이 순간만큼은 늘 긴장됩니다. 기다려주셔서 감사합니다. 많이 궁금하실 것 같아 메시지로 종합소득세 신고 결과를 먼저 보고드립니다.
+올해로 이 업을 한 지 만 20년이 되었습니다. 그런데도 매년 이 순간만큼은 늘 긴장됩니다. 기다려주셔서 감사합니다. 많이 궁금하실 것 같아 메시지로 종합소득세 신고 결과를 먼저 보고드립니다.
 
 메시지 확인하신 후 궁금하신 점은 5월 내내 오전 8시부터 오후 10시까지 언제든 연락 주시면 상세히 말씀드리겠습니다. 최하단에 개인직통번호 안내드리겠습니다.
 
@@ -65,10 +117,10 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 
 {?매출_당해}매출  {매출_당해}원{?매출_전년}(전년 {매출_전년}원){/?매출_전년}{/?매출_당해}{?소득_당해}
 소득  {소득_당해}원{?소득_전년}(전년 {소득_전년}원){/?소득_전년}{/?소득_당해}{?소득률}
-소득률  {소득률} %{?소득률_전년}(전년 {소득률_전년} %){/?소득률_전년}{/?소득률}
+소득률  {소득률} %{?소득률_전년}(전년 {소득률_전년} %){/?소득률_전년}{/?소득률}{?이월결손금}
 
-{?이월결손금}이월결손금    {이월결손금}원(향후 15년간 소득금액에서 공제예정){/?이월결손금}{?추가증빙_경비}
-추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}{#이월결손금 업체 중 추가증빙 입력한 업체만 입력할 것}
+이월결손금    {이월결손금}원(향후 15년간 소득금액에서 공제예정){?추가증빙_경비}
+추가증빙 필요한 경비     {추가증빙_경비}원{/?추가증빙_경비}{/?이월결손금}{#이월결손금 업체 중 추가증빙 입력한 업체만 입력할 것}
 
 {?_산출세액있음}{?_helper}
 조정후 소득  {조정후_소득}원(입력용·미출력)
@@ -715,6 +767,8 @@ function App() {
 
   // 좌우 분할 위치(%). 좌측 에디터 너비 비율. 기존 상하 분할 키(split_pos)와 분리.
   const [splitPos, setSplitPos] = useState(55);
+  // 미리보기 패널 표시 여부. localStorage(preview_visible)에 직원 PC별로 마지막 상태 저장.
+  const [previewVisible, setPreviewVisible] = useState(true);
   const splitContainerRef = useRef(null);
   const isDragging = useRef(false);
 
@@ -723,7 +777,7 @@ function App() {
   const orderCounter = useRef({ value: 0 });
   const previewContainerRef = useRef(null);
   const editorScrollRef = useRef(null);
-  const isSyncingScroll = useRef(false);
+  // 현재 포커스된 변수 키 — 미리보기에서 노란 하이라이트 위치 표시용. 스크롤은 이동하지 않음.
   const [focusedKey, setFocusedKey] = useState(null);
 
   const templates = DEFAULT_TEMPLATES;
@@ -750,6 +804,9 @@ function App() {
       // 좌우 분할 위치 — 기존 상하 분할 키(split_pos)와는 별도 키 사용
       const savedSplit = await Storage.get('split_pos_lr');
       if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
+      // 미리보기 패널 표시 여부 — false로 저장된 경우에만 끈 상태로 시작
+      const savedPreview = await Storage.get('preview_visible');
+      if (savedPreview === false) setPreviewVisible(false);
       setBootChecking(false);
     })();
   }, []);
@@ -826,6 +883,20 @@ function App() {
     } catch (e) {
       window.location.reload();
     }
+  };
+
+  // 미리보기 패널 표시 토글
+  const togglePreview = () => {
+    setPreviewVisible(prev => {
+      const next = !prev;
+      Storage.set('preview_visible', next);
+      return next;
+    });
+  };
+
+  // 인쇄 — 현재 보이는 에디터 내용을 인쇄. 입력박스(input/textarea)는 그대로 출력됨.
+  const handlePrint = () => {
+    try { window.print(); } catch (e) {}
   };
 
   const types = useMemo(() => templates[selectedCategory] ? Object.keys(templates[selectedCategory]) : [], [templates, selectedCategory]);
@@ -917,63 +988,11 @@ function App() {
     return alignAmountLines(raw);
   }, [previewParts]);
 
-  const scrollPreviewToKey = (key) => {
-    const container = previewContainerRef.current;
-    if (!container) return;
-    const target = container.querySelector(`[data-key="${key}"]`);
-    if (target) {
-      try { target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
-    }
-  };
-
-  useEffect(() => {
-    if (focusedKey) {
-      const t = setTimeout(() => scrollPreviewToKey(focusedKey), 50);
-      return () => clearTimeout(t);
-    }
-  }, [focusedKey, previewParts]);
-
-  // ===== 양방향 동기화 스크롤 =====
-  // 좌측(에디터) ↔ 우측(미리보기) 스크롤을 비율 기반으로 동기화.
-  // - 한쪽에서 휠/드래그로 스크롤하면 다른 쪽도 같은 비율 위치로 이동.
-  // - 빈 공간 위에서 휠을 굴려도 작동(스크롤 영역에 들어가 있으므로).
-  // - 한쪽이 동기화 중에 다른 쪽 이벤트가 발생해 무한 루프가 되는 것을 isSyncingScroll 플래그로 방지.
-  useEffect(() => {
-    if (!accessGranted || adminMode || !currentTemplate) return;
-    const editor = editorScrollRef.current;
-    const preview = previewContainerRef.current;
-    if (!editor || !preview) return;
-
-    const calcRatio = (el) => {
-      const max = el.scrollHeight - el.clientHeight;
-      return max <= 0 ? 0 : el.scrollTop / max;
-    };
-    const applyRatio = (el, ratio) => {
-      const max = el.scrollHeight - el.clientHeight;
-      if (max <= 0) return;
-      el.scrollTop = Math.round(ratio * max);
-    };
-
-    const onEditorScroll = () => {
-      if (isSyncingScroll.current) return;
-      isSyncingScroll.current = true;
-      applyRatio(preview, calcRatio(editor));
-      requestAnimationFrame(() => { isSyncingScroll.current = false; });
-    };
-    const onPreviewScroll = () => {
-      if (isSyncingScroll.current) return;
-      isSyncingScroll.current = true;
-      applyRatio(editor, calcRatio(preview));
-      requestAnimationFrame(() => { isSyncingScroll.current = false; });
-    };
-
-    editor.addEventListener('scroll', onEditorScroll, { passive: true });
-    preview.addEventListener('scroll', onPreviewScroll, { passive: true });
-    return () => {
-      editor.removeEventListener('scroll', onEditorScroll);
-      preview.removeEventListener('scroll', onPreviewScroll);
-    };
-  }, [accessGranted, adminMode, currentTemplate, selectedType, selectedButton, inputs]);
+  // 주의: 이 버전에서는 좌우 패널 사이의 자동 스크롤 동기화 기능을 의도적으로 제거함.
+  //   - 이전: 한쪽 휠을 굴리면 반대쪽이 비율 맞춰 따라오고(hover-driver),
+  //           input 포커스 시 미리보기가 해당 위치로 자동 이동(scrollPreviewToKey).
+  //   - 현재: 좌측·우측 각자 독립적으로 스크롤. 미리보기 노란 하이라이트(focusedKey)만 유지.
+  //   - 사유: 직원이 휠을 굴리는 동안 반대쪽 패널이 출렁이는 동작이 오히려 혼란을 유발한다는 피드백.
 
   const handleCopy = async () => {
     try {
@@ -1067,13 +1086,7 @@ function App() {
           value={rawValue}
           onChange={(e) => handleInputChange(variable.key, e.target.value, variable.type)}
           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); goNext(); } }}
-          onFocus={(e) => {
-            setFocusedKey(variable.key);
-            setTimeout(() => {
-              try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
-              scrollPreviewToKey(variable.key);
-            }, 0);
-          }}
+          onFocus={() => { setFocusedKey(variable.key); }}
           placeholder={variable.placeholder || variable.label}
           rows={Math.max(2, (rawValue.match(/\n/g) || []).length + 2)}
           className={`block w-full my-1 px-3 py-2 rounded-md text-[14px] leading-relaxed border focus:outline-none resize-y bg-white border-slate-300 text-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 placeholder:text-slate-400 placeholder:italic`}
@@ -1101,7 +1114,7 @@ function App() {
           tabIndex={-1}
           aria-disabled="true"
           title="이월결손금이 입력되어야 활성화됩니다"
-          className="inline-block mx-0.5 px-2 py-1 rounded-md text-[14px] font-medium bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed italic placeholder:text-slate-400"
+          className="inline-block mx-0.5 px-2 py-1 rounded-md text-[14px] font-medium bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed italic placeholder:text-slate-400 print-mono-bg"
           style={{ fontFamily: 'inherit', lineHeight: '1.4' }}
         />
       );
@@ -1134,10 +1147,7 @@ function App() {
         onFocus={(e) => {
           e.target.select();
           setFocusedKey(variable.key);
-          setTimeout(() => {
-            try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (er) {}
-            scrollPreviewToKey(variable.key);
-          }, 0);
+          // 좌우 패널 자동 스크롤은 제거됨. 노란 하이라이트(focusedKey)만 반영.
         }}
         placeholder={placeholderText}
         size={size}
@@ -1184,7 +1194,7 @@ function App() {
           const val = computeCalculated(node.key, inputs);
           const placeholderText = variable.placeholder || variable.label;
           return (
-            <span key={idx} className="inline-block mx-0.5 px-2 py-1 rounded-md text-[14px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span key={idx} className="inline-block mx-0.5 px-2 py-1 rounded-md text-[14px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 print-mono-bg">
               {val || <span className="text-emerald-400 font-normal italic">{placeholderText}</span>}
             </span>
           );
@@ -1200,7 +1210,7 @@ function App() {
             displayVal = rawValue;
           }
           return (
-            <span key={idx} className="inline-block mx-0.5 px-2 py-1 rounded-md text-[13px] font-medium bg-violet-50 text-violet-700 border border-violet-200" title="출력 위치">
+            <span key={idx} className="inline-block mx-0.5 px-2 py-1 rounded-md text-[13px] font-medium bg-violet-50 text-violet-700 border border-violet-200 print-mono-bg" title="출력 위치">
               {displayVal || <span className="text-violet-400 font-normal italic text-[12px]">↓ 출력 위치</span>}
             </span>
           );
@@ -1221,7 +1231,7 @@ function App() {
                 isChecked
                   ? 'bg-blue-100 border-blue-500 text-blue-900 shadow-sm'
                   : 'bg-blue-50 border-blue-300 text-blue-800 hover:bg-blue-100'
-              }`}>
+              } print-mono-bg`}>
                 <input
                   type="checkbox"
                   checked={isChecked}
@@ -1282,12 +1292,12 @@ function App() {
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
       {toast && (
-        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg shadow-lg text-white font-medium text-sm ${toast.type === 'error' ? 'bg-red-500' : 'bg-slate-900'}`}>
+        <div className={`no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg shadow-lg text-white font-medium text-sm ${toast.type === 'error' ? 'bg-red-500' : 'bg-slate-900'}`}>
           {toast.message}
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-200 z-30 shadow-sm flex-shrink-0">
+      <header className="no-print bg-white border-b border-slate-200 z-30 shadow-sm flex-shrink-0">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
           <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
           <div className="flex items-center gap-1.5">
@@ -1298,6 +1308,20 @@ function App() {
               title="새로고침 (최신 양식 받기)"
             >
               <RefreshCw size={16} />
+            </button>
+            <button
+              onClick={togglePreview}
+              className={`p-2 rounded-lg transition-colors ${previewVisible ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'hover:bg-slate-100 text-slate-400'}`}
+              title={previewVisible ? '미리보기 끄기' : '미리보기 켜기'}
+            >
+              {previewVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+            <button
+              onClick={handlePrint}
+              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
+              title="인쇄 (입력박스 그대로 출력)"
+            >
+              <Printer size={16} />
             </button>
             {adminMode ? (
               <button onClick={() => setAdminMode(false)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium flex items-center gap-1">
@@ -1316,7 +1340,7 @@ function App() {
       </header>
 
       {showAdminLogin && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="no-print fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Lock size={18} /> 관리자 모드 로그인</h2>
             <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()} placeholder="관리자 비밀번호" className="w-full px-3 py-2 border border-slate-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none" autoFocus />
@@ -1329,7 +1353,7 @@ function App() {
       )}
 
       {adminMode ? (
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto always-scroll">
           <AdminPanel
             onSavePassword={async (pw) => { setAdminPassword(pw); await Storage.set('admin_password', pw); showToast('비밀번호 변경됨'); }}
             showToast={showToast}
@@ -1343,7 +1367,7 @@ function App() {
         </div>
       ) : (
         <>
-          <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
+          <div className="no-print bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               {types.map(t => (
                 <button
@@ -1361,12 +1385,14 @@ function App() {
             </button>
           </div>
 
-          {/* ===== 좌우 분할 컨테이너 ===== */}
+          {/* ===== 좌우 분할 컨테이너 =====
+              좌측·우측 각자 독립 스크롤. 동기화 없음.
+              overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임. */}
           <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 relative">
             <div
               ref={editorScrollRef}
-              className="overflow-y-auto bg-slate-50"
-              style={{ width: `${splitPos}%` }}
+              className="overflow-y-scroll always-scroll bg-slate-50 print-full-width"
+              style={{ width: previewVisible ? `${splitPos}%` : '100%' }}
             >
               <div className="max-w-4xl mx-auto p-3">
                 <div className="bg-white rounded-xl px-5 py-5 shadow-sm border border-slate-200">
@@ -1377,43 +1403,47 @@ function App() {
               </div>
             </div>
 
-            <div
-              onMouseDown={handleDragStart}
-              onTouchStart={handleDragStart}
-              className="w-2 bg-slate-200 hover:bg-blue-400 active:bg-blue-500 cursor-col-resize flex items-center justify-center flex-shrink-0 transition-colors group select-none touch-none"
-              title="드래그하여 너비 조절"
-            >
-              <GripVertical size={16} className="text-slate-500 group-hover:text-white pointer-events-none" />
-            </div>
-
-            <div
-              ref={previewContainerRef}
-              className="overflow-y-auto bg-white"
-              style={{ width: `${100 - splitPos}%` }}
-            >
-              <div className="max-w-4xl mx-auto p-4">
-                <div className="text-[14px] whitespace-pre-wrap leading-relaxed text-slate-800 break-words">
-                  {previewParts.length === 0 ? (
-                    <span className="text-slate-400 italic">위에서 값을 입력하면 여기에 결과가 표시됩니다.</span>
-                  ) : (
-                    previewParts.map((part, idx) => {
-                      if (part.type === 'var') {
-                        return (
-                          <span
-                            key={idx}
-                            data-key={part.key}
-                            className={focusedKey === part.key ? 'bg-yellow-200 rounded px-0.5 -mx-0.5 transition-colors' : ''}
-                          >
-                            {part.content}
-                          </span>
-                        );
-                      }
-                      return <React.Fragment key={idx}>{part.content}</React.Fragment>;
-                    })
-                  )}
+            {previewVisible && (
+              <>
+                <div
+                  onMouseDown={handleDragStart}
+                  onTouchStart={handleDragStart}
+                  className="no-print w-2 bg-slate-200 hover:bg-blue-400 active:bg-blue-500 cursor-col-resize flex items-center justify-center flex-shrink-0 transition-colors group select-none touch-none"
+                  title="드래그하여 너비 조절"
+                >
+                  <GripVertical size={16} className="text-slate-500 group-hover:text-white pointer-events-none" />
                 </div>
-              </div>
-            </div>
+
+                <div
+                  ref={previewContainerRef}
+                  className="no-print overflow-y-scroll always-scroll bg-white"
+                  style={{ width: `${100 - splitPos}%` }}
+                >
+                  <div className="max-w-4xl mx-auto p-4">
+                    <div className="text-[14px] whitespace-pre-wrap leading-relaxed text-slate-800 break-words">
+                      {previewParts.length === 0 ? (
+                        <span className="text-slate-400 italic">위에서 값을 입력하면 여기에 결과가 표시됩니다.</span>
+                      ) : (
+                        previewParts.map((part, idx) => {
+                          if (part.type === 'var') {
+                            return (
+                              <span
+                                key={idx}
+                                data-key={part.key}
+                                className={focusedKey === part.key ? 'bg-yellow-200 rounded px-0.5 -mx-0.5 transition-colors' : ''}
+                              >
+                                {part.content}
+                              </span>
+                            );
+                          }
+                          return <React.Fragment key={idx}>{part.content}</React.Fragment>;
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </>
       )}
