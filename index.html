@@ -94,7 +94,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-19 00:00';
+const BUILD_DATE = '2026-05-19 00:15';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -1416,11 +1416,13 @@ function App() {
 
           {/* ===== 좌우 분할 컨테이너 =====
               좌측·우측 각자 독립 스크롤. 동기화 없음.
+              min-h-0 을 부모·좌·우 3곳에 모두 추가해야 flex-1 자식의 overflow-y-scroll 이 정상 작동.
+              (Flexbox 기본 min-height: auto 가 콘텐츠 만큼 부모를 늘려 스크롤을 무력화하는 문제 차단.)
               overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임. */}
-          <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 relative">
+          <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 min-h-0 relative">
             <div
               ref={editorScrollRef}
-              className="overflow-y-scroll always-scroll bg-slate-50 print-full-width"
+              className="overflow-y-scroll always-scroll bg-slate-50 print-full-width min-h-0"
               style={{ width: previewVisible ? `${splitPos}%` : '100%' }}
             >
               <div className="max-w-4xl mx-auto p-3">
@@ -1445,7 +1447,7 @@ function App() {
 
                 <div
                   ref={previewContainerRef}
-                  className="no-print overflow-y-scroll always-scroll bg-white"
+                  className="no-print overflow-y-scroll always-scroll bg-white min-h-0"
                   style={{ width: `${100 - splitPos}%` }}
                 >
                   <div className="max-w-4xl mx-auto p-4">
