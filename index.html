@@ -61,9 +61,15 @@
     .no-print { display: none !important; }
     .print-full-width { width: 100% !important; }
 
-    /* 부모 컨테이너 높이·overflow 제약 해제 — 콘텐츠 길면 자동으로 다음 페이지로 넘어가도록 */
+    /* 부모 컨테이너 높이·overflow 제약 해제 — 콘텐츠 길면 자동으로 다음 페이지로 넘어가도록.
+       추가로 .h-screen 박스 자체를 display:contents로 처리해서 인쇄 흐름에서 박스를 사라지게 함.
+       (.h-screen이 100vh flex-col 박스라 빈 첫 페이지를 통째로 차지하던 문제 해결) */
     html, body, #root { height: auto !important; overflow: visible !important; }
-    .h-screen { height: auto !important; overflow: visible !important; }
+    .h-screen {
+      height: auto !important;
+      overflow: visible !important;
+      display: contents !important;
+    }
     .flex-1 { overflow: visible !important; }
 
     /* 포커스 외곽선/그림자 제거 */
@@ -149,7 +155,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-19 16:56';
+const BUILD_DATE = '2026-05-19 17:17';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -1658,8 +1664,10 @@ function App() {
               min-h-0 을 부모·좌·우 3곳에 모두 추가해야 flex-1 자식의 overflow-y-scroll 이 정상 작동.
               (Flexbox 기본 min-height: auto 가 콘텐츠 만큼 부모를 늘려 스크롤을 무력화하는 문제 차단.)
               overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임.
-              기장거래처·기장(인건비추가) 탭일 때는 에디터에 .no-print 적용 → 인쇄 시 숨김 (별도 .print-only 영역이 대신 출력). */}
-          <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 min-h-0 relative">
+              기장거래처·기장(인건비추가) 탭일 때는 에디터에 .no-print 적용 → 인쇄 시 숨김 (별도 .print-only 영역이 대신 출력).
+              또한 isPrintProcessed=true 일 때는 split 컨테이너 자체에도 .no-print 적용 →
+              빈 flex 박스가 인쇄 시 첫 페이지를 빈 채로 차지하던 문제 해결. */}
+          <div ref={splitContainerRef} className={`flex-1 flex flex-row min-w-0 min-h-0 relative ${isPrintProcessed ? 'no-print' : ''}`}>
             <div
               ref={editorScrollRef}
               className={`overflow-y-scroll always-scroll bg-slate-50 min-h-0 ${isPrintProcessed ? 'no-print' : 'print-full-width'}`}
