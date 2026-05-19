@@ -103,7 +103,24 @@
       word-break: keep-all;
     }
 
+    /* ===== 기본 페이지: 신고대리 탭(에디터 자체 인쇄) 등에서 사용 ===== */
     @page { size: A4; margin: 14mm; }
+
+    /* ===== 페이지 번호 표시용 named page =====
+       .print-page 요소에만 적용 → 기장거래처·기장(인건비추가) 탭 인쇄 시
+       우측 하단에 "현재페이지/전체페이지" 형식으로 표시. (예: 1/2, 2/2)
+       .print-page는 두 탭에서만 렌더되므로 신고대리 탭에는 영향 없음. */
+    @page samho {
+      size: A4;
+      margin: 14mm;
+      @bottom-right {
+        content: counter(page) "/" counter(pages);
+        font-size: 10px;
+        color: #555;
+        font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      }
+    }
+    .print-page { page: samho; }
   }
 </style>
 </head>
@@ -132,7 +149,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-19 15:28';
+const BUILD_DATE = '2026-05-19 16:56';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -1702,7 +1719,8 @@ function App() {
 
           {/* ===== 인쇄 전용 영역 (기장거래처·기장(인건비추가) 탭에서만 렌더링) =====
               평시엔 .print-only{display:none} 으로 화면에서 숨겨져 있고,
-              @media print 에서만 표시됨. 위 에디터는 .no-print 로 인쇄 시 숨김. */}
+              @media print 에서만 표시됨. 위 에디터는 .no-print 로 인쇄 시 숨김.
+              .print-page 에는 CSS에서 page: samho 적용 → 우측 하단에 페이지 번호(1/2 등) 자동 표시. */}
           {isPrintProcessed && (
             <div className="print-only">
               <div className="print-page">
