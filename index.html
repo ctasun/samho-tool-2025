@@ -48,8 +48,14 @@
     background: #475569;              /* slate-600 */
   }
 
-  /* 인쇄 시: 에디터 영역만 100% 폭으로 펼치고, 헤더·탭바·토스트·드래그핸들·미리보기 패널은 숨김
-     입력박스(<input>/<textarea>)는 그대로 출력되어 직원이 손으로 채워서 사용할 수 있는 용지로 활용 가능 */
+  /* ===== 인쇄 전용 영역 =====
+     평시엔 숨김, 인쇄(@media print) 시에만 표시.
+     기장거래처 탭에서만 렌더링되며, 입력된 변수·자동계산값·체크박스 라벨만 추출해서 출력. */
+  .print-only { display: none; }
+
+  /* 인쇄 시: 에디터 영역만 100% 폭으로 펼치고, 헤더·탭바·토스트·드래그핸들·미리보기 패널은 숨김.
+     입력박스(<input>/<textarea>)는 그대로 출력되어 직원이 손으로 채워서 사용할 수 있는 용지로 활용 가능.
+     기장거래처 탭만 별도 처리 — JS에서 에디터 영역에 .no-print 추가 + .print-only 영역 표시. */
   @media print {
     body { background: #ffffff !important; }
     .no-print { display: none !important; }
@@ -65,7 +71,33 @@
     .print-mono-bg { background: #f5f5f5 !important; color: #000 !important; border-color: #999 !important; }
     /* 인쇄 시에는 스크롤바 영역이 잘려서 출력되지 않도록 일반 overflow로 복귀 */
     .always-scroll { overflow: visible !important; }
-    @page { size: A4; margin: 12mm; }
+
+    /* 인쇄 전용 영역 표시 */
+    .print-only { display: block !important; }
+    .print-page {
+      color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    }
+    .print-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #000;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+    .print-header .print-title { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+    .print-header .print-date { font-size: 12px; color: #333; }
+    .print-body {
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.85;
+      color: #000;
+      word-break: keep-all;
+    }
+
+    @page { size: A4; margin: 14mm; }
   }
 </style>
 </head>
@@ -94,7 +126,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-19 00:15';
+const BUILD_DATE = '2026-05-19 13:04';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -759,6 +791,158 @@ const alignAmountLines = (text) => {
   return lines.join('\n');
 };
 
+// ===== 인쇄용 본문 생성 (기장거래처 전용) =====
+// 카톡 본문(완성형 텍스트)이 아니라, 본문 트리를 새로 워크하면서
+// 인쇄용 텍스트를 만들고, 어느 위치가 변수·동적·체크박스 라벨인지 오프셋 기록을 남긴다.
+// 그 후 라인 단위로 끊고 다음만 인쇄 대상으로 남긴다:
+//   - 변수(입력값/자동계산) 라인
+//   - 동적 텍스트 라인 (예: "납부하실 세금 없습니다.")
+//   - 체크박스 활성 시 라벨로 대체된 라인 (예: "☑ 건보증가 없음 안내")
+//   - 위 라인 직전의 헤더 라인 (`-...-`, `[...]`, `2025년 귀속` 등)
+//
+// ⏬ 라인 이후 영역은 모두 제외하고, 담당자멘트만 별도 처리:
+//   입력 있으면 그대로, 없으면 "입력 없음".
+const buildPrintContent = (template, inputs) => {
+  if (!template) return '';
+  const variables = template.variables || [];
+  const tree = parseBody(template.body);
+
+  let output = '';
+  const varRanges = [];   // [start, end] 변수 값이 출력된 범위
+  const dynRanges = [];   // [start, end] cond 안의 텍스트가 출력된 범위
+  const cbRanges  = [];   // [start, end] 체크박스 라벨로 대체된 범위
+
+  const walk = (nodes, insideCond) => {
+    for (const node of nodes) {
+      if (node.type === 'text') {
+        const start = output.length;
+        output += node.value;
+        if (insideCond && node.value) dynRanges.push([start, output.length]);
+      } else if (node.type === 'hint') {
+        // 안내 힌트는 인쇄에도 제외
+      } else if (node.type === 'inputonly') {
+        // 입력 전용 마커는 출력 위치에 영향 없음 (별도 {변수명}이 출력 위치 담당)
+      } else if (node.type === 'var') {
+        const v = variables.find(x => x.key === node.key);
+        if (!v) continue;
+        let val;
+        if (v.type === 'calculated') {
+          val = computeCalculated(node.key, inputs);
+        } else if (v.type === 'switch') {
+          val = '';
+        } else {
+          val = inputs[node.key] || '';
+          if (v.type === 'currency') {
+            const isNeg = String(val).startsWith('-');
+            const d = String(val).replace(/[^\d]/g, '');
+            const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
+            val = (isNeg && formatted) ? '-' + formatted : formatted;
+          }
+        }
+        const start = output.length;
+        output += val || '';
+        if (val) varRanges.push([start, output.length]);
+      } else if (node.type === 'cond') {
+        const trigger = node.trigger;
+        const isNegated = trigger.startsWith('!');
+        const cleanKey = isNegated ? trigger.slice(1).trim() : trigger;
+        const v = variables.find(x => x.key === cleanKey);
+        const active = isCondActive(trigger, inputs, variables);
+        if (!active) continue;
+        // 체크박스(switch) + 활성 + 비부정 → 본문 대신 라벨로 대체
+        if (v && v.type === 'switch' && !isNegated) {
+          const label = v.label || cleanKey;
+          const start = output.length;
+          output += '\n☑ ' + label;
+          cbRanges.push([start, output.length]);
+        } else {
+          walk(node.children, true);
+        }
+      }
+    }
+  };
+  walk(tree, false);
+
+  // 라인 분리 + 누적 오프셋
+  const rawLines = output.split('\n');
+  const lineOffsets = [0];
+  for (const l of rawLines) lineOffsets.push(lineOffsets[lineOffsets.length - 1] + l.length + 1);
+
+  const overlap = (ranges, s, e) => {
+    for (const [rs, re_] of ranges) if (rs < e && re_ > s) return true;
+    return false;
+  };
+
+  const lines = rawLines.map((text, idx) => {
+    const s = lineOffsets[idx];
+    const e = s + text.length;
+    const trimmed = text.trim();
+    return {
+      text,
+      hasVar: overlap(varRanges, s, e),
+      hasDyn: overlap(dynRanges, s, e),
+      isCheckbox: overlap(cbRanges, s, e),
+      isHeader: /^-.+-$/.test(trimmed) || /^\[.+\]$/.test(trimmed) || /^\d{4}년 귀속/.test(trimmed),
+      isSeparator: /^⏬+$/.test(trimmed),
+      isEmpty: trimmed === ''
+    };
+  });
+
+  // ⏬ 라인 위치 — 그 이전 영역만 본격 처리
+  const sepIdx = lines.findIndex(l => l.isSeparator);
+  const beforeSep = sepIdx >= 0 ? lines.slice(0, sepIdx) : lines.slice();
+
+  // 인쇄 대상 인덱스 결정
+  const keepIdx = new Set();
+  for (let i = 0; i < beforeSep.length; i++) {
+    if (beforeSep[i].hasVar || beforeSep[i].hasDyn || beforeSep[i].isCheckbox) {
+      keepIdx.add(i);
+      // 직전 인접 헤더 보존 — 빈 줄은 건너뛰며 탐색
+      for (let j = i - 1; j >= 0; j--) {
+        if (beforeSep[j].isHeader) {
+          keepIdx.add(j);
+          break;
+        }
+        if (beforeSep[j].isEmpty) continue;
+        break;  // 일반 텍스트 만남 → 헤더 없음
+      }
+    }
+  }
+
+  // 결과 라인 조립 — 연속 빈 줄은 1개로 압축
+  const result = [];
+  let lastWasContent = false;
+  let pendingEmpty = false;
+  for (let i = 0; i < beforeSep.length; i++) {
+    if (keepIdx.has(i)) {
+      if (pendingEmpty && lastWasContent) result.push('');
+      result.push(beforeSep[i].text);
+      lastWasContent = true;
+      pendingEmpty = false;
+    } else if (beforeSep[i].isEmpty) {
+      pendingEmpty = true;
+    } else {
+      pendingEmpty = false;  // 제외 라인을 지나면 빈줄 상태 리셋
+    }
+  }
+
+  // ⏬ 영역 + 담당자멘트
+  if (sepIdx >= 0) {
+    if (result.length > 0) result.push('');
+    result.push(lines[sepIdx].text);  // ⏬⏬⏬...
+    result.push('');
+    const memo = inputs['담당자멘트'];
+    if (memo && String(memo).trim()) {
+      result.push(String(memo).trim());
+    } else {
+      result.push('입력 없음');
+    }
+  }
+
+  // 카톡 본문과 동일하게 라벨 쌍 자동 정렬 적용
+  return alignAmountLines(result.join('\n'));
+};
+
 function App() {
   const [adminPassword, setAdminPassword] = useState(ADMIN_PASSWORD_DEFAULT);
   const [selectedCategory] = useState('종합소득세 신고결과 보고');
@@ -782,6 +966,12 @@ function App() {
   const [previewVisible, setPreviewVisible] = useState(true);
   const splitContainerRef = useRef(null);
   const isDragging = useRef(false);
+
+  // 인쇄 헤더에 표시할 오늘 날짜 — 인쇄 버튼 클릭 직전 갱신해서 항상 출력 당일 날짜가 찍히도록 함.
+  const [printDate, setPrintDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
 
   const inputRefs = useRef([]);
   const renderedKeys = useRef(new Set());
@@ -905,9 +1095,16 @@ function App() {
     });
   };
 
-  // 인쇄 — 현재 보이는 에디터 내용을 인쇄. 입력박스(input/textarea)는 그대로 출력됨.
+  // 인쇄 — 인쇄 직전 오늘 날짜 갱신 후 window.print() 호출.
+  // 기장거래처 탭일 때는 별도의 .print-only 영역만 출력되고,
+  // 다른 탭은 기존처럼 에디터 영역이 그대로 인쇄됨 (직원이 손으로 채우는 용지로 활용 가능).
   const handlePrint = () => {
-    try { window.print(); } catch (e) {}
+    try {
+      const d = new Date();
+      setPrintDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+      // 상태 업데이트가 다음 페인트에 반영되도록 살짝 미룬다.
+      setTimeout(() => { window.print(); }, 50);
+    } catch (e) {}
   };
 
   const types = useMemo(() => templates[selectedCategory] ? Object.keys(templates[selectedCategory]) : [], [templates, selectedCategory]);
@@ -998,6 +1195,12 @@ function App() {
     const raw = previewParts.map(p => p.content).join('');
     return alignAmountLines(raw);
   }, [previewParts]);
+
+  // ===== 인쇄용 본문 텍스트 (기장거래처 탭에서만 사용) =====
+  const printContent = useMemo(() => {
+    if (selectedType !== '기장거래처' || !currentTemplate) return '';
+    return buildPrintContent(currentTemplate, inputs);
+  }, [selectedType, currentTemplate, inputs]);
 
   // 주의: 이 버전에서는 좌우 패널 사이의 자동 스크롤 동기화 기능을 의도적으로 제거함.
   //   - 이전: 한쪽 휠을 굴리면 반대쪽이 비율 맞춰 따라오고(hover-driver),
@@ -1318,6 +1521,10 @@ function App() {
     );
   }
 
+  // 기장거래처 탭일 때만 인쇄 시 에디터를 숨기고 별도 인쇄 영역을 사용.
+  // 다른 탭은 기존처럼 에디터 자체가 인쇄됨 (직원이 손으로 채울 용지로 활용 가능).
+  const isBookkeeping = selectedType === '기장거래처';
+
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
       {toast && (
@@ -1348,7 +1555,7 @@ function App() {
             <button
               onClick={handlePrint}
               className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
-              title="인쇄 (입력박스 그대로 출력)"
+              title={isBookkeeping ? '인쇄 (입력값·체크박스 라벨만 출력)' : '인쇄 (입력박스 그대로 출력)'}
             >
               <Printer size={16} />
             </button>
@@ -1418,11 +1625,12 @@ function App() {
               좌측·우측 각자 독립 스크롤. 동기화 없음.
               min-h-0 을 부모·좌·우 3곳에 모두 추가해야 flex-1 자식의 overflow-y-scroll 이 정상 작동.
               (Flexbox 기본 min-height: auto 가 콘텐츠 만큼 부모를 늘려 스크롤을 무력화하는 문제 차단.)
-              overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임. */}
+              overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임.
+              기장거래처 탭일 때는 에디터에 .no-print 적용 → 인쇄 시 숨김 (별도 .print-only 영역이 대신 출력). */}
           <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 min-h-0 relative">
             <div
               ref={editorScrollRef}
-              className="overflow-y-scroll always-scroll bg-slate-50 print-full-width min-h-0"
+              className={`overflow-y-scroll always-scroll bg-slate-50 min-h-0 ${isBookkeeping ? 'no-print' : 'print-full-width'}`}
               style={{ width: previewVisible ? `${splitPos}%` : '100%' }}
             >
               <div className="max-w-4xl mx-auto p-3">
@@ -1476,6 +1684,21 @@ function App() {
               </>
             )}
           </div>
+
+          {/* ===== 인쇄 전용 영역 (기장거래처 탭에서만 렌더링) =====
+              평시엔 .print-only{display:none} 으로 화면에서 숨겨져 있고,
+              @media print 에서만 표시됨. 위 에디터는 .no-print 로 인쇄 시 숨김. */}
+          {isBookkeeping && (
+            <div className="print-only">
+              <div className="print-page">
+                <div className="print-header">
+                  <span className="print-title">세무법인삼호</span>
+                  <span className="print-date">{printDate}</span>
+                </div>
+                <div className="print-body">{printContent || '(인쇄할 내용이 없습니다)'}</div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
