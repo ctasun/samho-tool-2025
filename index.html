@@ -50,16 +50,22 @@
 
   /* ===== 인쇄 전용 영역 =====
      평시엔 숨김, 인쇄(@media print) 시에만 표시.
-     기장거래처 탭에서만 렌더링되며, 입력된 변수·자동계산값·체크박스 라벨만 추출해서 출력. */
+     기장거래처·기장(인건비추가) 탭에서만 렌더링되며, 입력된 변수·자동계산값·체크박스 라벨만 추출해서 출력. */
   .print-only { display: none; }
 
   /* 인쇄 시: 에디터 영역만 100% 폭으로 펼치고, 헤더·탭바·토스트·드래그핸들·미리보기 패널은 숨김.
      입력박스(<input>/<textarea>)는 그대로 출력되어 직원이 손으로 채워서 사용할 수 있는 용지로 활용 가능.
-     기장거래처 탭만 별도 처리 — JS에서 에디터 영역에 .no-print 추가 + .print-only 영역 표시. */
+     기장거래처·기장(인건비추가) 탭만 별도 처리 — JS에서 에디터 영역에 .no-print 추가 + .print-only 영역 표시. */
   @media print {
     body { background: #ffffff !important; }
     .no-print { display: none !important; }
     .print-full-width { width: 100% !important; }
+
+    /* 부모 컨테이너 높이·overflow 제약 해제 — 콘텐츠 길면 자동으로 다음 페이지로 넘어가도록 */
+    html, body, #root { height: auto !important; overflow: visible !important; }
+    .h-screen { height: auto !important; overflow: visible !important; }
+    .flex-1 { overflow: visible !important; }
+
     /* 포커스 외곽선/그림자 제거 */
     input:focus, textarea:focus { box-shadow: none !important; outline: none !important; }
     /* 입력박스는 평면적인 테두리만 남겨 인쇄 시 가독성 확보 */
@@ -70,7 +76,7 @@
     /* 자동계산 배지·체크박스 라벨의 배경색은 회색조로 — 잉크 절약 + 흑백 프린터 호환 */
     .print-mono-bg { background: #f5f5f5 !important; color: #000 !important; border-color: #999 !important; }
     /* 인쇄 시에는 스크롤바 영역이 잘려서 출력되지 않도록 일반 overflow로 복귀 */
-    .always-scroll { overflow: visible !important; }
+    .always-scroll { overflow: visible !important; height: auto !important; }
 
     /* 인쇄 전용 영역 표시 */
     .print-only { display: block !important; }
@@ -126,7 +132,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-19 15:01';
+const BUILD_DATE = '2026-05-19 15:28';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -797,7 +803,7 @@ const alignAmountLines = (text) => {
   return lines.join('\n');
 };
 
-// ===== 인쇄용 본문 생성 (기장거래처 전용) =====
+// ===== 인쇄용 본문 생성 (기장거래처·기장(인건비추가) 공용) =====
 // 카톡 본문(완성형 텍스트)이 아니라, 본문 트리를 새로 워크하면서
 // 인쇄용 텍스트를 만들고, 어느 위치가 변수·동적·체크박스 라벨인지 오프셋 기록을 남긴다.
 // 그 후 라인 단위로 끊고 다음만 인쇄 대상으로 남긴다:
@@ -806,8 +812,9 @@ const alignAmountLines = (text) => {
 //   - 체크박스 활성 시 라벨로 대체된 라인 (예: "☑ 건보증가 없음 안내")
 //   - 위 라인 직전의 헤더 라인 (`-...-`, `[...]`, `2025년 귀속` 등)
 //
-// ⏬ 라인 이후 영역은 모두 제외하고, 담당자멘트만 별도 처리:
-//   입력 있으면 그대로, 없으면 "입력 없음".
+// 기장거래처: ⏬ 라인 이후 영역은 모두 제외하고, 담당자멘트만 별도 처리.
+// 기장(인건비추가): ⏬ separator 라인이 없으므로 sepIdx = -1 → 전체 본문이 자연스럽게 처리됨.
+//                   박스 헤더 "⏬{박스N_이름} 선생님"은 ⏬+ 정규식에 매칭되지 않아 separator로 잡히지 않음.
 const buildPrintContent = (template, inputs) => {
   if (!template) return '';
   const variables = template.variables || [];
@@ -894,7 +901,7 @@ const buildPrintContent = (template, inputs) => {
     };
   });
 
-  // ⏬ 라인 위치 — 그 이전 영역만 본격 처리
+  // ⏬ 라인 위치 — 그 이전 영역만 본격 처리 (기장(인건비추가)에는 없으므로 sepIdx = -1)
   const sepIdx = lines.findIndex(l => l.isSeparator);
   const beforeSep = sepIdx >= 0 ? lines.slice(0, sepIdx) : lines.slice();
 
@@ -932,7 +939,7 @@ const buildPrintContent = (template, inputs) => {
     }
   }
 
-  // ⏬ 영역 + 담당자멘트
+  // ⏬ 영역 + 담당자멘트 (기장거래처만 해당)
   if (sepIdx >= 0) {
     if (result.length > 0) result.push('');
     result.push(lines[sepIdx].text);  // ⏬⏬⏬...
@@ -1102,7 +1109,7 @@ function App() {
   };
 
   // 인쇄 — 인쇄 직전 오늘 날짜 갱신 후 window.print() 호출.
-  // 기장거래처 탭일 때는 별도의 .print-only 영역만 출력되고,
+  // 기장거래처·기장(인건비추가) 탭일 때는 별도의 .print-only 영역만 출력되고,
   // 다른 탭은 기존처럼 에디터 영역이 그대로 인쇄됨 (직원이 손으로 채우는 용지로 활용 가능).
   const handlePrint = () => {
     try {
@@ -1202,9 +1209,9 @@ function App() {
     return alignAmountLines(raw);
   }, [previewParts]);
 
-  // ===== 인쇄용 본문 텍스트 (기장거래처 탭에서만 사용) =====
+  // ===== 인쇄용 본문 텍스트 (기장거래처·기장(인건비추가) 탭에서만 사용) =====
   const printContent = useMemo(() => {
-    if (selectedType !== '기장거래처' || !currentTemplate) return '';
+    if ((selectedType !== '기장거래처' && selectedType !== '기장(인건비추가)') || !currentTemplate) return '';
     return buildPrintContent(currentTemplate, inputs);
   }, [selectedType, currentTemplate, inputs]);
 
@@ -1527,9 +1534,11 @@ function App() {
     );
   }
 
-  // 기장거래처 탭일 때만 인쇄 시 에디터를 숨기고 별도 인쇄 영역을 사용.
-  // 다른 탭은 기존처럼 에디터 자체가 인쇄됨 (직원이 손으로 채울 용지로 활용 가능).
+  // 기장거래처·기장(인건비추가) 탭일 때만 인쇄 시 에디터를 숨기고 별도 인쇄 영역을 사용.
+  // 다른 탭(신고대리)은 기존처럼 에디터 자체가 인쇄됨 (직원이 손으로 채울 용지로 활용 가능).
   const isBookkeeping = selectedType === '기장거래처';
+  const isCombined = selectedType === '기장(인건비추가)';
+  const isPrintProcessed = isBookkeeping || isCombined;
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
@@ -1561,7 +1570,7 @@ function App() {
             <button
               onClick={handlePrint}
               className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
-              title={isBookkeeping ? '인쇄 (입력값·체크박스 라벨만 출력)' : '인쇄 (입력박스 그대로 출력)'}
+              title={isPrintProcessed ? '인쇄 (입력값·체크박스 라벨만 출력)' : '인쇄 (입력박스 그대로 출력)'}
             >
               <Printer size={16} />
             </button>
@@ -1632,11 +1641,11 @@ function App() {
               min-h-0 을 부모·좌·우 3곳에 모두 추가해야 flex-1 자식의 overflow-y-scroll 이 정상 작동.
               (Flexbox 기본 min-height: auto 가 콘텐츠 만큼 부모를 늘려 스크롤을 무력화하는 문제 차단.)
               overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임.
-              기장거래처 탭일 때는 에디터에 .no-print 적용 → 인쇄 시 숨김 (별도 .print-only 영역이 대신 출력). */}
+              기장거래처·기장(인건비추가) 탭일 때는 에디터에 .no-print 적용 → 인쇄 시 숨김 (별도 .print-only 영역이 대신 출력). */}
           <div ref={splitContainerRef} className="flex-1 flex flex-row min-w-0 min-h-0 relative">
             <div
               ref={editorScrollRef}
-              className={`overflow-y-scroll always-scroll bg-slate-50 min-h-0 ${isBookkeeping ? 'no-print' : 'print-full-width'}`}
+              className={`overflow-y-scroll always-scroll bg-slate-50 min-h-0 ${isPrintProcessed ? 'no-print' : 'print-full-width'}`}
               style={{ width: previewVisible ? `${splitPos}%` : '100%' }}
             >
               <div className="max-w-4xl mx-auto p-3">
@@ -1691,10 +1700,10 @@ function App() {
             )}
           </div>
 
-          {/* ===== 인쇄 전용 영역 (기장거래처 탭에서만 렌더링) =====
+          {/* ===== 인쇄 전용 영역 (기장거래처·기장(인건비추가) 탭에서만 렌더링) =====
               평시엔 .print-only{display:none} 으로 화면에서 숨겨져 있고,
               @media print 에서만 표시됨. 위 에디터는 .no-print 로 인쇄 시 숨김. */}
-          {isBookkeeping && (
+          {isPrintProcessed && (
             <div className="print-only">
               <div className="print-page">
                 <div className="print-header">
