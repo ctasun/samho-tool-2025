@@ -155,7 +155,7 @@ const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-20 19:53';
+const BUILD_DATE = '2026-05-20 20:13';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -719,6 +719,22 @@ const Storage = {
   }
 };
 
+// 본문에서 `{?<key>_환급}` 패턴을 자동 탐지해 환급 트리거가 있는 변수 키 set 반환.
+// 이 set에 속한 변수(예: 국세·지방세·박스N_국세·박스N_지방세)는 currency 포맷팅 시 음수 부호 제거 →
+//   "1,000,000원" + 별도 "(환급)" 라벨 조합으로 출력.
+// 그 외 변수(예: 소득_당해·매출_당해)는 부호 보존 → "-5,000,000원" 형태로 출력.
+// 비탐욕 매칭(.+?)으로 `박스3_지방세_환급`처럼 키 안에 `_`가 있는 경우도 `박스3_지방세`로 정확히 캡처.
+const extractRefundKeys = (body) => {
+  const set = new Set();
+  if (!body) return set;
+  const re = /\{\?([^}]+?)_환급\}/g;
+  let m;
+  while ((m = re.exec(body)) !== null) {
+    set.add(m[1].trim());
+  }
+  return set;
+};
+
 const parseBody = (body) => {
   const root = { children: [] };
   const stack = [root];
@@ -848,6 +864,8 @@ const alignAmountLines = (text) => {
 const buildPrintContent = (template, inputs) => {
   if (!template) return '';
   const variables = template.variables || [];
+  // 환급 트리거 대상 변수 set — 본문에서 자동 탐지
+  const refundKeys = extractRefundKeys(template.body);
   const tree = parseBody(template.body);
 
   let output = '';
@@ -879,7 +897,13 @@ const buildPrintContent = (template, inputs) => {
             const isNeg = String(val).startsWith('-');
             const d = String(val).replace(/[^\d]/g, '');
             const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
-            val = (isNeg && formatted) ? '-' + formatted : formatted;
+            // _환급 트리거 대상 변수는 부호 제거 (절댓값 + 별도 "(환급)" 라벨 조합)
+            // 그 외 변수(소득_당해 등)는 부호 보존
+            if (refundKeys.has(node.key)) {
+              val = formatted;
+            } else {
+              val = (isNeg && formatted) ? '-' + formatted : formatted;
+            }
           }
         }
         const start = output.length;
@@ -1175,6 +1199,10 @@ function App() {
     return () => clearTimeout(t);
   }, [accessGranted, adminMode, currentTemplate, selectedType, selectedButton]);
 
+  // 환급 트리거 대상 변수 set — 현재 템플릿 본문에서 자동 추출.
+  // previewParts·renderTree에서 currency 포맷팅 시 부호 처리 분기에 사용.
+  const refundKeys = useMemo(() => extractRefundKeys(currentTemplate?.body || ''), [currentTemplate]);
+
   const tree = useMemo(() => currentTemplate ? parseBody(currentTemplate.body) : [], [currentTemplate]);
   const previewParts = useMemo(() => {
     if (!currentTemplate) return [];
@@ -1198,11 +1226,16 @@ function App() {
       } else {
         val = inputs[v.key] || '';
         if (v.type === 'currency') {
-          // 음수 부호 보존 — formatCurrency/buildPrintContent와 동일 패턴
           const isNeg = String(val).startsWith('-');
           const d = String(val).replace(/[^\d]/g, '');
           const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
-          val = (isNeg && formatted) ? '-' + formatted : formatted;
+          // _환급 트리거 대상 변수는 부호 제거 (절댓값 + 별도 "(환급)" 라벨 조합)
+          // 그 외 변수(소득_당해 등)는 부호 보존 → "-5,000,000원" 형태
+          if (refundKeys.has(v.key)) {
+            val = formatted;
+          } else {
+            val = (isNeg && formatted) ? '-' + formatted : formatted;
+          }
         } else if (v.type === 'switch') {
           val = '';
         }
@@ -1482,11 +1515,15 @@ function App() {
           const rawValue = inputs[node.key] || '';
           let displayVal;
           if (variable.type === 'currency') {
-            // 음수 부호 보존
             const isNeg = String(rawValue).startsWith('-');
             const d = String(rawValue).replace(/[^\d]/g, '');
             const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
-            displayVal = (isNeg && formatted) ? '-' + formatted : formatted;
+            // _환급 트리거 대상 변수는 부호 제거 (절댓값 + 별도 "(환급)" 라벨 조합)
+            if (refundKeys.has(node.key)) {
+              displayVal = formatted;
+            } else {
+              displayVal = (isNeg && formatted) ? '-' + formatted : formatted;
+            }
           } else {
             displayVal = rawValue;
           }
