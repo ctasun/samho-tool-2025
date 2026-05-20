@@ -20,50 +20,24 @@
   }
 
   /* ===== 스크롤바 명시 스타일 =====
-     좌측 에디터·우측 미리보기 모두 스크롤바가 항상 보이게.
-     - 두께 12px (Chrome 기본 약 15~17px보다 약간 가늘지만 트랙이 또렷이 보임)
-     - thumb는 회색조, hover 시 진해짐 → 마우스로 잡기 쉬움
-     - .always-scroll 클래스를 적용한 영역에만 한정 적용 */
+     좌측 에디터·우측 미리보기 모두 스크롤바가 항상 보이게. */
   .always-scroll {
-    scrollbar-width: auto;            /* Firefox — auto: 시스템 기본 두께 */
-    scrollbar-color: #94a3b8 #f1f5f9;  /* Firefox thumb / track */
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 #f1f5f9;
   }
-  .always-scroll::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-  .always-scroll::-webkit-scrollbar-track {
-    background: #f1f5f9;              /* slate-100 */
-    border-radius: 6px;
-  }
-  .always-scroll::-webkit-scrollbar-thumb {
-    background: #94a3b8;              /* slate-400 */
-    border-radius: 6px;
-    border: 2px solid #f1f5f9;        /* 트랙 색으로 패딩 효과 */
-  }
-  .always-scroll::-webkit-scrollbar-thumb:hover {
-    background: #64748b;              /* slate-500 */
-  }
-  .always-scroll::-webkit-scrollbar-thumb:active {
-    background: #475569;              /* slate-600 */
-  }
+  .always-scroll::-webkit-scrollbar { width: 12px; height: 12px; }
+  .always-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+  .always-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 6px; border: 2px solid #f1f5f9; }
+  .always-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  .always-scroll::-webkit-scrollbar-thumb:active { background: #475569; }
 
-  /* ===== 인쇄 전용 영역 =====
-     평시엔 숨김, 인쇄(@media print) 시에만 표시.
-     기장거래처·기장(인건비추가) 탭에서만 렌더링되며, 입력된 변수·자동계산값·체크박스 라벨만 추출해서 출력. */
+  /* ===== 인쇄 전용 영역 ===== */
   .print-only { display: none; }
 
-  /* 인쇄 시: 에디터 영역만 100% 폭으로 펼치고, 헤더·탭바·토스트·드래그핸들·미리보기 패널은 숨김.
-     입력박스(<input>/<textarea>)는 그대로 출력되어 직원이 손으로 채워서 사용할 수 있는 용지로 활용 가능.
-     기장거래처·기장(인건비추가) 탭만 별도 처리 — JS에서 에디터 영역에 .no-print 추가 + .print-only 영역 표시. */
   @media print {
     body { background: #ffffff !important; }
     .no-print { display: none !important; }
     .print-full-width { width: 100% !important; }
-
-    /* 부모 컨테이너 높이·overflow 제약 해제 — 콘텐츠 길면 자동으로 다음 페이지로 넘어가도록.
-       추가로 .h-screen 박스 자체를 display:contents로 처리해서 인쇄 흐름에서 박스를 사라지게 함.
-       (.h-screen이 100vh flex-col 박스라 빈 첫 페이지를 통째로 차지하던 문제 해결) */
     html, body, #root { height: auto !important; overflow: visible !important; }
     .h-screen {
       height: auto !important;
@@ -71,58 +45,31 @@
       display: contents !important;
     }
     .flex-1 { overflow: visible !important; }
-
-    /* 포커스 외곽선/그림자 제거 */
     input:focus, textarea:focus { box-shadow: none !important; outline: none !important; }
-    /* 입력박스는 평면적인 테두리만 남겨 인쇄 시 가독성 확보 */
-    input, textarea {
-      background: #fff !important;
-      box-shadow: none !important;
-    }
-    /* 자동계산 배지·체크박스 라벨의 배경색은 회색조로 — 잉크 절약 + 흑백 프린터 호환 */
+    input, textarea { background: #fff !important; box-shadow: none !important; }
     .print-mono-bg { background: #f5f5f5 !important; color: #000 !important; border-color: #999 !important; }
-    /* 인쇄 시에는 스크롤바 영역이 잘려서 출력되지 않도록 일반 overflow로 복귀 */
     .always-scroll { overflow: visible !important; height: auto !important; }
-
-    /* 인쇄 전용 영역 표시 */
     .print-only { display: block !important; }
     .print-page {
       color: #000;
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
     }
     .print-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #000;
-      margin-bottom: 14px;
-      font-size: 13px;
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding-bottom: 6px; border-bottom: 1px solid #000;
+      margin-bottom: 14px; font-size: 13px;
     }
     .print-header .print-title { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
     .print-header .print-date { font-size: 12px; color: #333; }
     .print-body {
-      white-space: pre-wrap;
-      font-size: 13px;
-      line-height: 1.85;
-      color: #000;
-      word-break: keep-all;
+      white-space: pre-wrap; font-size: 13px; line-height: 1.85; color: #000; word-break: keep-all;
     }
-
-    /* ===== 기본 페이지: 신고대리 탭(에디터 자체 인쇄) 등에서 사용 ===== */
     @page { size: A4; margin: 14mm; }
-
-    /* ===== 페이지 번호 표시용 named page =====
-       .print-page 요소에만 적용 → 기장거래처·기장(인건비추가) 탭 인쇄 시
-       우측 하단에 "현재페이지/전체페이지" 형식으로 표시. (예: 1/2, 2/2)
-       .print-page는 두 탭에서만 렌더되므로 신고대리 탭에는 영향 없음. */
     @page samho {
-      size: A4;
-      margin: 14mm;
+      size: A4; margin: 14mm;
       @bottom-right {
         content: counter(page) "/" counter(pages);
-        font-size: 10px;
-        color: #555;
+        font-size: 10px; color: #555;
         font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
       }
     }
@@ -145,17 +92,22 @@ const SvgIcon = ({ children, size = 16, className = '' }) => (
 const Copy = (props) => <SvgIcon {...props}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></SvgIcon>;
 const Settings = (props) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></SvgIcon>;
 const Lock = (props) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></SvgIcon>;
-const GripHorizontal = (props) => <SvgIcon {...props}><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></SvgIcon>;
 const GripVertical = (props) => <SvgIcon {...props}><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></SvgIcon>;
 const LogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></SvgIcon>;
 const RefreshCw = (props) => <SvgIcon {...props}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></SvgIcon>;
 const Eye = (props) => <SvgIcon {...props}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></SvgIcon>;
 const EyeOff = (props) => <SvgIcon {...props}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a17.94 17.94 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 7 10 7a17.71 17.71 0 0 1-2.13 3.06"/><line x1="1" y1="1" x2="23" y2="23"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/></SvgIcon>;
 const Printer = (props) => <SvgIcon {...props}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></SvgIcon>;
+const Save = (props) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></SvgIcon>;
+const FolderOpen = (props) => <SvgIcon {...props}><path d="M6 14l1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></SvgIcon>;
+const Trash = (props) => <SvgIcon {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></SvgIcon>;
+const X = (props) => <SvgIcon {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></SvgIcon>;
+const Info = (props) => <SvgIcon {...props}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></SvgIcon>;
+const CloudCheck = (props) => <SvgIcon {...props}><path d="M20.5 14.5A4 4 0 0 0 17 8h-1.26A8 8 0 1 0 4 16.25"/><polyline points="9 14 11 16 15 12"/></SvgIcon>;
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-20 20:13';
+const BUILD_DATE = '2026-05-20 20:51';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -247,6 +199,8 @@ const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
 📧samhotax2006@naver.com`;
 
 // ===== 신고대리 본문 =====
+// {@수수료} — 편집기에만 노출되는 입력 마커 (출력에는 제거됨).
+// 직원이 부가세 전 금액을 입력하면 아래 {수수료_표시}가 자동으로 VAT 포함(+ 옵션 10% 할인) 금액을 계산.
 const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 
 {고객명} 선생님,
@@ -274,7 +228,7 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 농협은행 351-1053-8412-43
 세무법인삼호 남부지점
 
-{?수수료}종합소득세 신고수수료는
+{@수수료}{?수수료}종합소득세 신고수수료는
 {수수료_표시}원입니다.{?할인적용} (VAT포함, 10%할인 후){/?할인적용}{?!할인적용} (VAT포함){/?!할인적용}{/?수수료}{?할증_있음}
 
 -할증수수료 항목-{?할증_1}
@@ -380,7 +334,6 @@ const BASIC_VARS = [
   { key: '소득률', label: '소득률', type: 'calculated', placeholder: '자동' },
   { key: '소득률_전년', label: '소득률 전년', type: 'calculated', placeholder: '자동' },
   { key: '이월결손금', label: '이월결손금', type: 'currency', placeholder: '이월결손금' },
-  // 추가증빙 필요한 경비: 이월결손금이 입력된 경우에만 입력 가능 (disabled 처리 + 카톡 출력 자동 제외)
   { key: '추가증빙_경비', label: '추가증빙 필요한 경비', type: 'currency', placeholder: '경비', dependsOn: '이월결손금' },
   { key: '추가증빙_경비2', label: '추가증빙 필요한 경비 (산출세액)', type: 'currency', placeholder: '경비' },
   { key: '추가인건비', label: '추가인건비', type: 'currency', placeholder: '추가인건비' },
@@ -393,8 +346,6 @@ const BASIC_VARS = [
   { key: '적용세율_조정전', label: '적용세율 조정전(자동)', type: 'calculated', placeholder: '자동' },
   { key: '지방세율_조정전', label: '지방세율 조정전(자동)', type: 'calculated', placeholder: '자동' },
   { key: '건보증가없음', label: '건보증가 없음 안내', type: 'switch' },
-  // CMS 출금일: 수수료 단락 안에 사용되는 일자 변수 (예: "5월 21일에 CMS로 출금")
-  // placeholder는 '**'로 두어 직원이 입력하지 않으면 시각적으로 빈자리가 강조되도록 함.
   { key: 'CMS출금일', label: 'CMS 출금일(일자)', type: 'text', placeholder: '**' },
   { key: '수수료', label: '신고 수수료', type: 'currency', placeholder: '수수료' }
 ];
@@ -437,8 +388,6 @@ const BASIC_VARS_COMBINED = [
   { key: '건보절감', label: '건강보험료 절감(자동)', type: 'calculated', placeholder: '자동' },
   { key: '적용세율', label: '적용세율(자동)', type: 'calculated', placeholder: '자동' },
   { key: '지방세율', label: '지방세율(자동)', type: 'calculated', placeholder: '자동' },
-  // CMS 출금일: 박스1~5 직전 공통 문구에 사용되는 일자 변수 (예: "5월 26일 CMS로 이체")
-  // placeholder는 '**'로 두어 직원이 입력하지 않으면 시각적으로 빈자리가 강조되도록 함.
   { key: 'CMS출금일', label: 'CMS 출금일(일자)', type: 'text', placeholder: '**' },
   ...COMBINED_BOX_VARS,
   { key: '수수료_합계_VAT포함', label: '총 합계 금액(자동)', type: 'calculated', placeholder: '자동' },
@@ -467,9 +416,11 @@ const DEFAULT_TEMPLATES = {
 
 // 접근 비밀번호 (외부인 차단용, 직원과 공유)
 const ACCESS_PASSWORD = 'samho0115!';
-
 // 관리자 비밀번호 (관리자 모드 진입용, 대표만)
 const ADMIN_PASSWORD_DEFAULT = '04041004';
+
+// 탭 목록 (저장/불러오기에서도 사용)
+const TAB_LIST = ['기장거래처', '신고대리', '기장(인건비추가)'];
 
 const formatCurrency = (val) => {
   if (val === '' || val == null) return '';
@@ -491,11 +442,36 @@ const parseNum = (val) => {
   return isNeg ? -n : n;
 };
 
+// ===== 환급 키 자동 탐지 =====
+// 본문에 {?<key>_환급}{/?<key>_환급} 블록이 있는 변수만 음수 부호를 제거하고 절댓값으로 출력.
+// 출력 옆에 "(환급)" 표기가 별도로 붙으므로 금액에 부호가 또 찍히면 중복됨.
+// 그 외 currency 변수(소득, 매출 등)는 부호 그대로 보존.
+const getRefundKeys = (body) => {
+  const set = new Set();
+  if (!body) return set;
+  const re = /\{\?([^}/!][^}]*?)_환급\}/g;
+  let m;
+  while ((m = re.exec(body)) !== null) {
+    set.add(m[1].trim());
+  }
+  return set;
+};
+
+// 통화 출력 공통 포맷터: 환급키면 부호 제거(절댓값), 아니면 부호 보존.
+// 입력 박스용 formatCurrency와는 별개 — 입력 박스에서는 음수 표시(빨강) 유지.
+const formatCurrencyOutput = (rawValue, isRefundKey) => {
+  const isNeg = String(rawValue).startsWith('-');
+  const d = String(rawValue).replace(/[^\d]/g, '');
+  if (!d) return '';
+  const formatted = parseInt(d).toLocaleString('ko-KR');
+  if (isRefundKey) return formatted;
+  return isNeg ? '-' + formatted : formatted;
+};
+
 const calculateIncomeRate = (income, revenue) => {
   const i = parseNum(income);
   const r = parseNum(revenue);
   if (i === null || r === null || r === 0) return '';
-  // 소득이 음수(결손)인 경우 '-' 표시 (소득률 라인은 유지)
   if (i < 0) return '-';
   return ((i / r) * 100).toFixed(1);
 };
@@ -516,7 +492,6 @@ const calculateTax = (income) => {
   return Math.round(tax).toLocaleString('ko-KR');
 };
 
-// 누진구간 세율(%)을 반환 — 양수 소득만 의미 있음
 const getProgressiveRate = (income) => {
   if (income == null || income <= 0) return '';
   if (income <= 14000000) return '6';
@@ -532,35 +507,31 @@ const getProgressiveRate = (income) => {
 const computeCalculated = (key, inputs) => {
   if (key === '소득률') return calculateIncomeRate(inputs['소득_당해'], inputs['매출_당해']);
   if (key === '소득률_전년') return calculateIncomeRate(inputs['소득_전년'], inputs['매출_전년']);
-
-  // ===== 기장거래처 산출세액 =====
-  // 입력: 위쪽 '소득_당해' (실제 신고된 사업소득금액 = 조정후 소득) + 추가증빙_경비2 + 추가인건비
-  // 조정전 소득 = 소득_당해 + 추가증빙_경비2 + 추가인건비
-  // 조정후 산출세액 = 소득_당해의 누진세
   if (key === '조정전_산출세액') {
+    // 조정전 소득 = 소득_당해 + 추가증빙_경비2 + 추가인건비.
+    // 소득_당해가 음수여도 추가증빙·추가인건비를 더해 조정전 소득이 양수면 산출세액 계산.
     const after = parseNum(inputs['소득_당해']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
     const labor = parseNum(inputs['추가인건비']) || 0;
     if (after === null) return '';
-    // 조정전 소득 = 소득_당해 + 추가증빙_경비2 + 추가인건비.
-    // 소득_당해가 음수여도 추가증빙·추가인건비를 더해 조정전 소득이 양수면 산출세액 계산.
     const before = after + adjust + labor;
     if (before <= 0) return '';
     return calculateTax(before);
   }
   if (key === '조정후_산출세액') {
+    // 조정후 산출세액 라인 처리는 기존 그대로: 소득_당해가 양수일 때만 출력.
     const after = parseNum(inputs['소득_당해']);
     if (after === null || after <= 0) return '';
     return calculateTax(after);
   }
   if (key === '종합소득세_절감') {
+    // 소득_당해 부호 무관. calculateTax는 음수/0 입력 시 '0' 반환하므로
+    // 조정후가 결손이어도 절세효과 산식이 깨지지 않음.
     const after = parseNum(inputs['소득_당해']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
     const labor = parseNum(inputs['추가인건비']) || 0;
     const sum = adjust + labor;
     if (after === null || sum <= 0) return '';
-    // 소득_당해 부호 무관. calculateTax는 음수/0 입력 시 0 반환하므로
-    // 조정후가 결손이어도 절세효과 산식이 깨지지 않음.
     const taxBefore = parseNum(calculateTax(after + sum));
     const taxAfter = parseNum(calculateTax(after));
     if (taxBefore === null || taxAfter === null) return '';
@@ -574,7 +545,6 @@ const computeCalculated = (key, inputs) => {
     return Math.round(g * 0.1).toLocaleString('ko-KR');
   }
   if (key === '건강보험료_절감') {
-    // 추가증빙_경비2 + 추가인건비를 합산하여 8.13% 적용
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
     const labor = parseNum(inputs['추가인건비']) || 0;
     const sum = adjust + labor;
@@ -590,11 +560,11 @@ const computeCalculated = (key, inputs) => {
     return total.toLocaleString('ko-KR');
   }
   if (key === '적용세율_조정전') {
+    // getProgressiveRate는 음수/0이면 '' 반환하므로 조정전 소득 양수일 때만 자동 표기됨.
     const after = parseNum(inputs['소득_당해']);
     const adjust = parseNum(inputs['추가증빙_경비2']) || 0;
     const labor = parseNum(inputs['추가인건비']) || 0;
     if (after === null) return '';
-    // getProgressiveRate는 음수/0이면 '' 반환하므로 조정전 소득 양수일 때만 자동 표기됨.
     return getProgressiveRate(after + adjust + labor);
   }
   if (key === '지방세율_조정전') {
@@ -602,8 +572,6 @@ const computeCalculated = (key, inputs) => {
     if (isNaN(rate)) return '';
     return (rate * 0.1).toFixed(1);
   }
-
-  // 신고대리: 수수료 표시 = 수수료(공급가액) × (할인 시 0.9) × 1.1 (VAT 포함)
   if (key === '수수료_표시') {
     const fee = parseNum(inputs['수수료']);
     if (fee === null || fee <= 0) return '';
@@ -611,21 +579,18 @@ const computeCalculated = (key, inputs) => {
     const final = discount ? fee * 0.9 * 1.1 : fee * 1.1;
     return Math.round(final).toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 추가경비_총액과 부담없음_매출은 동일 값
   if (key === '부담없음_매출') {
     const raw = inputs['추가경비_총액'] || '';
     const digits = String(raw).replace(/[^\d]/g, '');
     if (!digits) return '';
     return parseInt(digits).toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 반영전 소득 = 반영후 소득 + 추가경비 총액
   if (key === '반영전_소득') {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
     if (after === null || cost === null) return '';
     return (after + cost).toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 종합소득세 절감 = 반영전 산출세액 − 반영후 산출세액
   if (key === '국세절감') {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
@@ -638,19 +603,16 @@ const computeCalculated = (key, inputs) => {
     if (saving <= 0) return '';
     return saving.toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 지방소득세 절감 = 종합소득세 절감 × 10%
   if (key === '지방세절감') {
     const gukSaving = parseNum(computeCalculated('국세절감', inputs));
     if (gukSaving === null) return '';
     return Math.round(gukSaving * 0.1).toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 건강보험료 절감 = 추가경비 총액 × 8.13% (2026년 직장가입자: 건보 7.19% + 장기요양 13.14%)
   if (key === '건보절감') {
     const cost = parseNum(inputs['추가경비_총액']);
     if (cost === null || cost <= 0) return '';
     return Math.round(cost * 0.0813).toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 절세액 합계 = 국세절감 + 지방세절감 + 건보절감
   if (key === '절세액') {
     const g = parseNum(computeCalculated('국세절감', inputs)) || 0;
     const j = parseNum(computeCalculated('지방세절감', inputs)) || 0;
@@ -659,20 +621,17 @@ const computeCalculated = (key, inputs) => {
     if (total <= 0) return '';
     return total.toLocaleString('ko-KR');
   }
-  // 기장(인건비추가): 적용세율 = 반영전 소득의 누진구간 세율 (%)
   if (key === '적용세율') {
     const after = parseNum(inputs['반영후_소득']);
     const cost = parseNum(inputs['추가경비_총액']);
     if (after === null || cost === null) return '';
     return getProgressiveRate(after + cost);
   }
-  // 기장(인건비추가): 지방세율 = 적용세율 × 0.1 (소수 1자리)
   if (key === '지방세율') {
     const rate = parseFloat(computeCalculated('적용세율', inputs));
     if (isNaN(rate)) return '';
     return (rate * 0.1).toFixed(1);
   }
-  // 기장(인건비추가): 박스1~5 수수료 합 × 1.1 (VAT 포함). 이름이 입력된 박스만 합산.
   if (key === '수수료_합계_VAT포함') {
     let sum = 0;
     for (let n = 1; n <= 5; n++) {
@@ -686,8 +645,6 @@ const computeCalculated = (key, inputs) => {
   return '';
 };
 
-// 종속 변수(dependsOn)의 값이 채워져 있는지 확인.
-// currency 타입을 가정 — 숫자 0 또는 빈 값은 "비어있음"으로 간주.
 const isDependencySatisfied = (variable, inputs) => {
   if (!variable || !variable.dependsOn) return true;
   const depVal = inputs[variable.dependsOn];
@@ -719,20 +676,22 @@ const Storage = {
   }
 };
 
-// 본문에서 `{?<key>_환급}` 패턴을 자동 탐지해 환급 트리거가 있는 변수 키 set 반환.
-// 이 set에 속한 변수(예: 국세·지방세·박스N_국세·박스N_지방세)는 currency 포맷팅 시 음수 부호 제거 →
-//   "1,000,000원" + 별도 "(환급)" 라벨 조합으로 출력.
-// 그 외 변수(예: 소득_당해·매출_당해)는 부호 보존 → "-5,000,000원" 형태로 출력.
-// 비탐욕 매칭(.+?)으로 `박스3_지방세_환급`처럼 키 안에 `_`가 있는 경우도 `박스3_지방세`로 정확히 캡처.
-const extractRefundKeys = (body) => {
-  const set = new Set();
-  if (!body) return set;
-  const re = /\{\?([^}]+?)_환급\}/g;
-  let m;
-  while ((m = re.exec(body)) !== null) {
-    set.add(m[1].trim());
-  }
-  return set;
+// 현재 시각을 'YYYY-MM-DD HH:MM' 형식으로 반환 (자동저장·수동저장 타임스탬프용)
+const nowStamp = () => {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+// inputs 객체에 실질적인 입력이 있는지 검사 (빈 자동저장 방지용)
+const hasMeaningfulInput = (inputs, extraMemo) => {
+  if (extraMemo && String(extraMemo).trim()) return true;
+  if (!inputs) return false;
+  return Object.values(inputs).some(v => {
+    if (typeof v === 'boolean') return v;
+    if (v == null) return false;
+    return String(v).trim() !== '';
+  });
 };
 
 const parseBody = (body) => {
@@ -755,11 +714,9 @@ const parseBody = (body) => {
       const trigger = content.slice(2).trim();
       if (stack.length > 1 && stack[stack.length - 1].trigger === trigger) stack.pop();
     } else if (content.startsWith('@')) {
-      // 입력 전용 마커: 에디터에서만 입력 필드를 표시하고, 최종 출력(클립보드)에는 포함되지 않음
       const key = content.slice(1).trim();
       stack[stack.length - 1].children.push({ type: 'inputonly', key });
     } else if (content.startsWith('#')) {
-      // 안내 힌트 마커: 에디터에만 회색 작은 글씨로 표시, 카톡 출력에 포함되지 않음
       const hintText = content.slice(1).trim();
       stack[stack.length - 1].children.push({ type: 'hint', value: hintText });
     } else {
@@ -788,15 +745,10 @@ const isCondActive = (trigger, inputs, variables) => {
   if (trigger === '환급발생') return ['국세', '지방세'].some(k => hasAmount(inputs[k]) && isNegativeValue(inputs[k]));
   if (trigger === '세금없음') return ['국세', '지방세'].every(k => !hasAmount(inputs[k]));
   if (trigger === '세금있음') return !isCondActive('세금없음', inputs, variables);
-  // ===== 산출세액 블록 트리거 =====
-  // 위쪽 '소득_당해'에 양수 값이 있으면 산출세액 블록을 표시
   if (trigger === '_산출세액있음') return hasAmount(inputs['소득_당해']);
   if (trigger === '_절세효과있음') return computeCalculated('종합소득세_절감', inputs) !== '';
-  // ===== 추가증빙 안내문 트리거 =====
-  // 추가증빙_경비, 추가증빙_경비2만 판정 (추가인건비는 별도 안내문 트리거 안 됨)
   if (trigger === '_추가증빙있음') return hasAmount(inputs['추가증빙_경비']) || hasAmount(inputs['추가증빙_경비2']);
   if (trigger === '_복수') {
-    // 기장(인건비추가): 박스 이름이 채워진 게 2개 이상이면 true
     const names = ['박스1_이름','박스2_이름','박스3_이름','박스4_이름','박스5_이름'];
     return names.filter(k => inputs[k] && String(inputs[k]).trim()).length >= 2;
   }
@@ -807,9 +759,6 @@ const isCondActive = (trigger, inputs, variables) => {
     return Object.keys(inputs).some(k => k.startsWith(prefix) && inputs[k] && String(inputs[k]).trim());
   }
   const variable = variables.find(v => v.key === trigger);
-  // 종속 변수(dependsOn) 안전장치:
-  //   직원이 추가증빙_경비를 먼저 입력한 뒤 이월결손금을 지운 경우에도
-  //   카톡 출력에서 추가증빙_경비 라인이 자동으로 제외되도록 함.
   if (variable?.dependsOn && !isDependencySatisfied(variable, inputs)) return false;
   if (variable?.type === 'switch') return !!inputs[trigger];
   const value = inputs[trigger];
@@ -818,9 +767,6 @@ const isCondActive = (trigger, inputs, variables) => {
   return !!(value && String(value).trim());
 };
 
-// ===== 카톡 출력 정렬: 국세/지방세, 종합소득세/지방소득세 라벨 쌍의 숫자 우측 정렬 =====
-// 같은 라벨 군에 속하는 두 줄이 연속해서 나올 때, 짧은 쪽 라벨 뒤에 일반 공백을 더해 자리수를 맞춤.
-// (예: "국　세 100,000,000원" / "지방세  10,000,000원")
 const ALIGN_PAIRS = [
   ['국　세', '지방세'],
   ['종합소득세', '지방소득세']
@@ -849,30 +795,15 @@ const alignAmountLines = (text) => {
   return lines.join('\n');
 };
 
-// ===== 인쇄용 본문 생성 (기장거래처·기장(인건비추가) 공용) =====
-// 카톡 본문(완성형 텍스트)이 아니라, 본문 트리를 새로 워크하면서
-// 인쇄용 텍스트를 만들고, 어느 위치가 변수·동적·체크박스 라벨인지 오프셋 기록을 남긴다.
-// 그 후 라인 단위로 끊고 다음만 인쇄 대상으로 남긴다:
-//   - 변수(입력값/자동계산) 라인
-//   - 동적 텍스트 라인 (예: "납부하실 세금 없습니다.")
-//   - 체크박스 활성 시 라벨로 대체된 라인 (예: "☑ 건보증가 없음 안내")
-//   - 위 라인 직전의 헤더 라인 (`-...-`, `[...]`, `2025년 귀속` 등)
-//
-// 기장거래처: ⏬ 라인 이후 영역은 모두 제외하고, 담당자멘트만 별도 처리.
-// 기장(인건비추가): ⏬ separator 라인이 없으므로 sepIdx = -1 → 전체 본문이 자연스럽게 처리됨.
-//                   박스 헤더 "⏬{박스N_이름} 선생님"은 ⏬+ 정규식에 매칭되지 않아 separator로 잡히지 않음.
 const buildPrintContent = (template, inputs) => {
   if (!template) return '';
   const variables = template.variables || [];
-  // 환급 트리거 대상 변수 set — 본문에서 자동 탐지
-  const refundKeys = extractRefundKeys(template.body);
+  const refundKeys = getRefundKeys(template.body);
   const tree = parseBody(template.body);
-
   let output = '';
-  const varRanges = [];   // [start, end] 변수 값이 출력된 범위
-  const dynRanges = [];   // [start, end] cond 안의 텍스트가 출력된 범위
-  const cbRanges  = [];   // [start, end] 체크박스 라벨로 대체된 범위
-
+  const varRanges = [];
+  const dynRanges = [];
+  const cbRanges  = [];
   const walk = (nodes, insideCond) => {
     for (const node of nodes) {
       if (node.type === 'text') {
@@ -880,9 +811,7 @@ const buildPrintContent = (template, inputs) => {
         output += node.value;
         if (insideCond && node.value) dynRanges.push([start, output.length]);
       } else if (node.type === 'hint') {
-        // 안내 힌트는 인쇄에도 제외
       } else if (node.type === 'inputonly') {
-        // 입력 전용 마커는 출력 위치에 영향 없음 (별도 {변수명}이 출력 위치 담당)
       } else if (node.type === 'var') {
         const v = variables.find(x => x.key === node.key);
         if (!v) continue;
@@ -894,16 +823,7 @@ const buildPrintContent = (template, inputs) => {
         } else {
           val = inputs[node.key] || '';
           if (v.type === 'currency') {
-            const isNeg = String(val).startsWith('-');
-            const d = String(val).replace(/[^\d]/g, '');
-            const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
-            // _환급 트리거 대상 변수는 부호 제거 (절댓값 + 별도 "(환급)" 라벨 조합)
-            // 그 외 변수(소득_당해 등)는 부호 보존
-            if (refundKeys.has(node.key)) {
-              val = formatted;
-            } else {
-              val = (isNeg && formatted) ? '-' + formatted : formatted;
-            }
+            val = formatCurrencyOutput(val, refundKeys.has(node.key));
           }
         }
         const start = output.length;
@@ -916,7 +836,6 @@ const buildPrintContent = (template, inputs) => {
         const v = variables.find(x => x.key === cleanKey);
         const active = isCondActive(trigger, inputs, variables);
         if (!active) continue;
-        // 체크박스(switch) + 활성 + 비부정 → 본문 대신 라벨로 대체
         if (v && v.type === 'switch' && !isNegated) {
           const label = v.label || cleanKey;
           const start = output.length;
@@ -929,17 +848,13 @@ const buildPrintContent = (template, inputs) => {
     }
   };
   walk(tree, false);
-
-  // 라인 분리 + 누적 오프셋
   const rawLines = output.split('\n');
   const lineOffsets = [0];
   for (const l of rawLines) lineOffsets.push(lineOffsets[lineOffsets.length - 1] + l.length + 1);
-
   const overlap = (ranges, s, e) => {
     for (const [rs, re_] of ranges) if (rs < e && re_ > s) return true;
     return false;
   };
-
   const lines = rawLines.map((text, idx) => {
     const s = lineOffsets[idx];
     const e = s + text.length;
@@ -954,29 +869,19 @@ const buildPrintContent = (template, inputs) => {
       isEmpty: trimmed === ''
     };
   });
-
-  // ⏬ 라인 위치 — 그 이전 영역만 본격 처리 (기장(인건비추가)에는 없으므로 sepIdx = -1)
   const sepIdx = lines.findIndex(l => l.isSeparator);
   const beforeSep = sepIdx >= 0 ? lines.slice(0, sepIdx) : lines.slice();
-
-  // 인쇄 대상 인덱스 결정
   const keepIdx = new Set();
   for (let i = 0; i < beforeSep.length; i++) {
     if (beforeSep[i].hasVar || beforeSep[i].hasDyn || beforeSep[i].isCheckbox) {
       keepIdx.add(i);
-      // 직전 인접 헤더 보존 — 빈 줄은 건너뛰며 탐색
       for (let j = i - 1; j >= 0; j--) {
-        if (beforeSep[j].isHeader) {
-          keepIdx.add(j);
-          break;
-        }
+        if (beforeSep[j].isHeader) { keepIdx.add(j); break; }
         if (beforeSep[j].isEmpty) continue;
-        break;  // 일반 텍스트 만남 → 헤더 없음
+        break;
       }
     }
   }
-
-  // 결과 라인 조립 — 연속 빈 줄은 1개로 압축
   const result = [];
   let lastWasContent = false;
   let pendingEmpty = false;
@@ -989,14 +894,12 @@ const buildPrintContent = (template, inputs) => {
     } else if (beforeSep[i].isEmpty) {
       pendingEmpty = true;
     } else {
-      pendingEmpty = false;  // 제외 라인을 지나면 빈줄 상태 리셋
+      pendingEmpty = false;
     }
   }
-
-  // ⏬ 영역 + 담당자멘트 (기장거래처만 해당)
   if (sepIdx >= 0) {
     if (result.length > 0) result.push('');
-    result.push(lines[sepIdx].text);  // ⏬⏬⏬...
+    result.push(lines[sepIdx].text);
     result.push('');
     const memo = inputs['담당자멘트'];
     if (memo && String(memo).trim()) {
@@ -1005,8 +908,6 @@ const buildPrintContent = (template, inputs) => {
       result.push('입력 없음');
     }
   }
-
-  // 카톡 본문과 동일하게 라벨 쌍 자동 정렬 적용
   return alignAmountLines(result.join('\n'));
 };
 
@@ -1021,20 +922,22 @@ function App() {
   const [adminMode, setAdminMode] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [toast, setToast] = useState(null);
-
   const [accessGranted, setAccessGranted] = useState(false);
   const [accessInput, setAccessInput] = useState('');
   const [accessError, setAccessError] = useState(false);
   const [bootChecking, setBootChecking] = useState(true);
-
-  // 좌우 분할 위치(%). 좌측 에디터 너비 비율. 기존 상하 분할 키(split_pos)와 분리.
   const [splitPos, setSplitPos] = useState(55);
-  // 미리보기 패널 표시 여부. localStorage(preview_visible)에 직원 PC별로 마지막 상태 저장.
   const [previewVisible, setPreviewVisible] = useState(true);
   const splitContainerRef = useRef(null);
   const isDragging = useRef(false);
 
-  // 인쇄 헤더에 표시할 오늘 날짜 — 인쇄 버튼 클릭 직전 갱신해서 항상 출력 당일 날짜가 찍히도록 함.
+  const [savedDrafts, setSavedDrafts] = useState([]);
+  const [autoSaves, setAutoSaves] = useState({});
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveName, setSaveName] = useState('');
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState('');
+
   const [printDate, setPrintDate] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1045,13 +948,10 @@ function App() {
   const orderCounter = useRef({ value: 0 });
   const previewContainerRef = useRef(null);
   const editorScrollRef = useRef(null);
-  // 현재 포커스된 변수 키 — 미리보기에서 노란 하이라이트 위치 표시용. 스크롤은 이동하지 않음.
   const [focusedKey, setFocusedKey] = useState(null);
 
   const templates = DEFAULT_TEMPLATES;
 
-  // 새로고침 버튼이 붙인 캐시 우회용 ?v= 쿼리를 주소창에서 즉시 제거
-  // (브라우저는 이미 ?v= 가 붙은 URL로 페이지를 받아왔으므로 캐시 우회 효과는 유지됨)
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
@@ -1069,13 +969,28 @@ function App() {
       if (savedAccess === true) setAccessGranted(true);
       const savedPw = await Storage.get('admin_password');
       if (savedPw) setAdminPassword(savedPw);
-      // 좌우 분할 위치 — 기존 상하 분할 키(split_pos)와는 별도 키 사용
       const savedSplit = await Storage.get('split_pos_lr');
       if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
-      // 미리보기 패널 표시 여부 — false로 저장된 경우에만 끈 상태로 시작
       const savedPreview = await Storage.get('preview_visible');
       if (savedPreview === false) setPreviewVisible(false);
+
+      const drafts = await Storage.get('saved_drafts');
+      if (Array.isArray(drafts)) setSavedDrafts(drafts);
+      const autos = {};
+      for (const t of TAB_LIST) {
+        const a = await Storage.get(`autosave_${t}`);
+        if (a && hasMeaningfulInput(a.inputs, a.extraMemo)) autos[t] = a;
+      }
+      setAutoSaves(autos);
+
       setBootChecking(false);
+
+      if (Object.keys(autos).length > 0) {
+        setTimeout(() => {
+          setToast({ message: '이전 작업이 자동저장되어 있습니다. [불러오기]에서 확인하세요.', type: 'success' });
+          setTimeout(() => setToast(null), 3500);
+        }, 700);
+      }
     })();
   }, []);
 
@@ -1085,7 +1000,6 @@ function App() {
       const container = splitContainerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
-      // 좌우 분할 — 가로(clientX) 기준
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const x = clientX - rect.left;
       const percent = (x / rect.width) * 100;
@@ -1142,7 +1056,6 @@ function App() {
     setAdminMode(false);
   };
 
-  // 캐시를 우회하여 GitHub에서 최신 버전을 받아오는 강력 새로고침
   const handleHardReload = () => {
     try {
       const url = new URL(window.location.href);
@@ -1153,7 +1066,6 @@ function App() {
     }
   };
 
-  // 미리보기 패널 표시 토글
   const togglePreview = () => {
     setPreviewVisible(prev => {
       const next = !prev;
@@ -1162,14 +1074,10 @@ function App() {
     });
   };
 
-  // 인쇄 — 인쇄 직전 오늘 날짜 갱신 후 window.print() 호출.
-  // 기장거래처·기장(인건비추가) 탭일 때는 별도의 .print-only 영역만 출력되고,
-  // 다른 탭은 기존처럼 에디터 영역이 그대로 인쇄됨 (직원이 손으로 채우는 용지로 활용 가능).
   const handlePrint = () => {
     try {
       const d = new Date();
       setPrintDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
-      // 상태 업데이트가 다음 페인트에 반영되도록 살짝 미룬다.
       setTimeout(() => { window.print(); }, 50);
     } catch (e) {}
   };
@@ -1178,13 +1086,18 @@ function App() {
   const currentList = templates?.[selectedCategory]?.[selectedType]?.[selectedButton] || [];
   const currentTemplate = currentList[0] || null;
 
+  // 현재 본문에서 자동 탐지된 환급 키 집합
+  const refundKeys = useMemo(
+    () => currentTemplate ? getRefundKeys(currentTemplate.body) : new Set(),
+    [currentTemplate]
+  );
+
   useEffect(() => {
     setInputs({});
     setExtraMemo('');
     inputRefs.current = [];
   }, [selectedCategory, selectedType, selectedButton]);
 
-  // 초기 진입·탭 전환 시 첫 입력 필드(고객명)에 자동 포커스
   useEffect(() => {
     if (!accessGranted || adminMode || !currentTemplate) return;
     const t = setTimeout(() => {
@@ -1199,18 +1112,125 @@ function App() {
     return () => clearTimeout(t);
   }, [accessGranted, adminMode, currentTemplate, selectedType, selectedButton]);
 
-  // 환급 트리거 대상 변수 set — 현재 템플릿 본문에서 자동 추출.
-  // previewParts·renderTree에서 currency 포맷팅 시 부호 처리 분기에 사용.
-  const refundKeys = useMemo(() => extractRefundKeys(currentTemplate?.body || ''), [currentTemplate]);
+  useEffect(() => {
+    if (!accessGranted || adminMode) return;
+    if (!hasMeaningfulInput(inputs, extraMemo)) return;
+    const timer = setTimeout(() => {
+      const stamp = nowStamp();
+      const data = {
+        tab: selectedType,
+        inputs: { ...inputs },
+        extraMemo,
+        savedAt: stamp
+      };
+      Storage.set(`autosave_${selectedType}`, data);
+      setAutoSaves(prev => ({ ...prev, [selectedType]: data }));
+      setAutoSaveStatus(`자동저장됨 · ${stamp.slice(11)}`);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [inputs, extraMemo, selectedType, accessGranted, adminMode]);
+
+  useEffect(() => {
+    setAutoSaveStatus('');
+  }, [selectedType]);
+
+  const handleSaveOpen = () => {
+    if (!hasMeaningfulInput(inputs, extraMemo)) {
+      showToast('저장할 입력값이 없습니다', 'error');
+      return;
+    }
+    const defaultName = (inputs['고객명'] || '').toString().trim();
+    setSaveName(defaultName);
+    setShowSaveModal(true);
+  };
+
+  const handleSaveConfirm = () => {
+    const name = saveName.trim();
+    if (!name) {
+      showToast('작업명을 입력하세요', 'error');
+      return;
+    }
+    const existing = savedDrafts.find(d => d.tab === selectedType && d.name === name);
+    if (existing) {
+      if (!confirm(`"${selectedType} - ${name}"이(가) 이미 있습니다. 덮어쓰시겠습니까?`)) return;
+    }
+    const stamp = nowStamp();
+    const newDraft = {
+      id: existing ? existing.id : 'draft_' + Date.now(),
+      name,
+      tab: selectedType,
+      inputs: { ...inputs },
+      extraMemo,
+      savedAt: stamp
+    };
+    const newDrafts = existing
+      ? savedDrafts.map(d => d.id === existing.id ? newDraft : d)
+      : [newDraft, ...savedDrafts];
+    setSavedDrafts(newDrafts);
+    Storage.set('saved_drafts', newDrafts);
+    setShowSaveModal(false);
+    showToast(`"${name}" 저장됨 ✓`);
+  };
+
+  const handleLoadDraft = (draft) => {
+    const targetTab = draft.tab;
+    const targetInputs = { ...(draft.inputs || {}) };
+    const targetMemo = draft.extraMemo || '';
+    if (targetTab && targetTab !== selectedType) {
+      setSelectedType(targetTab);
+      setTimeout(() => {
+        setInputs(targetInputs);
+        setExtraMemo(targetMemo);
+      }, 30);
+    } else {
+      setInputs(targetInputs);
+      setExtraMemo(targetMemo);
+    }
+    setShowLoadModal(false);
+    const label = draft.name ? `"${draft.name}"` : `${targetTab} 자동저장`;
+    showToast(`${label} 불러옴 ✓`);
+  };
+
+  const handleDeleteDraft = (id) => {
+    const target = savedDrafts.find(d => d.id === id);
+    if (!target) return;
+    if (!confirm(`"${target.name}"을(를) 삭제하시겠습니까?`)) return;
+    const newDrafts = savedDrafts.filter(d => d.id !== id);
+    setSavedDrafts(newDrafts);
+    Storage.set('saved_drafts', newDrafts);
+  };
+
+  const handleDeleteAutoSave = (tab) => {
+    if (!confirm(`${tab} 탭의 자동저장을 삭제하시겠습니까?`)) return;
+    Storage.remove(`autosave_${tab}`);
+    setAutoSaves(prev => {
+      const next = { ...prev };
+      delete next[tab];
+      return next;
+    });
+    if (tab === selectedType) setAutoSaveStatus('');
+  };
+
+  const handleClearCurrentTab = () => {
+    if (!confirm(`현재 탭(${selectedType})의 입력값을 모두 비우시겠습니까? 자동저장 슬롯도 함께 삭제됩니다.`)) return;
+    setInputs({});
+    setExtraMemo('');
+    Storage.remove(`autosave_${selectedType}`);
+    setAutoSaves(prev => {
+      const next = { ...prev };
+      delete next[selectedType];
+      return next;
+    });
+    setAutoSaveStatus('');
+    showToast('현재 탭 비움 ✓');
+  };
 
   const tree = useMemo(() => currentTemplate ? parseBody(currentTemplate.body) : [], [currentTemplate]);
   const previewParts = useMemo(() => {
     if (!currentTemplate) return [];
     let body = currentTemplate.body;
     const variables = currentTemplate.variables || [];
-    // 입력 전용 마커 ({@변수명})는 최종 출력에 포함되지 않음 — 에디터 표시용일 뿐
     body = body.replace(/\{@[^}]+\}/g, '');
-    // 안내 힌트 마커 ({#텍스트})도 최종 출력에 포함되지 않음 — 에디터 표시용일 뿐
     body = body.replace(/\{#[^}]+\}/g, '');
     let prev;
     do {
@@ -1226,16 +1246,7 @@ function App() {
       } else {
         val = inputs[v.key] || '';
         if (v.type === 'currency') {
-          const isNeg = String(val).startsWith('-');
-          const d = String(val).replace(/[^\d]/g, '');
-          const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
-          // _환급 트리거 대상 변수는 부호 제거 (절댓값 + 별도 "(환급)" 라벨 조합)
-          // 그 외 변수(소득_당해 등)는 부호 보존 → "-5,000,000원" 형태
-          if (refundKeys.has(v.key)) {
-            val = formatted;
-          } else {
-            val = (isNeg && formatted) ? '-' + formatted : formatted;
-          }
+          val = formatCurrencyOutput(val, refundKeys.has(v.key));
         } else if (v.type === 'switch') {
           val = '';
         }
@@ -1267,25 +1278,17 @@ function App() {
       i = valueEnd + 1;
     }
     return parts;
-  }, [currentTemplate, inputs, extraMemo]);
+  }, [currentTemplate, inputs, extraMemo, refundKeys]);
 
-  // 카톡 복사용 텍스트 (라벨 쌍 자동 정렬 적용)
   const plainText = useMemo(() => {
     const raw = previewParts.map(p => p.content).join('');
     return alignAmountLines(raw);
   }, [previewParts]);
 
-  // ===== 인쇄용 본문 텍스트 (기장거래처·기장(인건비추가) 탭에서만 사용) =====
   const printContent = useMemo(() => {
     if ((selectedType !== '기장거래처' && selectedType !== '기장(인건비추가)') || !currentTemplate) return '';
     return buildPrintContent(currentTemplate, inputs);
   }, [selectedType, currentTemplate, inputs]);
-
-  // 주의: 이 버전에서는 좌우 패널 사이의 자동 스크롤 동기화 기능을 의도적으로 제거함.
-  //   - 이전: 한쪽 휠을 굴리면 반대쪽이 비율 맞춰 따라오고(hover-driver),
-  //           input 포커스 시 미리보기가 해당 위치로 자동 이동(scrollPreviewToKey).
-  //   - 현재: 좌측·우측 각자 독립적으로 스크롤. 미리보기 노란 하이라이트(focusedKey)만 유지.
-  //   - 사유: 직원이 휠을 굴리는 동안 반대쪽 패널이 출렁이는 동작이 오히려 혼란을 유발한다는 피드백.
 
   const handleCopy = async () => {
     try {
@@ -1356,14 +1359,9 @@ function App() {
 
   const renderInput = (variable, order, idx) => {
     const rawValue = inputs[variable.key] || '';
-    const isOptional = variable.optional;
     const isNeg = isNegativeValue(rawValue);
-
-    // 종속 변수가 있으면 종속 조건이 채워지지 않은 동안 입력 잠금(disabled)
     const isDisabled = !!variable.dependsOn && !isDependencySatisfied(variable, inputs);
 
-    // disabled된 필드는 건너뛰고 다음/이전 활성 필드로 이동
-    // (예: 이월결손금이 비어있어 추가증빙_경비가 잠겨 있을 때, 엔터/방향키로 그 필드를 건너뜀)
     const goNext = () => {
       let i = order + 1;
       while (i < inputRefs.current.length) {
@@ -1410,7 +1408,6 @@ function App() {
     const placeholderText = isDisabled ? '🔒 잠김' : (variable.placeholder || variable.label);
     const size = Math.max((displayValue || placeholderText).length + 1, 4);
 
-    // 잠김(disabled) 상태 — 회색 톤. 종속변수 입력 시 자동 활성화.
     if (isDisabled) {
       return (
         <input
@@ -1458,7 +1455,6 @@ function App() {
         onFocus={(e) => {
           e.target.select();
           setFocusedKey(variable.key);
-          // 좌우 패널 자동 스크롤은 제거됨. 노란 하이라이트(focusedKey)만 반영.
         }}
         placeholder={placeholderText}
         size={size}
@@ -1477,7 +1473,6 @@ function App() {
     return nodes.map((node, idx) => {
       if (node.type === 'text') return <React.Fragment key={idx}>{node.value}</React.Fragment>;
       if (node.type === 'hint') {
-        // 안내 힌트: 회색 작은 글씨로 표시. 클릭/입력 불가, 카톡 출력에 포함되지 않음.
         return (
           <span
             key={idx}
@@ -1489,10 +1484,8 @@ function App() {
         );
       }
       if (node.type === 'inputonly') {
-        // 입력 전용 마커: 에디터 화면에 입력 필드를 표시. 최종 출력에는 포함되지 않음.
         const variable = vars.find(v => v.key === node.key);
         if (!variable) return <span key={idx} className="text-red-500">{`{@${node.key}}`}</span>;
-        // 이후 같은 키의 {변수명}은 출력 위치 표시(읽기 전용 미리보기)로 렌더링
         renderedKeys.current.add(node.key);
         const order = orderCounter.current.value++;
         return renderInput(variable, order, idx);
@@ -1500,7 +1493,6 @@ function App() {
       if (node.type === 'var') {
         const variable = vars.find(v => v.key === node.key);
         if (!variable) return <span key={idx} className="text-red-500">{`{${node.key}}`}</span>;
-
         if (variable.type === 'calculated') {
           const val = computeCalculated(node.key, inputs);
           const placeholderText = variable.placeholder || variable.label;
@@ -1510,20 +1502,11 @@ function App() {
             </span>
           );
         }
-
         if (renderedKeys.current.has(node.key)) {
           const rawValue = inputs[node.key] || '';
           let displayVal;
           if (variable.type === 'currency') {
-            const isNeg = String(rawValue).startsWith('-');
-            const d = String(rawValue).replace(/[^\d]/g, '');
-            const formatted = d ? parseInt(d).toLocaleString('ko-KR') : '';
-            // _환급 트리거 대상 변수는 부호 제거 (절댓값 + 별도 "(환급)" 라벨 조합)
-            if (refundKeys.has(node.key)) {
-              displayVal = formatted;
-            } else {
-              displayVal = (isNeg && formatted) ? '-' + formatted : formatted;
-            }
+            displayVal = formatCurrencyOutput(rawValue, refundKeys.has(node.key));
           } else {
             displayVal = rawValue;
           }
@@ -1534,7 +1517,6 @@ function App() {
           );
         }
         renderedKeys.current.add(node.key);
-
         const order = orderCounter.current.value++;
         return renderInput(variable, order, idx);
       }
@@ -1577,12 +1559,10 @@ function App() {
   orderCounter.current.value = 0;
   renderedKeys.current.clear();
 
-  // ===== 부팅 중 (localStorage 읽는 동안 잠깐) =====
   if (bootChecking) {
     return <div className="h-screen flex items-center justify-center bg-slate-50 text-slate-400 text-sm">로딩 중...</div>;
   }
 
-  // ===== 접근 비밀번호 게이트 =====
   if (!accessGranted) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50 p-4">
@@ -1607,11 +1587,19 @@ function App() {
     );
   }
 
-  // 기장거래처·기장(인건비추가) 탭일 때만 인쇄 시 에디터를 숨기고 별도 인쇄 영역을 사용.
-  // 다른 탭(신고대리)은 기존처럼 에디터 자체가 인쇄됨 (직원이 손으로 채울 용지로 활용 가능).
   const isBookkeeping = selectedType === '기장거래처';
   const isCombined = selectedType === '기장(인건비추가)';
   const isPrintProcessed = isBookkeeping || isCombined;
+
+  const draftsByTab = TAB_LIST.reduce((acc, t) => {
+    acc[t] = savedDrafts
+      .filter(d => d.tab === t)
+      .slice()
+      .sort((a, b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
+    return acc;
+  }, {});
+  const autoSaveList = TAB_LIST.filter(t => autoSaves[t]).map(t => ({ ...autoSaves[t], _tabKey: t }));
+  const hasAnyLoadable = autoSaveList.length > 0 || savedDrafts.length > 0;
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
@@ -1626,42 +1614,23 @@ function App() {
           <h1 className="text-base font-bold text-slate-900">세무법인삼호 메시지 도구</h1>
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-slate-400 mr-1 hidden sm:inline" title="이 도구가 마지막으로 갱신된 시각">업데이트 {BUILD_DATE}</span>
-            <button
-              onClick={handleHardReload}
-              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
-              title="새로고침 (최신 양식 받기)"
-            >
-              <RefreshCw size={16} />
-            </button>
-            <button
-              onClick={togglePreview}
-              className={`p-2 rounded-lg transition-colors ${previewVisible ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'hover:bg-slate-100 text-slate-400'}`}
-              title={previewVisible ? '미리보기 끄기' : '미리보기 켜기'}
-            >
-              {previewVisible ? <Eye size={16} /> : <EyeOff size={16} />}
-            </button>
-            <button
-              onClick={handlePrint}
-              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700"
-              title={isPrintProcessed ? '인쇄 (입력값·체크박스 라벨만 출력)' : '인쇄 (입력박스 그대로 출력)'}
-            >
-              <Printer size={16} />
-            </button>
+            <button onClick={handleHardReload} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700" title="새로고침 (최신 양식 받기)"><RefreshCw size={16} /></button>
+            <button onClick={togglePreview} className={`p-2 rounded-lg transition-colors ${previewVisible ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'hover:bg-slate-100 text-slate-400'}`} title={previewVisible ? '미리보기 끄기' : '미리보기 켜기'}>{previewVisible ? <Eye size={16} /> : <EyeOff size={16} />}</button>
+            <button onClick={handlePrint} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700" title={isPrintProcessed ? '인쇄 (입력값·체크박스 라벨만 출력)' : '인쇄 (입력박스 그대로 출력)'}><Printer size={16} /></button>
             {adminMode ? (
-              <button onClick={() => setAdminMode(false)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium flex items-center gap-1">
-                <Lock size={14} /> 종료
-              </button>
+              <button onClick={() => setAdminMode(false)} className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium flex items-center gap-1"><Lock size={14} /> 종료</button>
             ) : (
-              <button onClick={() => setShowAdminLogin(true)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600" title="관리자 모드">
-                <Settings size={17} />
-              </button>
+              <button onClick={() => setShowAdminLogin(true)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600" title="관리자 모드"><Settings size={17} /></button>
             )}
-            <button onClick={handleAccessLogout} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600" title="로그아웃">
-              <LogOut size={16} />
-            </button>
+            <button onClick={handleAccessLogout} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600" title="로그아웃"><LogOut size={16} /></button>
           </div>
         </div>
       </header>
+
+      <div className="no-print bg-blue-50 border-b border-blue-200 text-blue-800 text-[11px] px-4 py-1.5 flex items-center gap-1.5 flex-shrink-0">
+        <Info size={13} />
+        <span><strong>저장 위치: 이 PC의 브라우저(Chrome/Edge) 내부</strong> · 다른 PC와 공유되지 않음 · 브라우저 캐시 삭제 시 함께 사라짐 · 입력 중 1초마다 자동저장</span>
+      </div>
 
       {showAdminLogin && (
         <div className="no-print fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1672,6 +1641,84 @@ function App() {
               <button onClick={handlePasswordSubmit} className="flex-1 bg-slate-900 text-white py-2 rounded-lg">확인</button>
               <button onClick={() => { setShowAdminLogin(false); setPasswordInput(''); }} className="px-4 py-2 border border-slate-300 rounded-lg">취소</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSaveModal && (
+        <div className="no-print fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-xl">
+            <h2 className="text-base font-bold mb-1 flex items-center gap-2"><Save size={16} /> 작업 저장</h2>
+            <p className="text-xs text-slate-500 mb-3">탭: <strong className="text-slate-700">{selectedType}</strong></p>
+            <label className="text-xs text-slate-600 block mb-1">작업명</label>
+            <input
+              type="text"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSaveConfirm()}
+              placeholder="예: 홍길동"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm mb-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              autoFocus
+            />
+            <p className="text-[11px] text-slate-400 mb-4">고객명이 자동으로 채워집니다. 같은 탭에 같은 이름이 있으면 덮어쓰기를 묻습니다.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowSaveModal(false)} className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg hover:bg-slate-50">취소</button>
+              <button onClick={handleSaveConfirm} className="px-4 py-1.5 text-sm bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold">저장</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLoadModal && (
+        <div className="no-print fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-5 max-w-lg w-full shadow-xl max-h-[80vh] overflow-y-auto always-scroll">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold flex items-center gap-2"><FolderOpen size={16} /> 저장된 작업 불러오기</h2>
+              <button onClick={() => setShowLoadModal(false)} className="p-1 hover:bg-slate-100 rounded text-slate-500"><X size={16} /></button>
+            </div>
+
+            {!hasAnyLoadable && (
+              <p className="text-sm text-slate-400 text-center py-8">저장된 작업이 없습니다.</p>
+            )}
+
+            {autoSaveList.length > 0 && (
+              <div className="mb-4">
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5 px-1 flex items-center gap-1"><CloudCheck size={11} /> 자동저장 (탭별 최근 작업)</p>
+                {autoSaveList.map(item => (
+                  <div key={`auto-${item._tabKey}`} className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-1.5 flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">
+                        {item._tabKey}
+                        <span className="text-xs text-slate-400 font-normal ml-1.5">{item.inputs?.['고객명'] ? `${item.inputs['고객명']} (작업 중)` : '(작업 중)'}</span>
+                      </p>
+                      <p className="text-[11px] text-slate-400">{item.savedAt}</p>
+                    </div>
+                    <button onClick={() => handleLoadDraft(item)} className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-white">불러오기</button>
+                    <button onClick={() => handleDeleteAutoSave(item._tabKey)} className="p-1 text-slate-400 hover:text-rose-500" title="삭제"><Trash size={13} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {TAB_LIST.map(tab => {
+              const list = draftsByTab[tab];
+              if (!list || list.length === 0) return null;
+              return (
+                <div key={`group-${tab}`} className="mb-4">
+                  <p className="text-[11px] font-semibold text-slate-500 mb-1.5 px-1 flex items-center gap-1"><Save size={11} /> 수동저장 — {tab}</p>
+                  {list.map(d => (
+                    <div key={d.id} className="bg-white border border-slate-200 rounded-lg px-3 py-2 mb-1.5 flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-800 truncate">{d.name}</p>
+                        <p className="text-[11px] text-slate-400">{d.savedAt}</p>
+                      </div>
+                      <button onClick={() => handleLoadDraft(d)} className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-50">불러오기</button>
+                      <button onClick={() => handleDeleteDraft(d.id)} className="p-1 text-slate-400 hover:text-rose-500" title="삭제"><Trash size={13} /></button>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -1702,21 +1749,23 @@ function App() {
                   {t}
                 </button>
               ))}
+              {autoSaveStatus && (
+                <span className="text-[11px] text-emerald-700 ml-1 flex items-center gap-1" title="현재 입력 내용이 이 PC에 자동저장됨">
+                  <CloudCheck size={11} /> {autoSaveStatus}
+                </span>
+              )}
               <span className="text-[11px] text-rose-600 font-medium ml-1 hidden md:inline">💡 음수(-) 입력 시 자동 (환급) 처리</span>
             </div>
-            <button onClick={handleCopy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow whitespace-nowrap">
-              <Copy size={15} /> 카톡용 복사
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button onClick={handleSaveOpen} className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1" title="현재 작업을 이름 붙여 저장"><Save size={13} /> 저장</button>
+              <button onClick={() => setShowLoadModal(true)} className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1" title="저장된 작업 불러오기"><FolderOpen size={13} /> 불러오기</button>
+              <button onClick={handleClearCurrentTab} className="px-2 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-300 rounded-lg text-xs font-medium flex items-center gap-1" title="현재 탭의 입력값과 자동저장을 모두 비움"><Trash size={12} /></button>
+              <button onClick={handleCopy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow whitespace-nowrap">
+                <Copy size={15} /> 카톡용 복사
+              </button>
+            </div>
           </div>
 
-          {/* ===== 좌우 분할 컨테이너 =====
-              좌측·우측 각자 독립 스크롤. 동기화 없음.
-              min-h-0 을 부모·좌·우 3곳에 모두 추가해야 flex-1 자식의 overflow-y-scroll 이 정상 작동.
-              (Flexbox 기본 min-height: auto 가 콘텐츠 만큼 부모를 늘려 스크롤을 무력화하는 문제 차단.)
-              overflow-y-scroll + .always-scroll → 스크롤바가 항상 보임.
-              기장거래처·기장(인건비추가) 탭일 때는 에디터에 .no-print 적용 → 인쇄 시 숨김 (별도 .print-only 영역이 대신 출력).
-              또한 isPrintProcessed=true 일 때는 split 컨테이너 자체에도 .no-print 적용 →
-              빈 flex 박스가 인쇄 시 첫 페이지를 빈 채로 차지하던 문제 해결. */}
           <div ref={splitContainerRef} className={`flex-1 flex flex-row min-w-0 min-h-0 relative ${isPrintProcessed ? 'no-print' : ''}`}>
             <div
               ref={editorScrollRef}
@@ -1775,10 +1824,6 @@ function App() {
             )}
           </div>
 
-          {/* ===== 인쇄 전용 영역 (기장거래처·기장(인건비추가) 탭에서만 렌더링) =====
-              평시엔 .print-only{display:none} 으로 화면에서 숨겨져 있고,
-              @media print 에서만 표시됨. 위 에디터는 .no-print 로 인쇄 시 숨김.
-              .print-page 에는 CSS에서 page: samho 적용 → 우측 하단에 페이지 번호(1/2 등) 자동 표시. */}
           {isPrintProcessed && (
             <div className="print-only">
               <div className="print-page">
@@ -1798,7 +1843,6 @@ function App() {
 
 function AdminPanel({ onSavePassword, showToast }) {
   const [pwInput, setPwInput] = useState('');
-
   return (
     <main className="max-w-5xl mx-auto p-4">
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-900 flex items-center gap-2">
