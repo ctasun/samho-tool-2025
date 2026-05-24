@@ -107,7 +107,7 @@ const CloudCheck = (props) => <SvgIcon {...props}><path d="M20.5 14.5A4 4 0 0 0 
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-20 21:25';
+const BUILD_DATE = '2026-05-24 19:20';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -217,7 +217,8 @@ const SIMPLE_BODY_REPORT = `【종합소득세 신고 결과보고】
 
 -6월 1일까지 납부하실 금액-{?국세}
 종합소득세 {국세}원{?국세_환급}(환급){/?국세_환급}{/?국세}{?지방세}
-지방소득세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?환급발생}
+지방소득세 {지방세}원{?지방세_환급}(환급){/?지방세_환급}{/?지방세}{?기납부_전액환급}
+(기납부세액 전액 환급){/?기납부_전액환급}{?환급발생}
 {/?환급발생}{?국세_환급}
 종합소득세 환급예정일은 6월말{/?국세_환급}{?지방세_환급}
 지방소득세 환급예정일은 7월말{/?지방세_환급}{?세금없음}
@@ -355,6 +356,7 @@ const BASIC_VARS_REPORT = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '홍길동' },
   { key: '국세', label: '종합소득세', type: 'currency', placeholder: '종합소득세' },
   { key: '지방세', label: '지방소득세', type: 'currency', placeholder: '지방소득세' },
+  { key: '기납부_전액환급', label: '기납부세액 전액 환급 안내', type: 'switch' },
   { key: '수수료', label: '신고 수수료 (부가세별도)', type: 'currency', placeholder: '공급가액' },
   { key: '수수료_표시', label: '수수료 표시(자동)', type: 'calculated', placeholder: '자동' },
   { key: '할인적용', label: '10% 할인 적용', type: 'switch' },
@@ -1286,8 +1288,8 @@ function App() {
   }, [previewParts]);
 
   const printContent = useMemo(() => {
-    if ((selectedType !== '기장거래처' && selectedType !== '기장(인건비추가)') || !currentTemplate) return '';
-    return buildPrintContent(currentTemplate, inputs);
+  if (!['기장거래처', '신고대리', '기장(인건비추가)'].includes(selectedType) || !currentTemplate) return '';
+  return buildPrintContent(currentTemplate, inputs);
   }, [selectedType, currentTemplate, inputs]);
 
   const handleCopy = async () => {
