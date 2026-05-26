@@ -107,7 +107,7 @@ const CloudCheck = (props) => <SvgIcon {...props}><path d="M20.5 14.5A4 4 0 0 0 
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-26 23:47';
+const BUILD_DATE = '2026-05-27 01:00';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -273,20 +273,21 @@ const buildBoxBlock = (n) => `{?박스${n}_이름}
 ⏬{박스${n}_이름} 선생님
 {?박스${n}_요청사항}{박스${n}_요청사항}
 {/?박스${n}_요청사항}-환급받으실 세금-
-종합소득세 {박스${n}_국세}원{?박스${n}_국세_환급}(환급){/?박스${n}_국세_환급}
-지방소득세 {박스${n}_지방세}원{?박스${n}_지방세_환급}(환급){/?박스${n}_지방세_환급}
-{?!박스${n}_전액환급}(기납부세액 최대치환급){/?!박스${n}_전액환급}{?박스${n}_전액환급}(기납부세액 전액환급){/?박스${n}_전액환급}
+종합소득세 {박스${n}_국세}원{?박스${n}_국세_환급}(환급){/?박스${n}_국세_환급}{?박스${n}_전액환급}{/?박스${n}_전액환급}
+지방소득세 {박스${n}_지방세}원{?박스${n}_지방세_환급}(환급){/?박스${n}_지방세_환급}{?박스${n}_최대치환급}{/?박스${n}_최대치환급}{?박스${n}_전액환급}
+(기납부세액 전액 환급){/?박스${n}_전액환급}{?박스${n}_최대치환급}
+(기납부세액 최대치 환급){/?박스${n}_최대치환급}
 
 종합소득세 환급예정일은 6월말
 지방소득세 환급예정일은 7월말
 종합소득세 신고수수료 {박스${n}_수수료}원(부가세 별도)
 {/?박스${n}_이름}`;
-
+  
 const SIMPLE_BODY_COMBINED = `【종합소득세 신고결과보고】
 
 {고객명} 대표님.
 
-추가로 필요경비에 반영한 금액은 총 {추가경비_총액}원입니다.
+{?추가경비_총액}추가로 필요경비에 반영한 금액은 총 {추가경비_총액}원입니다.
 
 요청하신 사항에 맞게 종합소득세 신고완료하였습니다. 대표님의 매출액 중 {부담없음_매출}원은 종합소득세 및 지역건보료 부담이 없습니다.
 
@@ -294,10 +295,10 @@ const SIMPLE_BODY_COMBINED = `【종합소득세 신고결과보고】
 필요경비 반영으로 인한 절세액은 {절세액}원입니다.
  · 종합소득세 {국세절감}원 (적용세율 {적용세율}%)
  · 지방소득세 {지방세절감}원 (적용세율 {지방세율}%)
- · 건강보험료 {건보절감}원 (적용세율 8.13%)
+ · 건강보험료 {건보절감}원 (적용세율 8.13%){/?추가경비_총액}
 
 {?_복수}아래 분들 모두 다음에도 경비에 반영하실 수 있도록 전액환급(최대치 환급)으로 처리하였습니다.{/?_복수}{?!_복수}아래 분 다음에도 경비에 반영하실 수 있도록 전액환급(최대치 환급)으로 처리하였습니다.{/?!_복수} 추가 필요경비 반영한 분들의 수수료는 합산하여 5월 {CMS출금일}일 CMS로 이체되오니 잔고확인 부탁드립니다.
-${[1,2,3,4,5].map(buildBoxBlock).join('\n')}{?수수료_합계_VAT포함}
+${[1,2,3,4,5].map(buildBoxBlock).join('')}{?수수료_합계_VAT포함}
 
 총 합계 금액 : {수수료_합계_VAT포함}원(부가세포함){/?수수료_합계_VAT포함}{?계좌안내}
 
@@ -373,13 +374,14 @@ const BASIC_VARS_REPORT = [
 // ===== 기장(인건비추가) 변수 =====
 const COMBINED_BOX_VARS = [1,2,3,4,5].flatMap(n => [
   { key: `박스${n}_이름`, label: `${n}번 성명`, type: 'text', placeholder: '성명' },
-  { key: `박스${n}_요청사항`, label: `${n}번 요청사항`, type: 'text', placeholder: '요청사항 (한 줄)' },
+  { key: `박스${n}_요청사항`, label: `${n}번 요청사항`, type: 'text', placeholder: '요청사항 (한 줄)', widthMul: 4 },
   { key: `박스${n}_국세`, label: `${n}번 종합소득세`, type: 'currency', placeholder: '종합소득세' },
   { key: `박스${n}_지방세`, label: `${n}번 지방소득세`, type: 'currency', placeholder: '지방소득세' },
-  { key: `박스${n}_전액환급`, label: '(기납부세액 전액환급)변경', type: 'switch' },
+  { key: `박스${n}_전액환급`, label: '기납부세액 전액 환급 안내', type: 'switch' },
+  { key: `박스${n}_최대치환급`, label: '기납부세액 최대치 환급 안내', type: 'switch' },
   { key: `박스${n}_수수료`, label: `${n}번 수수료`, type: 'currency', placeholder: '수수료' }
 ]);
-
+  
 const BASIC_VARS_COMBINED = [
   { key: '고객명', label: '고객명', type: 'text', placeholder: '홍길동' },
   { key: '추가경비_총액', label: '추가경비 총액', type: 'currency', placeholder: '추가경비 총액' },
@@ -428,9 +430,10 @@ const TAB_LIST = ['기장거래처', '신고대리', '기장(인건비추가)'];
 
 // 상호배타 스위치 그룹 — 그룹 내 한 스위치를 켜면 같은 그룹의 다른 스위치는 자동 해제
 const EXCLUSIVE_SWITCH_GROUPS = [
-  ['기납부_전액환급', '기납부_최대치환급']
+  ['기납부_전액환급', '기납부_최대치환급'],
+  ...[1,2,3,4,5].map(n => [`박스${n}_전액환급`, `박스${n}_최대치환급`])
 ];
-
+  
 const formatCurrency = (val) => {
   if (val === '' || val == null) return '';
   const isNeg = String(val).startsWith('-');
@@ -845,7 +848,7 @@ const buildPrintContent = (template, inputs) => {
         const v = variables.find(x => x.key === cleanKey);
         const active = isCondActive(trigger, inputs, variables);
         if (!active) continue;
-        if (v && v.type === 'switch' && !isNegated) {
+        if (v && v.type === 'switch' && !isNegated && node.children.length > 0) {
           const label = v.label || cleanKey;
           const start = output.length;
           output += '\n☑ ' + label;
@@ -926,7 +929,9 @@ function App() {
   const [selectedType, setSelectedType] = useState('기장거래처');
   const [selectedButton, setSelectedButton] = useState('1. 납부발생');
   const [inputs, setInputs] = useState({});
+  const [inputs, setInputs] = useState({});
   const [extraMemo, setExtraMemo] = useState('');
+  const [boxCount, setBoxCount] = useState(1);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -1105,6 +1110,7 @@ function App() {
   useEffect(() => {
     setInputs({});
     setExtraMemo('');
+    setBoxCount(1);
     inputRefs.current = [];
   }, [selectedCategory, selectedType, selectedButton]);
 
@@ -1233,6 +1239,29 @@ function App() {
     });
     setAutoSaveStatus('');
     showToast('현재 탭 비움 ✓');
+  };
+
+  const BOX_FIELD_SUFFIXES = ['_이름', '_요청사항', '_국세', '_지방세', '_전액환급', '_최대치환급', '_수수료'];
+  const filledBoxMax = useMemo(() => {
+    let m = 0;
+    for (let n = 1; n <= 5; n++) {
+      if (inputs[`박스${n}_이름`] && String(inputs[`박스${n}_이름`]).trim()) m = n;
+    }
+    return m;
+  }, [inputs]);
+  const effectiveBoxCount = Math.max(boxCount, filledBoxMax);
+  const deleteBox = (d) => {
+    const nm = inputs[`박스${d}_이름`];
+    if (nm && String(nm).trim() && !confirm(`인원 ${d} (${nm})을(를) 삭제하시겠습니까?`)) return;
+    setInputs(prev => {
+      const next = { ...prev };
+      for (let n = d; n <= 4; n++) {
+        BOX_FIELD_SUFFIXES.forEach(suf => { next[`박스${n}${suf}`] = prev[`박스${n + 1}${suf}`]; });
+      }
+      BOX_FIELD_SUFFIXES.forEach(suf => { delete next[`박스5${suf}`]; });
+      return next;
+    });
+    setBoxCount(c => Math.max(1, c - 1));
   };
 
   const tree = useMemo(() => currentTemplate ? parseBody(currentTemplate.body) : [], [currentTemplate]);
@@ -1417,7 +1446,8 @@ function App() {
     const displayValue = variable.type === 'currency' ? formatCurrency(rawValue) : rawValue;
     const placeholderText = isDisabled ? '🔒 잠김' : (variable.placeholder || variable.label);
     const baseSize = Math.max((displayValue || placeholderText).length + 1, 4);
-    const size = variable.wide ? Math.max(baseSize, placeholderText.length + 1) * 3 : baseSize;
+    const widthMul = variable.widthMul || (variable.wide ? 3 : 1);
+    const size = widthMul > 1 ? Math.max(baseSize, placeholderText.length + 1) * widthMul : baseSize;
 
     if (isDisabled) {
       return (
@@ -1532,6 +1562,36 @@ function App() {
         return renderInput(variable, order, idx);
       }
       if (node.type === 'cond') {
+        const boxM = node.trigger.match(/^박스(\d+)_이름$/);
+        if (boxM && selectedType === '기장(인건비추가)') {
+          const bn = parseInt(boxM[1], 10);
+          if (bn > effectiveBoxCount + 1) return <React.Fragment key={idx} />;
+          if (bn > effectiveBoxCount) {
+            return (
+              <button
+                key={idx}
+                onClick={() => setBoxCount(Math.min(5, effectiveBoxCount + 1))}
+                className="block w-full my-2 border border-dashed border-blue-400 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg py-2.5 text-sm font-bold"
+              >
+                ＋ 인원 추가
+              </button>
+            );
+          }
+          return (
+            <span key={idx} className="block border border-slate-300 rounded-lg my-2 overflow-hidden">
+              <span className="flex items-center justify-between bg-slate-100 px-3 py-1.5 text-[13px] font-semibold text-slate-700">
+                <span>인원 {bn}</span>
+                <button
+                  onClick={() => deleteBox(bn)}
+                  className="text-rose-600 hover:text-white hover:bg-rose-500 border border-rose-300 rounded px-2 py-0.5 text-[11px] font-medium transition-colors"
+                >
+                  삭제
+                </button>
+              </span>
+              <span className="block px-3 py-1">{renderTree(node.children, vars)}</span>
+            </span>
+          );
+        }
         const variable = vars.find(v => v.key === node.trigger);
         const isSwitch = variable?.type === 'switch';
         const isChecked = isSwitch && !!inputs[node.trigger];
