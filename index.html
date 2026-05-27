@@ -107,7 +107,7 @@ const CloudCheck = (props) => <SvgIcon {...props}><path d="M20.5 14.5A4 4 0 0 0 
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-27 10:14';
+const BUILD_DATE = '2026-05-27 12:44';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -766,6 +766,12 @@ const isCondActive = (trigger, inputs, variables) => {
   }
   if (trigger === '소득률') return computeCalculated('소득률', inputs) !== '';
   if (trigger === '소득률_전년') return computeCalculated('소득률_전년', inputs) !== '';
+  if (trigger === '할증_있음') {
+    return [1,2,3,4,5].some(n => {
+      const v = inputs[`할증_${n}`];
+      return v && String(v).trim();
+    });
+  }
   if (trigger.endsWith('_있음')) {
     const prefix = trigger.slice(0, trigger.length - '_있음'.length) + '_';
     return Object.keys(inputs).some(k => k.startsWith(prefix) && inputs[k] && String(inputs[k]).trim());
