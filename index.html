@@ -107,7 +107,7 @@ const CloudCheck = (props) => <SvgIcon {...props}><path d="M20.5 14.5A4 4 0 0 0 
 
 // ===== 빌드 정보 =====
 // 코드 수정 후 GitHub에 push할 때 이 시각(KST, YYYY-MM-DD HH:MM)을 갱신하세요.
-const BUILD_DATE = '2026-05-27 12:44';
+const BUILD_DATE = '2026-05-28 10:46';
 
 // ===== 기장거래처 본문 =====
 const SIMPLE_BODY = `【종합소득세 신고 결과 보고】
@@ -993,6 +993,8 @@ function App() {
       if (savedSplit && typeof savedSplit === 'number') setSplitPos(savedSplit);
       const savedPreview = await Storage.get('preview_visible');
       if (savedPreview === false) setPreviewVisible(false);
+      const savedType = await Storage.get('selected_type');
+      if (savedType && TAB_LIST.includes(savedType)) setSelectedType(savedType);
 
       const drafts = await Storage.get('saved_drafts');
       if (Array.isArray(drafts)) setSavedDrafts(drafts);
@@ -1155,6 +1157,11 @@ function App() {
     setAutoSaveStatus('');
   }, [selectedType]);
 
+  useEffect(() => {
+    if (bootChecking) return;
+    Storage.set('selected_type', selectedType);
+  }, [selectedType, bootChecking]);
+
   const handleSaveOpen = () => {
     if (!hasMeaningfulInput(inputs, extraMemo)) {
       showToast('저장할 입력값이 없습니다', 'error');
@@ -1233,17 +1240,11 @@ function App() {
   };
 
   const handleClearCurrentTab = () => {
-    if (!confirm(`현재 탭(${selectedType})의 입력값을 모두 비우시겠습니까? 자동저장 슬롯도 함께 삭제됩니다.`)) return;
+    if (!confirm(`현재 탭(${selectedType})의 입력값을 비우시겠습니까? (저장된 슬롯은 유지됩니다)`)) return;
     setInputs({});
     setExtraMemo('');
-    Storage.remove(`autosave_${selectedType}`);
-    setAutoSaves(prev => {
-      const next = { ...prev };
-      delete next[selectedType];
-      return next;
-    });
     setAutoSaveStatus('');
-    showToast('현재 탭 비움 ✓');
+    showToast('입력 초기화 ✓');
   };
 
   const BOX_FIELD_SUFFIXES = ['_이름', '_요청사항', '_국세', '_지방세', '_전액환급', '_최대치환급', '_수수료'];
@@ -1850,7 +1851,7 @@ function App() {
             <div className="flex items-center gap-1.5">
               <button onClick={handleSaveOpen} className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1" title="현재 작업을 이름 붙여 저장"><Save size={13} /> 저장</button>
               <button onClick={() => setShowLoadModal(true)} className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1" title="저장된 작업 불러오기"><FolderOpen size={13} /> 불러오기</button>
-              <button onClick={handleClearCurrentTab} className="px-2 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-300 rounded-lg text-xs font-medium flex items-center gap-1" title="현재 탭의 입력값과 자동저장을 모두 비움"><Trash size={12} /></button>
+              <button onClick={handleClearCurrentTab} className="px-2 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-300 rounded-lg text-xs font-medium flex items-center gap-1" title="현재 탭의 입력값만 비움 (저장 슬롯 유지)"><Trash size={12} /></button>
               <button onClick={handleCopy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow whitespace-nowrap">
                 <Copy size={15} /> 카톡용 복사
               </button>
